@@ -1,18 +1,18 @@
 import { HttpService } from "@nestjs/axios";
 import { Injectable } from "@nestjs/common";
-import { firstValueFrom } from "rxjs";
-import { decodeCommentId, extractPhoneNumber, getHttpAgent } from "src/common/utils/helper";
-import { ProxyService } from "src/modules/proxy/proxy.service";
-import { getBodyComment, getHeaderComment } from "../../utils";
-import { isNumeric } from "src/common/utils/check-utils";
+import { InjectRepository } from "@nestjs/typeorm";
 import * as dayjs from 'dayjs';
 import * as utc from 'dayjs/plugin/utc';
-import { IGetCmtPublicResponse } from "./get-comment-public.i";
-import { ProxyEntity } from "src/modules/proxy/entities/proxy.entity";
-import { GetUuidUserUseCase } from "../get-uuid-user/get-uuid-user";
+import { firstValueFrom } from "rxjs";
+import { isNumeric } from "src/common/utils/check-utils";
+import { decodeCommentId, extractPhoneNumber, getHttpAgent } from "src/common/utils/helper";
 import { CommentEntity } from "src/modules/comments/entities/comment.entity";
-import { InjectRepository } from "@nestjs/typeorm";
+import { ProxyEntity } from "src/modules/proxy/entities/proxy.entity";
+import { ProxyService } from "src/modules/proxy/proxy.service";
 import { Repository } from "typeorm";
+import { getBodyComment, getHeaderComment } from "../../utils";
+import { GetUuidUserUseCase } from "../get-uuid-user/get-uuid-user";
+import { IGetCmtPublicResponse } from "./get-comment-public.i";
 
 dayjs.extend(utc);
 
@@ -37,15 +37,25 @@ export class GetCommentPublicUseCase {
             const headers = getHeaderComment(this.fbUrl);
             const body = getBodyComment(encodedPostId);
             const proxy = await this.proxyService.getRandomProxy()
+
             if (!proxy) return null
             const httpsAgent = getHttpAgent(proxy)
+            const start = Date.now();
 
             const response = await firstValueFrom(
                 this.httpService.post(this.fbGraphql, body, {
                     headers,
                     httpsAgent
-                }),
+                })
             )
+
+            const end = Date.now();
+            const duration = (end - start) / 1000;
+
+            if (duration > 6) {
+                await this.proxyService.updateProxyDie(proxy, 'TIME_OUT')
+                return this.getCmtPublic(postId)
+            }
 
             if (response.data?.errors?.[0]?.code === 1675004) {
                 await this.proxyService.updateProxyFbBlock(proxy)

@@ -18,4 +18,7 @@ export class ProxyEntity {
 
     @Column({ default: false, name: "is_fb_block" })
     isFbBlock: Boolean;
+
+    @Column({ name: 'error_code' })
+    errorCode: string;
 }

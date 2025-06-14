@@ -124,7 +124,11 @@ export class MonitoringService implements OnModuleInit {
     if (this.isCheckProxy) return
 
     this.isCheckProxy = true
-    const proxyInActive = await this.proxyRepository.find()
+    const proxyInActive = await this.proxyRepository.find({
+      where: {
+        errorCode: Not('TIME_OUT')
+      }
+    })
 
     for (const proxy of proxyInActive) {
       const [host, port, username, password] = proxy.proxyAddress.split(':');

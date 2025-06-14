@@ -22,11 +22,13 @@ export class GetInfoLinkUseCase {
     async getInfoLink(postId: string): Promise<IGetInfoLinkResponse> | null {
         const proxy = await this.proxyService.getRandomProxy()
         const token = await this.tokenService.getTokenGetInfoActiveFromDb()
+
         if (!proxy || !token) {
             return {
                 linkType: LinkType.UNDEFINED
             }
         }
+        console.log("🚀 ~ MonitoringService ~ awaitPromise.all ~ link:")
 
         try {
             const httpsAgent = getHttpAgent(proxy)
