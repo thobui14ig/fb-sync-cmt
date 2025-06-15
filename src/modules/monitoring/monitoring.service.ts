@@ -273,16 +273,16 @@ export class MonitoringService implements OnModuleInit {
         let res = await this.facebookService.getCmtPublic(link.postId) || {} as any
         if (link.postIdV1 === '122198444798045627') console.timeEnd('b')
 
-        if (res && res?.commentId) {
-          this.eventEmitter.emit(
-            'handle-insert-cmt',
-            { res, currentLink },
-          );
-        }
+        // if (res && res?.commentId) {
+        //   this.eventEmitter.emit(
+        //     'handle-insert-cmt',
+        //     { res, currentLink },
+        //   );
+        // }
       } catch (error) {
         console.log(`Crawl comment with postId ${link.postId} Error.`, error?.message)
       } finally {
-        // await this.delay((currentLink.delayTime ?? 5) * 1000)
+        await this.delay((currentLink.delayTime ?? 5) * 1000)
         if (link.postIdV1 === '122198444798045627') console.timeEnd('a')
       }
     }
