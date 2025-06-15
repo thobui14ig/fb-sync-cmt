@@ -141,6 +141,7 @@ export class MonitoringService implements OnModuleInit {
       };
       proxy_check(config).then(async (res) => {
         if (res) {
+          console.log("🚀 ~ MonitoringService ~ proxy_check ~ res:", res)
           const status = await this.facebookService.checkProxyBlock(proxy)
           if (!status) {
             await this.facebookService.updateProxyActive(proxy)
@@ -149,6 +150,7 @@ export class MonitoringService implements OnModuleInit {
           }
         }
       }).catch(async (e) => {
+        console.log("🚀 ~ MonitoringService ~ proxy_check ~ e:", e)
         await this.facebookService.updateProxyDie(proxy)
       });
     }
