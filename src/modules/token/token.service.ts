@@ -41,7 +41,7 @@ export class TokenService {
   }
 
   updateStatusToken(token: TokenEntity, status: TokenStatus) {
-    console.log("🚀 ~ updateTokenDie ~ token:", token)
+    // console.log("🚀 ~ updateTokenDie ~ token:", token)
     return this.repo.save({ ...token, status })
   }
 }

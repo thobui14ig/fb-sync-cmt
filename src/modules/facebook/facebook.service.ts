@@ -582,7 +582,7 @@ export class FacebookService {
   }
 
   updateStatusTokenDie(token: TokenEntity, status: TokenStatus) {
-    console.log("🚀 ~ updateTokenDie ~ token:", token)
+    // console.log("🚀 ~ updateTokenDie ~ token:", token)
     return this.tokenRepository.save({ ...token, status })
   }
 
