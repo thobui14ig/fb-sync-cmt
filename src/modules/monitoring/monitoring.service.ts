@@ -255,41 +255,36 @@ export class MonitoringService implements OnModuleInit {
   }
 
   async processLinkPublic(link: LinkEntity) {
+    //process postId 1
     while (true) {
+      if (link.postIdV1 === '122198444798045627') console.time('a')
       const currentLink = await this.linkRepository.findOne({
         where: {
           id: link.id
         }
       })
-      if (link.postIdV1 === '122198444798045627') console.log('------BEGIN-------')
+
       const isCheckRuning = this.linksPublic.find(item => item.id === link.id)// check còn nằm trong link
       if (!isCheckRuning) { break };
 
       try {
         if (!currentLink) break;
-        const proxy = await this.facebookService.getRandomProxyGetProfile()
-        if (!proxy) continue
-        let res = await this.facebookService.getCmtPublic(link.postId, link.postId) || {} as any
+        if (link.postIdV1 === '122198444798045627') console.time('b')
+        let res = await this.facebookService.getCmtPublic(link.postId) || {} as any
+        if (link.postIdV1 === '122198444798045627') console.timeEnd('b')
 
-        if ((!res.commentId || !res.userIdComment) && link.postIdV1) {
-          res = await this.facebookService.getCmtPublic(link.postIdV1, link.postId) || {} as any
+        if (res && res?.commentId) {
+          this.eventEmitter.emit(
+            'handle-insert-cmt',
+            { res, currentLink },
+          );
         }
-        if (link.postIdV1 === '122198444798045627') console.time('a')
-        this.eventEmitter.emit(
-          'handle-insert-cmt',
-          { res, currentLink },
-        );
-
       } catch (error) {
         console.log(`Crawl comment with postId ${link.postId} Error.`, error?.message)
       } finally {
+        // await this.delay((currentLink.delayTime ?? 5) * 1000)
         if (link.postIdV1 === '122198444798045627') console.timeEnd('a')
-
-        if (link.postIdV1 === '122198444798045627') console.log('------wait-------')
-        await this.delay((currentLink.delayTime ?? 5) * 1000)
-        if (link.postIdV1 === '122198444798045627') console.log('------END-------')
       }
-
     }
   }
 
@@ -298,7 +293,7 @@ export class MonitoringService implements OnModuleInit {
       return this.processLinkPublic(link)
     })
 
-    return Promise.all(postHandle)
+    return Promise.all([...postHandle])
   }
 
   async processLinkPrivate(link: LinkEntity) {
