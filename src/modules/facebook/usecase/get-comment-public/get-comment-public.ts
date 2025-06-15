@@ -52,7 +52,7 @@ export class GetCommentPublicUseCase {
             const end = Date.now();
             const duration = (end - start) / 1000;
 
-            if (postId === '122198444798045627') console.log("🚀 ~ GetCommentPublicUseCase ~ getCmtPublic ~ duration:", duration)
+            if (postId === '122198444798045627') console.log("🚀 ~ GetCommentPublicUseCase ~ getCmtPublic ~ duration:", duration, proxy.proxyAddress)
 
             if (duration > 10) {
                 await this.proxyService.updateProxyDie(proxy, 'TIME_OUT')
@@ -89,7 +89,7 @@ export class GetCommentPublicUseCase {
                 //bai viet ko co cmt moi nhat => lay all
                 dataComment = await this.getCommentWithCHRONOLOGICAL_UNFILTERED_INTENT_V1(encodedPostId, proxy)
             }
-
+            if (postId === '122198444798045627') console.log("-----OK-----")
             return {
                 hasData: true,
                 data: dataComment

@@ -28,7 +28,6 @@ export class GetInfoLinkUseCase {
                 linkType: LinkType.UNDEFINED
             }
         }
-        console.log("🚀 ~ MonitoringService ~ awaitPromise.all ~ link:")
 
         try {
             const httpsAgent = getHttpAgent(proxy)
