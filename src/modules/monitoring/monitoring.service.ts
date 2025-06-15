@@ -130,7 +130,6 @@ export class MonitoringService implements OnModuleInit {
         { errorCode: IsNull() }
       ]
     })
-    console.log("🚀 ~ MonitoringService ~ checkProxy ~ proxyInActive:", proxyInActive)
 
     for (const proxy of proxyInActive) {
       const [host, port, username, password] = proxy.proxyAddress.split(':');
@@ -143,6 +142,7 @@ export class MonitoringService implements OnModuleInit {
         if (res) {
           console.log("🚀 ~ MonitoringService ~ proxy_check ~ res:", res)
           const status = await this.facebookService.checkProxyBlock(proxy)
+          console.log("🚀 ~ MonitoringService ~ proxy_check ~ status:", status)
           if (!status) {
             await this.facebookService.updateProxyActive(proxy)
           } else {
