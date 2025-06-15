@@ -130,6 +130,7 @@ export class MonitoringService implements OnModuleInit {
         { errorCode: IsNull() }
       ]
     })
+    console.log("🚀 ~ MonitoringService ~ checkProxy ~ proxyInActive:", proxyInActive)
 
     for (const proxy of proxyInActive) {
       const [host, port, username, password] = proxy.proxyAddress.split(':');
