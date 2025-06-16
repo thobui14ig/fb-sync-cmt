@@ -19,8 +19,8 @@ export class GetUuidUserUseCase {
     async getUuidUserPublic(uuid: string): Promise<string | null> {
         try {
             const proxy = await this.proxyService.getRandomProxy()
-            const httpsAgent = getHttpAgent(proxy)
             if (!proxy) { return null }
+            const httpsAgent = getHttpAgent(proxy)
 
             const body = {
                 route_urls: [`/${uuid}#`],

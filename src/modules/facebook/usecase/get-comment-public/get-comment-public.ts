@@ -53,17 +53,6 @@ export class GetCommentPublicUseCase {
             const duration = (end - start) / 1000;
 
             if (postId === '122198444798045627') console.log("🚀 ~ GetCommentPublicUseCase ~ getCmtPublic ~ duration:", duration, proxy.proxyAddress)
-
-            if (duration > 10) {
-                await this.proxyService.updateProxyDie(proxy, 'TIME_OUT')
-                return this.getCmtPublic(postId)
-            }
-
-            if (response.data?.errors?.[0]?.code === 1675004) {
-                await this.proxyService.updateProxyFbBlock(proxy)
-                return this.getCmtPublic(postId)
-            }
-
             if (isCheckInfoLink) {//không phải là link public
                 if (!response?.data?.data?.node) {
                     return {
@@ -76,23 +65,35 @@ export class GetCommentPublicUseCase {
                 }
             }
 
-            let dataComment = await this.handleDataComment(response)
-
-            if (!dataComment && typeof response.data === 'string') {
-                const text = response.data
-                const lines = text.trim().split('\n');
-                const data = JSON.parse(lines[0])
-                dataComment = await this.handleDataComment({ data })
+            if (duration > 10) {
+                await this.proxyService.updateProxyDie(proxy, 'TIME_OUT')
+                return this.getCmtPublic(postId)
             }
 
-            if (!dataComment) {
-                //bai viet ko co cmt moi nhat => lay all
-                dataComment = await this.getCommentWithCHRONOLOGICAL_UNFILTERED_INTENT_V1(encodedPostId, proxy)
+            if (response.data?.errors?.[0]?.code === 1675004) {
+                await this.proxyService.updateProxyFbBlock(proxy)
+                return this.getCmtPublic(postId)
             }
-            if (postId === '122198444798045627') console.log("-----OK-----")
+
+
+
+            // let dataComment = await this.handleDataComment(response)
+
+            // if (!dataComment && typeof response.data === 'string') {
+            //     const text = response.data
+            //     const lines = text.trim().split('\n');
+            //     const data = JSON.parse(lines[0])
+            //     dataComment = await this.handleDataComment({ data })
+            // }
+
+            // if (!dataComment) {
+            //     //bai viet ko co cmt moi nhat => lay all
+            //     dataComment = await this.getCommentWithCHRONOLOGICAL_UNFILTERED_INTENT_V1(encodedPostId, proxy)
+            // }
+
             return {
                 hasData: true,
-                data: dataComment
+                data: null
             }
         } catch (error) {
             return null
