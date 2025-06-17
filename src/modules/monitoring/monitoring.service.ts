@@ -781,7 +781,6 @@ export class MonitoringService {
       'hide.cmt',
       comments,
     );
-
   }
 
   private getComment(linkId: number, userId: number, cmtId: string) {
