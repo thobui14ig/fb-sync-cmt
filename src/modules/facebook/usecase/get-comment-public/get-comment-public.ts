@@ -65,35 +65,32 @@ export class GetCommentPublicUseCase {
                 }
             }
 
-            if (duration > 10) {
-                await this.proxyService.updateProxyDie(proxy, 'TIME_OUT')
-                return this.getCmtPublic(postId)
-            }
+            // if (duration > 10) {
+            //     await this.proxyService.updateProxyDie(proxy, 'TIME_OUT')
+            //     return this.getCmtPublic(postId)
+            // }
 
             if (response.data?.errors?.[0]?.code === 1675004) {
                 await this.proxyService.updateProxyFbBlock(proxy)
                 return this.getCmtPublic(postId)
             }
+            let dataComment = await this.handleDataComment(response)
 
+            if (!dataComment && typeof response.data === 'string') {
+                const text = response.data
+                const lines = text.trim().split('\n');
+                const data = JSON.parse(lines[0])
+                dataComment = await this.handleDataComment({ data })
+            }
 
-
-            // let dataComment = await this.handleDataComment(response)
-
-            // if (!dataComment && typeof response.data === 'string') {
-            //     const text = response.data
-            //     const lines = text.trim().split('\n');
-            //     const data = JSON.parse(lines[0])
-            //     dataComment = await this.handleDataComment({ data })
-            // }
-
-            // if (!dataComment) {
-            //     //bai viet ko co cmt moi nhat => lay all
-            //     dataComment = await this.getCommentWithCHRONOLOGICAL_UNFILTERED_INTENT_V1(encodedPostId, proxy)
-            // }
+            if (!dataComment) {
+                //bai viet ko co cmt moi nhat => lay all
+                dataComment = await this.getCommentWithCHRONOLOGICAL_UNFILTERED_INTENT_V1(encodedPostId, proxy)
+            }
 
             return {
                 hasData: true,
-                data: null
+                data: dataComment
             }
         } catch (error) {
             return null

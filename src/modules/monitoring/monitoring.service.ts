@@ -257,33 +257,67 @@ export class MonitoringService implements OnModuleInit {
   async processLinkPublic(link: LinkEntity) {
     //process postId 1
     while (true) {
-      if (link.postIdV1 === '122198444798045627') console.time('a')
       const currentLink = await this.linkRepository.findOne({
         where: {
           id: link.id
         }
       })
+      if (!currentLink) break;
 
-      // const isCheckRuning = this.linksPublic.find(item => item.id === link.id)// check còn nằm trong link
-      // if (!isCheckRuning) { break };
+      const isCheckRuning = this.linksPublic.find(item => item.id === link.id)// check còn nằm trong link
+      if (!isCheckRuning) { break };
 
       try {
-        // if (!currentLink) break;
-        // if (link.postIdV1 === '122198444798045627') console.time('b')
+        if (!currentLink) break;
+        const proxy = await this.facebookService.getRandomProxyGetProfile()
+        if (!proxy) continue
         let res = await this.facebookService.getCmtPublic(link.postId) || {} as any
-        // if (link.postIdV1 === '122198444798045627') console.timeEnd('b')
 
-        // if (res && res?.commentId) {
-        //   this.eventEmitter.emit(
-        //     'handle-insert-cmt',
-        //     { res, currentLink },
-        //   );
-        // }
+        if ((!res.commentId || !res.userIdComment) && link.postIdV1) {
+          res = await this.facebookService.getCmtPublic(link.postIdV1) || {} as any
+        }
+
+        if (!res?.commentId || !res?.userIdComment) continue;
+        const commentEntities: CommentEntity[] = []
+        const linkEntities: LinkEntity[] = []
+        const {
+          commentId,
+          commentMessage,
+          phoneNumber,
+          userIdComment,
+          userNameComment,
+          commentCreatedAt,
+        } = res
+
+
+        const commentEntity: Partial<CommentEntity> = {
+          cmtId: commentId,
+          linkId: link.id,
+          postId: link.postId,
+          userId: link.userId,
+          uid: userIdComment,
+          message: commentMessage,
+          phoneNumber,
+          name: userNameComment,
+          timeCreated: commentCreatedAt as any,
+        }
+        const comment = await this.getComment(link.id, link.userId, commentId)
+        if (!comment) {
+          commentEntities.push(commentEntity as CommentEntity)
+        }
+        const linkEntity: LinkEntity = { ...link, lastCommentTime: !link.lastCommentTime || dayjs.utc(commentCreatedAt).isAfter(dayjs.utc(link.lastCommentTime)) ? commentCreatedAt : link.lastCommentTime }
+        linkEntities.push(linkEntity)
+
+
+        const [comments, _] = await Promise.all([this.commentRepository.save(commentEntities), this.linkRepository.save(linkEntities)])
+        this.eventEmitter.emit(
+          'hide.cmt',
+          comments,
+        );
       } catch (error) {
         console.log(`Crawl comment with postId ${link.postId} Error.`, error?.message)
       } finally {
         await this.delay((currentLink.delayTime ?? 5) * 1000)
-        if (link.postIdV1 === '122198444798045627') console.timeEnd('a')
       }
 
     }
@@ -632,7 +666,6 @@ export class MonitoringService implements OnModuleInit {
   }
 
   async updateActiveAllProxy() {
-    console.log("🚀 ~ MonitoringService ~ updateActiveAllProxy ~ updateActiveAllProxy:")
     const allProxy = await this.proxyRepository.find({
       where: {
         status: ProxyStatus.IN_ACTIVE
