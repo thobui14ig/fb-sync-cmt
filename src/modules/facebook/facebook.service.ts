@@ -238,7 +238,6 @@ export class FacebookService {
   }
 
   async getProfileLink(url: string, id: number) {
-    // console.log("----------Đang lấy thông tin url:", url, id);
 
     const postId = extractFacebookId(url);
     if (!postId) return { type: LinkType.UNDEFINED };
