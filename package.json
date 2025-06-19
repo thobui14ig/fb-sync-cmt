@@ -23,6 +23,7 @@
     "node": ">=20.0.0"
   },
   "dependencies": {
+    "@nestjs-modules/ioredis": "^2.0.2",
     "@nestjs/axios": "^4.0.0",
     "@nestjs/common": "^11.0.1",
     "@nestjs/config": "^4.0.2",
@@ -41,6 +42,7 @@
     "html-entities": "^2.6.0",
     "http-proxy-agent": "^7.0.2",
     "https-proxy-agent": "^7.0.6",
+    "ioredis": "^5.6.1",
     "mysql2": "^3.14.0",
     "node-fetch": "^3.3.2",
     "proxy-chain": "^2.5.8",

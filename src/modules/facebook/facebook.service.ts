@@ -744,20 +744,6 @@ export class FacebookService {
     return randomProxy
   }
 
-
-  async getRandomProxyGetProfile() {
-    const proxies = await this.proxyRepository.find({
-      where: {
-        status: ProxyStatus.ACTIVE,
-        isFbBlock: false
-      }
-    })
-    const randomIndex = Math.floor(Math.random() * proxies.length);
-    const randomProxy = proxies[randomIndex];
-
-    return randomProxy
-  }
-
   parseCookieString(cookieStr: string) {
     return cookieStr.split(';').map(cookie => {
       const [name, ...rest] = cookie.trim().split('=');

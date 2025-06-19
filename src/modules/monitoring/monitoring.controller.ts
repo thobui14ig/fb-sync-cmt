@@ -7,6 +7,7 @@ export class MonitoringController {
 
   @Post('/process')
   updateProcess(@Body() processDTO) {
-    return this.monitoringService.handleInsertComment(processDTO)
+    // console.log("🚀 ~ MonitoringController ~ updateProcess ~ processDTO:", processDTO)
+    // return this.monitoringService.handleInsertComment(processDTO)
   }
 }

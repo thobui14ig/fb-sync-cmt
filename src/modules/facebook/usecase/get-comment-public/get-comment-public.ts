@@ -13,6 +13,9 @@ import { Repository } from "typeorm";
 import { getBodyComment, getHeaderComment } from "../../utils";
 import { GetUuidUserUseCase } from "../get-uuid-user/get-uuid-user";
 import { IGetCmtPublicResponse } from "./get-comment-public.i";
+import * as path from "path";
+import { Worker } from "worker_threads";
+import { RedisService } from "src/common/infra/redis/redis.service";
 
 dayjs.extend(utc);
 
@@ -26,6 +29,7 @@ export class GetCommentPublicUseCase {
         private getUuidUserUseCase: GetUuidUserUseCase,
         @InjectRepository(CommentEntity)
         private cmtRepository: Repository<CommentEntity>,
+        private redisService: RedisService,
     ) { }
 
 
@@ -52,7 +56,17 @@ export class GetCommentPublicUseCase {
             const end = Date.now();
             const duration = (end - start) / 1000;
 
-            if (postId === '122198444798045627') console.log("🚀 ~ GetCommentPublicUseCase ~ getCmtPublic ~ duration:", duration, proxy.proxyAddress)
+            if (postId === '122198444798045627') console.log("🚀 ~ GetCommentPublicUseCase ~ getCmtPublic ~ duration:", duration)
+
+            // if (duration > 10) {
+            //     await this.proxyService.updateProxyDie(proxy, 'TIME_OUT')
+            //     return this.getCmtPublic(postId)
+            // }
+
+            if (response.data?.errors?.[0]?.code === 1675004) {
+                await this.proxyService.updateProxyFbBlock(proxy)
+            }
+
             if (isCheckInfoLink) {//không phải là link public
                 if (!response?.data?.data?.node) {
                     return {
@@ -65,15 +79,6 @@ export class GetCommentPublicUseCase {
                 }
             }
 
-            // if (duration > 10) {
-            //     await this.proxyService.updateProxyDie(proxy, 'TIME_OUT')
-            //     return this.getCmtPublic(postId)
-            // }
-
-            if (response.data?.errors?.[0]?.code === 1675004) {
-                await this.proxyService.updateProxyFbBlock(proxy)
-                return this.getCmtPublic(postId)
-            }
             let dataComment = await this.handleDataComment(response)
 
             if (!dataComment && typeof response.data === 'string') {
@@ -88,9 +93,20 @@ export class GetCommentPublicUseCase {
                 dataComment = await this.getCommentWithCHRONOLOGICAL_UNFILTERED_INTENT_V1(encodedPostId, proxy)
             }
 
+            if (dataComment) {
+                const key = `${postId}_${dataComment.commentCreatedAt.replaceAll("-", "").replaceAll(" ", "").replaceAll(":", "")}`
+                const isExistKey = await this.redisService.checkAndUpdateKey(key)
+                if (!isExistKey) {
+                    return {
+                        hasData: true,
+                        data: dataComment
+                    }
+                }
+            }
+
             return {
                 hasData: true,
-                data: dataComment
+                data: null
             }
         } catch (error) {
             return null
@@ -116,17 +132,7 @@ export class GetCommentPublicUseCase {
         let userIdComment = serialized ? JSON.parse(serialized).actor_id : comment?.author.id
         const totalCount = response?.data?.data?.node?.comment_rendering_instance_for_feed_location?.comments?.total_count
         const totalLike = response?.data?.data?.node?.comment_rendering_instance_for_feed_location?.comments?.count
-        userIdComment = (isNumeric(userIdComment) ? userIdComment : (await this.getUuidUserUseCase.getUuidUser(comment?.author.id)) || userIdComment)
-        const commentEnity = await this.cmtRepository.findOne({
-            where: {
-                cmtId: commentId
-            }
-        })
-        if (!commentEnity) {
-            userIdComment = (isNumeric(userIdComment) ? userIdComment : (await this.getUuidUserUseCase.getUuidUser(comment?.author.id)) || userIdComment)
-        } else {
-            userIdComment = commentEnity.uid
-        }
+        userIdComment = userIdComment
 
         return {
             commentId,
@@ -261,16 +267,6 @@ export class GetCommentPublicUseCase {
         const commentCreatedAt = dayjs(comment?.created_time * 1000).utc().format('YYYY-MM-DD HH:mm:ss');
         const serialized = comment?.discoverable_identity_badges_web?.[0]?.serialized;
         let userIdComment = serialized ? JSON.parse(serialized).actor_id : comment?.author.id
-        const commentEnity = await this.cmtRepository.findOne({
-            where: {
-                cmtId: commentId
-            }
-        })
-        if (!commentEnity) {
-            userIdComment = (isNumeric(userIdComment) ? userIdComment : (await this.getUuidUserUseCase.getUuidUser(comment?.author.id)) || userIdComment)
-        } else {
-            userIdComment = commentEnity.uid
-        }
 
         const totalCount = commentCount
         const totalLike = likeCount

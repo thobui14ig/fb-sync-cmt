@@ -4,9 +4,11 @@ import { UpdateProxyDto } from './dto/update-proxy.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { ProxyEntity, ProxyStatus } from './entities/proxy.entity';
+import { Cron, CronExpression } from '@nestjs/schedule';
 
 @Injectable()
 export class ProxyService {
+  proxies: ProxyEntity[]
   constructor(
     @InjectRepository(ProxyEntity)
     private repo: Repository<ProxyEntity>,
@@ -20,14 +22,21 @@ export class ProxyService {
     });
   }
 
-  async getRandomProxy() {
+  @Cron(CronExpression.EVERY_5_SECONDS)
+  async cronjobRandomProxy() {
     const proxies = await this.repo.find({
       where: {
         status: ProxyStatus.ACTIVE,
       }
     })
-    const randomIndex = Math.floor(Math.random() * proxies.length);
-    const randomProxy = proxies[randomIndex];
+
+    this.proxies = proxies
+  }
+
+  async getRandomProxy() {
+    if (this.proxies.length === 0) return this.getRandomProxy()
+    const randomIndex = Math.floor(Math.random() * this.proxies?.length);
+    const randomProxy = this.proxies[randomIndex];
 
     return randomProxy
   }
