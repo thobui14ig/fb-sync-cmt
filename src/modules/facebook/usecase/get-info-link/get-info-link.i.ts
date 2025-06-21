@@ -18,7 +18,8 @@ export interface IFacebookResponse {
     picture: string;
     source: string;
     id: string;
-    message: string
+    message: string,
+    description: string
 }
 
 interface FacebookComment {
