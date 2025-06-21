@@ -11,7 +11,7 @@ import { ProxyService } from "src/modules/proxy/proxy.service";
 import { getBodyComment, getHeaderComment } from "../../utils";
 import { IGetCmtPublicResponse } from "./get-comment-public.i";
 import { GetInfoLinkUseCase } from "../get-info-link/get-info-link";
-import { LinkType } from "src/modules/links/entities/links.entity";
+import { LinkEntity, LinkType } from "src/modules/links/entities/links.entity";
 
 dayjs.extend(utc);
 
@@ -28,7 +28,7 @@ export class GetCommentPublicUseCase {
     ) { }
 
 
-    async getCmtPublic(postId: string, isCheckInfoLink: boolean = false): Promise<IGetCmtPublicResponse | null> {
+    async getCmtPublic(postId: string, isCheckInfoLink: boolean = false, link?: LinkEntity): Promise<IGetCmtPublicResponse | null> {
         const postIdString = `feedback:${postId}`;
         const encodedPostId = Buffer.from(postIdString, 'utf-8').toString('base64');
 
@@ -74,8 +74,8 @@ export class GetCommentPublicUseCase {
                 }
             }
 
-            if (response.data?.data?.node === null) {//check link die
-                await this.updateLinkDie(postId)
+            if (response.data?.data?.node === null && link) {//check link die
+                await this.updateLinkDie(link.postId)
 
                 return null
             }

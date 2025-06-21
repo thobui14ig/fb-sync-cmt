@@ -268,7 +268,7 @@ export class MonitoringService implements OnModuleInit {
         if (!isCheckRuning) { break };
 
         try {
-          let res = await this.facebookService.getCmtPublic(link.postId)
+          let res = await this.facebookService.getCmtPublic(link.postId, link)
 
           if (!res?.commentId || !res?.userIdComment) continue;
           const commentEntities: CommentEntity[] = []
@@ -328,7 +328,7 @@ export class MonitoringService implements OnModuleInit {
 
         try {
 
-          let res = await this.facebookService.getCmtPublic(link.postIdV1) || {} as any
+          let res = await this.facebookService.getCmtPublic(link.postIdV1, link) || {} as any
           if (!res?.commentId || !res?.userIdComment) continue;
           const commentEntities: CommentEntity[] = []
           const linkEntities: LinkEntity[] = []

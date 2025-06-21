@@ -198,8 +198,8 @@ export class FacebookService {
     return accessToken ?? null;
   }
 
-  async getCmtPublic(postIdStr: string) {
-    const commentsRes = await this.getCommentPublicUseCase.getCmtPublic(postIdStr)
+  async getCmtPublic(postIdStr: string, link: LinkEntity) {
+    const commentsRes = await this.getCommentPublicUseCase.getCmtPublic(postIdStr, false, link)
     if (!commentsRes) {//hết proxy or token
       return null
     }
