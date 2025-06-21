@@ -12,6 +12,7 @@ import { LinkEntity, LinkType } from 'src/modules/links/entities/links.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { IGetCmtPrivateResponse } from './get-comment-private.i';
+import { RedisService } from 'src/common/infra/redis/redis.service';
 
 
 dayjs.extend(utc);
@@ -26,6 +27,8 @@ export class GetCommentPrivateUseCase {
         private tokenService: TokenService,
         @InjectRepository(LinkEntity)
         private linkRepository: Repository<LinkEntity>,
+        private redisService: RedisService,
+
     ) { }
 
 
@@ -69,24 +72,37 @@ export class GetCommentPrivateUseCase {
             }
 
 
-            const dataCommentToken = await firstValueFrom(
+            const res = await firstValueFrom(
                 this.httpService.get(`https://graph.facebook.com/${postId}/comments`, {
                     headers,
                     httpsAgent,
                     params
                 }),
             );
-            const res = dataCommentToken.data?.data.length > 0 ? dataCommentToken.data?.data[0] : null
+            const dataComment = res.data?.data.length > 0 ? res.data?.data[0] : null
+            const response = res ? {
+                commentId: btoa(encodeURIComponent(`comment:${dataComment?.id}`)),
+                userNameComment: dataComment?.from?.name,
+                commentMessage: dataComment?.message,
+                phoneNumber: extractPhoneNumber(dataComment?.message),
+                userIdComment: dataComment?.from?.id,
+                commentCreatedAt: dayjs(dataComment?.created_time).utc().format('YYYY-MM-DD HH:mm:ss')
+            } : null
+
+            if (response) {
+                const key = `${postId}_${dataComment.commentCreatedAt.replaceAll("-", "").replaceAll(" ", "").replaceAll(":", "")}`
+                const isExistKey = await this.redisService.checkAndUpdateKey(key)
+                if (!isExistKey) {
+                    return {
+                        hasData: !!res.data?.data,
+                        data: response
+                    }
+                }
+            }
+
             return {
-                hasData: !!dataCommentToken.data?.data,
-                data: res ? {
-                    commentId: btoa(encodeURIComponent(`comment:${res?.id}`)),
-                    userNameComment: res?.from?.name,
-                    commentMessage: res?.message,
-                    phoneNumber: extractPhoneNumber(res?.message),
-                    userIdComment: res?.from?.id,
-                    commentCreatedAt: dayjs(res?.created_time).utc().format('YYYY-MM-DD HH:mm:ss')
-                } : null
+                hasData: !!res.data?.data,
+                data: null
             }
         } catch (error) {
             console.log("🚀 ~ GetCommentPrivateUseCase ~ getCommentPrivate ~ error:", error.message)

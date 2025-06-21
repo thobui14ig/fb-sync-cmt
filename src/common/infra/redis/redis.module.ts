@@ -1,8 +1,9 @@
-import { Module } from '@nestjs/common';
+import { Global, Module } from '@nestjs/common';
 import { RedisModule as NestRedisModule } from '@nestjs-modules/ioredis';
 import { RedisService } from './redis.service';
 import { RedisOptions } from 'ioredis';
 
+@Global()
 @Module({
     imports: [
         NestRedisModule.forRoot({
