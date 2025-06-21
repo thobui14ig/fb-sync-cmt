@@ -8,7 +8,7 @@ import { RedisOptions } from 'ioredis';
         NestRedisModule.forRoot({
             type: 'single',
             options: {
-                host: 'localhost',
+                host: 'redis',
                 port: 6379,
             } as RedisOptions,
         }),
