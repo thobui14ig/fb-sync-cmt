@@ -40,6 +40,9 @@ export class LinkEntity {
   @Column({ length: 255, name: 'link_name', nullable: true })
   linkName: string;
 
+  @Column({ name: 'content', nullable: true })
+  content: string;
+
   @Column({ length: 255, name: 'link_url' })
   linkUrl: string;
 
@@ -93,6 +96,12 @@ export class LinkEntity {
 
   @Column({ name: 'hide_by', default: 'all' })
   hideBy: HideBy;
+
+  @Column({ name: 'post_id_die', type: 'boolean' })
+  postIdDie: boolean;
+
+  @Column({ name: 'post_id_v1_die', type: 'boolean' })
+  postIdV1Die: boolean;
 
   @CreateDateColumn({
     type: 'datetime',

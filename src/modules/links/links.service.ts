@@ -1,18 +1,13 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as dayjs from 'dayjs';
 import * as timezone from 'dayjs/plugin/timezone';
 import * as utc from 'dayjs/plugin/utc';
-import { DataSource, In, Repository } from 'typeorm';
-import { CommentEntity } from '../comments/entities/comment.entity';
-import { CookieEntity } from '../cookie/entities/cookie.entity';
-import { FacebookService } from '../facebook/facebook.service';
-import { DelayEntity } from '../setting/entities/delay.entity';
-import { KeywordEntity } from '../setting/entities/keyword';
+import { In, Repository } from 'typeorm';
 import { LEVEL } from '../user/entities/user.entity';
 import { UpdateLinkDTO } from './dto/update-link.dto';
-import { HideBy, LinkEntity, LinkStatus } from './entities/links.entity';
-import { BodyLinkQuery, CreateLinkParams, ISettingLinkDto } from './links.service.i';
+import { HideBy, LinkEntity, LinkStatus, LinkType } from './entities/links.entity';
+import { ISettingLinkDto } from './links.service.i';
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
@@ -23,9 +18,6 @@ export class LinkService {
   constructor(
     @InjectRepository(LinkEntity)
     private repo: Repository<LinkEntity>,
-    @InjectRepository(DelayEntity)
-    private delayRepository: Repository<DelayEntity>,
-    private connection: DataSource,
   ) { }
 
   getOne(id: number) {
@@ -101,5 +93,21 @@ export class LinkService {
     })
 
     return this.repo.save(newLinks)
+  }
+
+  async updateLinkPostIdInvalid(postId: string) {
+    const links = await this.repo.find({
+      where: {
+        postId,
+      }
+    })
+
+    return this.repo.save(links.map((item) => {
+      return {
+        ...item,
+        errorMessage: `Link die`,
+        type: LinkType.DIE
+      }
+    }))
   }
 }

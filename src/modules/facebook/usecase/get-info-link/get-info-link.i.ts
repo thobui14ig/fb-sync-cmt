@@ -18,6 +18,7 @@ export interface IFacebookResponse {
     picture: string;
     source: string;
     id: string;
+    message: string
 }
 
 interface FacebookComment {
@@ -38,4 +39,5 @@ export interface IGetInfoLinkResponse {
     linkName?: string,
     pageId?: string,
     linkType: LinkType,
+    content?: string
 }

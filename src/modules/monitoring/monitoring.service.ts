@@ -1,7 +1,7 @@
 import { HttpException, HttpStatus, Injectable, OnModuleInit } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { InjectRepository } from '@nestjs/typeorm';
-import { IsNull, Not, Repository } from 'typeorm';
+import { In, IsNull, Not, Repository } from 'typeorm';
 import { CommentEntity } from '../comments/entities/comment.entity';
 import { CookieEntity, CookieStatus } from '../cookie/entities/cookie.entity';
 import { FacebookService } from '../facebook/facebook.service';
@@ -255,10 +255,10 @@ export class MonitoringService implements OnModuleInit {
       this.linksPublic = links
       return this.handlePostsPublic(linksRunning)
     }
-    // else {
-    //   this.linksPrivate = links
-    //   return this.handlePostsPrivate(linksRunning)
-    // }
+    else {
+      this.linksPrivate = links
+      return this.handlePostsPrivate(linksRunning)
+    }
   }
 
   async processLinkPublic(link: LinkEntity) {
@@ -473,7 +473,7 @@ export class MonitoringService implements OnModuleInit {
       const batch = links.slice(i, i + BATCH_SIZE);
 
       await Promise.all(batch.map(async (link) => {
-        const { type, name, postId, pageId } = await this.facebookService.getProfileLink(link.linkUrl, link.id) || {} as any;
+        const { type, name, postId, pageId, content } = await this.facebookService.getProfileLink(link.linkUrl) || {} as any;
         if (postId) {
           const exitLink = await this.linkRepository.findOne({
             where: {
@@ -495,6 +495,7 @@ export class MonitoringService implements OnModuleInit {
         link.type = type;
         link.postId = postId;
         link.pageId = pageId
+        link.content = content;
 
         if (type !== LinkType.UNDEFINED) {
           const delayTime = await this.getDelayTime(link.status, link.type)
@@ -503,9 +504,9 @@ export class MonitoringService implements OnModuleInit {
 
         if (postId) {
           link.postIdV1 =
-            type === LinkType.PRIVATE
-              ? await this.facebookService.getPostIdV2WithCookie(link.linkUrl) || null
-              : await this.facebookService.getPostIdPublicV2(link.linkUrl) || null;
+            type === LinkType.PUBLIC
+              ? await this.facebookService.getPostIdPublicV2(link.linkUrl)
+              : null;
         }
 
         await this.linkRepository.save(link);
@@ -551,8 +552,9 @@ export class MonitoringService implements OnModuleInit {
   private getPostStarted(): Promise<LinkEntity[]> {
     return this.linkRepository.find({
       where: {
-        status: LinkStatus.Started,
-        type: Not(LinkType.DIE)
+        status: In([LinkStatus.Started, LinkStatus.Pending]),
+        type: Not(LinkType.DIE),
+        id: 12025
       }
     })
   }

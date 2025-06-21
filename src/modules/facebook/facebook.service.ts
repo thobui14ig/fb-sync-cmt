@@ -237,8 +237,7 @@ export class FacebookService {
     return commentsRes.data
   }
 
-  async getProfileLink(url: string, id: number) {
-
+  async getProfileLink(url: string) {
     const postId = extractFacebookId(url);
     if (!postId) return { type: LinkType.UNDEFINED };
 
@@ -253,6 +252,7 @@ export class FacebookService {
     const baseInfo = {
       name: info.linkName,
       postId: info.id,
+      content: info.content
     };
 
     if (cmtResponse.hasData) {
@@ -310,14 +310,27 @@ export class FacebookService {
       );
 
       const htmlContent = response.data
-      const matchLike = htmlContent.match(/"reaction_count":\{"count":(\d+),/);
-      if (matchLike && matchLike[1]) {
-        res.totalCount = matchLike[1]
+      const matchComment = htmlContent.match(/"reaction_count":\{"count":(\d+),/);
+      if (matchComment && matchComment[1]) {
+        res.totalCount = matchComment[1]
+      }
+      if (!res.totalCount) {
+        const matchComment = htmlContent.match(/"total_comment_count":(\d+)/);
+        if (matchComment && matchComment[1]) {
+          res.totalCount = matchComment[1]
+        }
       }
 
-      const matchCount = htmlContent.match(/"total_count":(\d+)/);
-      if (matchCount && matchCount[1]) {
-        res.totalLike = matchCount[1]
+
+      const matchLike = htmlContent.match(/"total_count":(\d+)/);
+      if (matchLike && matchLike[1]) {
+        res.totalLike = matchLike[1]
+      }
+      if (!res.totalLike) {
+        const matchLike2 = htmlContent.match(/"likers":\{"count":(\d+)}/);
+        if (matchLike2 && matchLike2[1]) {
+          res.totalLike = matchLike2[1]
+        }
       }
 
       return res
@@ -698,7 +711,7 @@ export class FacebookService {
       where: {
         status: In([TokenStatus.ACTIVE]),
         tokenValueV1: Not(IsNull()),
-        type: TokenHandle.GET_INFO
+        type: TokenHandle.CRAWL_CMT
       }
     })
 

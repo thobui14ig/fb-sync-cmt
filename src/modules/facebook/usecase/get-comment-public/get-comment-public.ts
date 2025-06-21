@@ -1,21 +1,17 @@
 import { HttpService } from "@nestjs/axios";
 import { Injectable } from "@nestjs/common";
-import { InjectRepository } from "@nestjs/typeorm";
 import * as dayjs from 'dayjs';
 import * as utc from 'dayjs/plugin/utc';
 import { firstValueFrom } from "rxjs";
-import { isNumeric } from "src/common/utils/check-utils";
+import { RedisService } from "src/common/infra/redis/redis.service";
 import { decodeCommentId, extractPhoneNumber, getHttpAgent } from "src/common/utils/helper";
-import { CommentEntity } from "src/modules/comments/entities/comment.entity";
+import { LinkService } from "src/modules/links/links.service";
 import { ProxyEntity } from "src/modules/proxy/entities/proxy.entity";
 import { ProxyService } from "src/modules/proxy/proxy.service";
-import { Repository } from "typeorm";
 import { getBodyComment, getHeaderComment } from "../../utils";
-import { GetUuidUserUseCase } from "../get-uuid-user/get-uuid-user";
 import { IGetCmtPublicResponse } from "./get-comment-public.i";
-import * as path from "path";
-import { Worker } from "worker_threads";
-import { RedisService } from "src/common/infra/redis/redis.service";
+import { GetInfoLinkUseCase } from "../get-info-link/get-info-link";
+import { LinkType } from "src/modules/links/entities/links.entity";
 
 dayjs.extend(utc);
 
@@ -26,10 +22,9 @@ export class GetCommentPublicUseCase {
 
     constructor(private readonly httpService: HttpService,
         private proxyService: ProxyService,
-        private getUuidUserUseCase: GetUuidUserUseCase,
-        @InjectRepository(CommentEntity)
-        private cmtRepository: Repository<CommentEntity>,
+        private linkService: LinkService,
         private redisService: RedisService,
+        private getInfoLinkUseCase: GetInfoLinkUseCase,
     ) { }
 
 
@@ -79,6 +74,12 @@ export class GetCommentPublicUseCase {
                 }
             }
 
+            if (response.data?.data?.node === null) {//check link die
+                await this.updateLinkDie(postId)
+
+                return null
+            }
+
             let dataComment = await this.handleDataComment(response)
 
             if (!dataComment && typeof response.data === 'string') {
@@ -110,6 +111,13 @@ export class GetCommentPublicUseCase {
             }
         } catch (error) {
             return null
+        }
+    }
+
+    async updateLinkDie(postId: string) {
+        const info = await this.getInfoLinkUseCase.getInfoLink(postId)
+        if (info.linkType === LinkType.DIE) {
+            return this.linkService.updateLinkPostIdInvalid(postId)
         }
     }
 

@@ -61,13 +61,14 @@ export class GetInfoLinkUseCase {
                 }),
             );
             const { name: linkName, id: pageId } = response.data.from || {}
-            const { id } = response.data
+            const { id, message = null } = response.data
 
             return {
                 id,
                 linkName,
                 linkType: LinkType.PUBLIC, //mạc định sẽ là public
-                pageId
+                pageId,
+                content: message
             }
         } catch (error) {
             console.log("🚀 ~ GetInfoLinkUseCase ~ getInfoLink ~ error:", error.response.data)
