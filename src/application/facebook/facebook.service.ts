@@ -792,7 +792,7 @@ export class FacebookService {
       const keywords = infoComment.link.keywords
 
       if (infoComment.link.hideCmt && !infoComment.hideCmt) {
-        await this.hideCommentUseCase.hideComment(infoComment.link.userId, infoComment.link.hideBy, comment, keywords)
+        await this.hideCommentUseCase.hideComment(infoComment.link.userId, infoComment.link.hideBy, infoComment.postId, comment, keywords)
       }
     }
   }

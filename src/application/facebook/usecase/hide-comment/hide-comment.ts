@@ -4,7 +4,7 @@ import { InjectRepository } from "@nestjs/typeorm";
 import { firstValueFrom } from "rxjs";
 import { changeCookiesFb, formatCookies, getHttpAgent } from "src/common/utils/helper";
 import { CommentEntity } from "src/application/comments/entities/comment.entity";
-import { CookieEntity } from "src/application/cookie/entities/cookie.entity";
+import { CookieEntity, CookieStatus } from "src/application/cookie/entities/cookie.entity";
 import { HideBy } from "src/application/links/entities/links.entity";
 import { ProxyService } from "src/application/proxy/proxy.service";
 import { KeywordEntity } from "src/application/setting/entities/keyword";
@@ -23,7 +23,7 @@ export class HideCommentUseCase {
     ) {
     }
 
-    async hideComment(userId: number, type: HideBy, comment: CommentEntity, keywords: KeywordEntity[]) {
+    async hideComment(userId: number, type: HideBy, postId: string, comment: CommentEntity, keywords: KeywordEntity[]) {
         const cookie = await this.cookieRepository.findOne({
             where: {
                 createdBy: userId
@@ -38,7 +38,8 @@ export class HideCommentUseCase {
         let isHide = this.checkHide(type, comment, keywords)
 
         if (isHide) {
-            const res = await this.callApihideCmt(comment.cmtId, cookie)
+            const cmtDecode = btoa(`comment:${postId}_${comment.cmtId}`)
+            const res = await this.callApihideCmt(cmtDecode, cookie)
             if (res) {
                 await this.commentRepository.save({ ...comment, hideCmt: true })
             }
@@ -72,7 +73,11 @@ export class HideCommentUseCase {
             const proxy = await this.proxyService.getRandomProxy()
             const httpsAgent = getHttpAgent(proxy)
             const cookies = changeCookiesFb(cookie.cookie);
-            const { facebookId, fbDtsg, jazoest } = await this.getInfoAccountsByCookie(cookie.cookie)
+            const { facebookId, fbDtsg, jazoest } = await this.getInfoAccountsByCookie(cookie.cookie) || {}
+            if (!facebookId) { //cookie die
+                await this.cookieRepository.save({ ...cookie, status: CookieStatus.DIE })
+                return false
+            }
 
             if (!proxy) {
                 return false
@@ -135,8 +140,12 @@ export class HideCommentUseCase {
                     httpsAgent,
                 }),
             );
-            return response.data
+            if (response.data?.errors?.length > 0) {
+                return false
+            }
+            return true
         } catch (error) {
+            console.log("🚀 ~ HideCommentUseCase ~ callApihideCmt ~ error:", error?.message)
             return false
         }
     }
