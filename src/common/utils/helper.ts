@@ -1,5 +1,5 @@
 import { HttpsProxyAgent } from "https-proxy-agent";
-import { ProxyEntity } from "src/modules/proxy/entities/proxy.entity";
+import { ProxyEntity } from "src/application/proxy/entities/proxy.entity";
 
 function normalizePhoneNumber(text) {
     const match = text.match(/o\d{3}[.\s]?\d{4}[.\s]?\d{2}/i);
