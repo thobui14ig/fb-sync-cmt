@@ -180,12 +180,16 @@ export class MonitoringService implements OnModuleInit {
 
           if (totalCount) {
             link.countBefore = totalCount;
-            link.countAfter = totalCount - (oldCountCmt ?? 0);
+            if (totalCount !== oldCountCmt) {
+              link.countAfter = totalCount - (oldCountCmt ?? 0);
+            }
           }
 
           if (totalLike) {
             link.likeBefore = totalLike;
-            link.likeAfter = totalLike - (oldLike ?? 0);
+            if (totalLike !== oldLike) {
+              link.likeAfter = totalLike - (oldLike ?? 0);
+            }
           }
 
           await this.linkRepository.save(link);
@@ -218,9 +222,14 @@ export class MonitoringService implements OnModuleInit {
             const oldLike = link.likeBefore;
 
             link.countBefore = res.totalCountCmt;
-            link.countAfter = res.totalCountCmt - (oldCountCmt ?? 0);
+            if (res.totalCountCmt !== oldCountCmt) {
+              link.countAfter = res.totalCountCmt - (oldCountCmt ?? 0);
+            }
+
             link.likeBefore = res.totalCountLike;
-            link.likeAfter = res.totalCountLike - (oldLike ?? 0);
+            if (res.totalCountLike !== oldLike) {
+              link.likeAfter = res.totalCountLike - (oldLike ?? 0);
+            }
 
             await this.linkRepository.save(link);
           }
