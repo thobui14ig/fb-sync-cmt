@@ -1,6 +1,15 @@
 import { HttpsProxyAgent } from "https-proxy-agent";
-import { ProxyEntity } from "src/modules/proxy/entities/proxy.entity";
+import { ProxyEntity } from "src/application/proxy/entities/proxy.entity";
 
+function normalizePhoneNumber(text) {
+    const match = text.match(/o\d{3}[.\s]?\d{4}[.\s]?\d{2}/i);
+    if (match) {
+        return match[0]
+            .replace(/^o/i, '0')
+            .replace(/[.\s]/g, '');
+    }
+    return null;
+}
 function extractPhoneNumber(text: string) {
     text = text.replace(/o/gi, '0');
     text = text.replace(/[^0-9]/g, '');
@@ -25,7 +34,7 @@ function extractPhoneNumber(text: string) {
         }
     }
 
-    return null;
+    return normalizePhoneNumber(text)
 }
 
 function extractFacebookId(url: string): string | null {
@@ -38,7 +47,9 @@ function extractFacebookId(url: string): string | null {
         /permalink\.php\/\?story_fbid=(\d+)/,      // story_fbid in permalink.php
         /permalink\.php\/?\?story_fbid=(\d+|pfbid\w+)/,
         /\/reel\/(\d+)/,                            // reel id
-        /facebook\.com\/\d+\/posts\/(\d+)/
+        /facebook\.com\/\d+\/posts\/(\d+)/,
+        /comment_id=(\d+)/,                          // comment_id in query params
+        /fbid=(\d+)/                                // fbid in query params
     ];
 
     for (const pattern of patterns) {
