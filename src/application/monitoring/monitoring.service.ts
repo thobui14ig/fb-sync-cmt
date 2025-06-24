@@ -552,7 +552,6 @@ export class MonitoringService implements OnModuleInit {
       where: {
         status: In([LinkStatus.Started, LinkStatus.Pending]),
         type: Not(LinkType.DIE),
-        id: 12655
       }
     })
   }
