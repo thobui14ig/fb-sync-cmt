@@ -55,7 +55,7 @@ export class GetInfoLinkUseCase {
                 'accept-language': apceptLanguage,
             };
             const response: AxiosResponse<IFacebookResponse, any> = await firstValueFrom(
-                this.httpService.get(`https://graph.facebook.com/${postId}?access_token=${token.tokenValue}`, {
+                this.httpService.get(`https://graph.facebook.com/${postId}?access_token=${token.tokenValueV1}`, {
                     headers,
                     httpsAgent
                 }),
