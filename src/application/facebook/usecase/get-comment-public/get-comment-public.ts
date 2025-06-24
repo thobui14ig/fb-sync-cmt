@@ -94,16 +94,16 @@ export class GetCommentPublicUseCase {
                 dataComment = await this.getCommentWithCHRONOLOGICAL_UNFILTERED_INTENT_V1(encodedPostId, proxy)
             }
 
-            // if (dataComment) {
-            //     const key = `${link.id}_${dataComment.commentCreatedAt.replaceAll("-", "").replaceAll(" ", "").replaceAll(":", "")}`
-            //     const isExistKey = await this.redisService.checkAndUpdateKey(key)
-            //     if (!isExistKey) {
-            //         return {
-            //             hasData: true,
-            //             data: dataComment
-            //         }
-            //     }
-            // }
+            if (dataComment) {
+                const key = `${link.id}_${dataComment.commentCreatedAt.replaceAll("-", "").replaceAll(" ", "").replaceAll(":", "")}`
+                const isExistKey = await this.redisService.checkAndUpdateKey(key)
+                if (!isExistKey) {
+                    return {
+                        hasData: true,
+                        data: dataComment
+                    }
+                }
+            }
 
             return {
                 hasData: true,
