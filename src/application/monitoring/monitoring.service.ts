@@ -344,7 +344,6 @@ export class MonitoringService implements OnModuleInit {
 
           let res = await this.facebookService.getCmtPublic(link.postIdV1, link) || {} as any
           if (!res?.commentId || !res?.userIdComment) continue;
-          console.log("🚀 ~ MonitoringService ~ processLinkPublicV1 ~ res:", res)
           const commentEntities: CommentEntity[] = []
           const linkEntities: LinkEntity[] = []
           const {
