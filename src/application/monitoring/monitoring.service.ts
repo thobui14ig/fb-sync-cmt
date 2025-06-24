@@ -27,6 +27,8 @@ import { ProxyService } from '../proxy/proxy.service';
 import { isNumeric } from 'src/common/utils/check-utils';
 import { GetCommentPublicUseCase } from '../facebook/usecase/get-comment-public/get-comment-public';
 import { GetUuidUserUseCase } from '../facebook/usecase/get-uuid-user/get-uuid-user';
+import { SettingService } from '../setting/setting.service';
+import { KeywordEntity } from '../setting/entities/keyword';
 const proxy_check = require('proxy-check');
 
 dayjs.extend(utc);
@@ -67,10 +69,9 @@ export class MonitoringService implements OnModuleInit {
     private proxyRepository: Repository<ProxyEntity>,
     @InjectRepository(DelayEntity)
     private delayRepository: Repository<DelayEntity>,
-    private readonly httpService: HttpService,
     private eventEmitter: EventEmitter2,
     private getUuidUserUseCase: GetUuidUserUseCase,
-
+    private settingService: SettingService
   ) {
   }
 
@@ -290,29 +291,33 @@ export class MonitoringService implements OnModuleInit {
             userNameComment,
             commentCreatedAt,
           } = res
-          const comment = await this.getComment(link.id, link.userId, commentId)
-          if (!comment) {
-            const commentEntity: Partial<CommentEntity> = {
-              cmtId: commentId,
-              linkId: link.id,
-              postId: link.postId,
-              userId: link.userId,
-              uid: (isNumeric(userIdComment) ? userIdComment : (await this.getUuidUserUseCase.getUuidUser(userIdComment)) || userIdComment),
-              message: commentMessage,
-              phoneNumber,
-              name: userNameComment,
-              timeCreated: commentCreatedAt as any,
-            }
-            commentEntities.push(commentEntity as CommentEntity)
-            const linkEntity: LinkEntity = { ...link, lastCommentTime: !link.lastCommentTime || dayjs.utc(commentCreatedAt).isAfter(dayjs.utc(link.lastCommentTime)) ? commentCreatedAt as any : link.lastCommentTime }
-            linkEntities.push(linkEntity)
+          let isSave = await this.checkIsSave(commentMessage)
+          if (isSave) {
+            const comment = await this.getComment(link.id, link.userId, commentId)
+            if (!comment) {
+              const commentEntity: Partial<CommentEntity> = {
+                cmtId: commentId,
+                linkId: link.id,
+                postId: link.postId,
+                userId: link.userId,
+                uid: (isNumeric(userIdComment) ? userIdComment : (await this.getUuidUserUseCase.getUuidUser(userIdComment)) || userIdComment),
+                message: commentMessage,
+                phoneNumber,
+                name: userNameComment,
+                timeCreated: commentCreatedAt as any,
+              }
+              commentEntities.push(commentEntity as CommentEntity)
+              const linkEntity: LinkEntity = { ...link, lastCommentTime: !link.lastCommentTime || dayjs.utc(commentCreatedAt).isAfter(dayjs.utc(link.lastCommentTime)) ? commentCreatedAt as any : link.lastCommentTime }
+              linkEntities.push(linkEntity)
 
-            const [comments, _] = await Promise.all([this.commentRepository.save(commentEntities), this.linkRepository.save(linkEntities)])
-            this.eventEmitter.emit(
-              'hide.cmt',
-              comments,
-            );
+              const [comments, _] = await Promise.all([this.commentRepository.save(commentEntities), this.linkRepository.save(linkEntities)])
+              this.eventEmitter.emit(
+                'hide.cmt',
+                comments,
+              );
+            }
           }
+
         } catch (error) {
           console.log(`Crawl comment with postId ${link.postId} Error.`, error?.message)
         } finally {
@@ -349,30 +354,31 @@ export class MonitoringService implements OnModuleInit {
             userNameComment,
             commentCreatedAt,
           } = res
+          let isSave = await this.checkIsSave(commentMessage)
+          if (isSave) {
+            const comment = await this.getComment(link.id, link.userId, commentId)
+            if (!comment) {
+              const commentEntity: Partial<CommentEntity> = {
+                cmtId: commentId,
+                linkId: link.id,
+                postId: link.postId,
+                userId: link.userId,
+                uid: (isNumeric(userIdComment) ? userIdComment : (await this.getUuidUserUseCase.getUuidUser(userIdComment)) || userIdComment),
+                message: commentMessage,
+                phoneNumber,
+                name: userNameComment,
+                timeCreated: commentCreatedAt as any,
+              }
+              commentEntities.push(commentEntity as CommentEntity)
+              const linkEntity: LinkEntity = { ...link, lastCommentTime: !link.lastCommentTime || dayjs.utc(commentCreatedAt).isAfter(dayjs.utc(link.lastCommentTime)) ? commentCreatedAt : link.lastCommentTime }
+              linkEntities.push(linkEntity)
 
-
-          const comment = await this.getComment(link.id, link.userId, commentId)
-          if (!comment) {
-            const commentEntity: Partial<CommentEntity> = {
-              cmtId: commentId,
-              linkId: link.id,
-              postId: link.postId,
-              userId: link.userId,
-              uid: (isNumeric(userIdComment) ? userIdComment : (await this.getUuidUserUseCase.getUuidUser(userIdComment)) || userIdComment),
-              message: commentMessage,
-              phoneNumber,
-              name: userNameComment,
-              timeCreated: commentCreatedAt as any,
+              const [comments, _] = await Promise.all([this.commentRepository.save(commentEntities), this.linkRepository.save(linkEntities)])
+              this.eventEmitter.emit(
+                'hide.cmt',
+                comments,
+              );
             }
-            commentEntities.push(commentEntity as CommentEntity)
-            const linkEntity: LinkEntity = { ...link, lastCommentTime: !link.lastCommentTime || dayjs.utc(commentCreatedAt).isAfter(dayjs.utc(link.lastCommentTime)) ? commentCreatedAt : link.lastCommentTime }
-            linkEntities.push(linkEntity)
-
-            const [comments, _] = await Promise.all([this.commentRepository.save(commentEntities), this.linkRepository.save(linkEntities)])
-            this.eventEmitter.emit(
-              'hide.cmt',
-              comments,
-            );
           }
 
         } catch (error) {
@@ -421,26 +427,27 @@ export class MonitoringService implements OnModuleInit {
         if (!commentId || !userIdComment) continue;
         const commentEntities: CommentEntity[] = []
         const linkEntities: LinkEntity[] = []
+        let isSave = await this.checkIsSave(commentMessage)
+        if (isSave) {
+          const comment = await this.getComment(link.id, link.userId, commentId)
+          if (!comment) {
+            const commentEntity: Partial<CommentEntity> = {
+              cmtId: commentId,
+              linkId: link.id,
+              postId: link.postId,
+              userId: link.userId,
+              uid: (isNumeric(userIdComment) ? userIdComment : (await this.getUuidUserUseCase.getUuidUser(userIdComment)) || userIdComment),
+              message: commentMessage,
+              phoneNumber,
+              name: userNameComment,
+              timeCreated: commentCreatedAt as any,
+            }
+            commentEntities.push(commentEntity as CommentEntity)
 
-
-        const comment = await this.getComment(link.id, link.userId, commentId)
-        if (!comment) {
-          const commentEntity: Partial<CommentEntity> = {
-            cmtId: commentId,
-            linkId: link.id,
-            postId: link.postId,
-            userId: link.userId,
-            uid: (isNumeric(userIdComment) ? userIdComment : (await this.getUuidUserUseCase.getUuidUser(userIdComment)) || userIdComment),
-            message: commentMessage,
-            phoneNumber,
-            name: userNameComment,
-            timeCreated: commentCreatedAt as any,
+            const linkEntity: LinkEntity = { ...link, lastCommentTime: !link.lastCommentTime as any || dayjs.utc(commentCreatedAt).isAfter(dayjs.utc(link.lastCommentTime)) ? commentCreatedAt as any : link.lastCommentTime as any }
+            linkEntities.push(linkEntity)
+            await Promise.all([this.commentRepository.save(commentEntities), this.linkRepository.save(linkEntities)])
           }
-          commentEntities.push(commentEntity as CommentEntity)
-
-          const linkEntity: LinkEntity = { ...link, lastCommentTime: !link.lastCommentTime as any || dayjs.utc(commentCreatedAt).isAfter(dayjs.utc(link.lastCommentTime)) ? commentCreatedAt as any : link.lastCommentTime as any }
-          linkEntities.push(linkEntity)
-          await Promise.all([this.commentRepository.save(commentEntities), this.linkRepository.save(linkEntities)])
         }
       } catch (error) {
         console.log(`Crawl comment with postId ${link.postId} Error.`, error?.message)
@@ -545,6 +552,7 @@ export class MonitoringService implements OnModuleInit {
       where: {
         status: In([LinkStatus.Started, LinkStatus.Pending]),
         type: Not(LinkType.DIE),
+        id: 12655
       }
     })
   }
@@ -734,5 +742,19 @@ export class MonitoringService implements OnModuleInit {
     const httpsAgent = new HttpsProxyAgent(agent);
 
     return httpsAgent;
+  }
+
+  async checkIsSave(commentMessage: string) {
+    let isSave = true;
+
+    const keywords = await this.settingService.getKeywordsAdmin()
+    for (const keyword of keywords) {
+      if (commentMessage.includes(keyword.keyword)) {
+        isSave = false;
+        break;
+      }
+    }
+
+    return isSave
   }
 }

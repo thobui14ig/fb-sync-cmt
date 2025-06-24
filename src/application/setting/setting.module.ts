@@ -9,5 +9,6 @@ import { DelayEntity } from './entities/delay.entity';
 
   controllers: [],
   providers: [SettingService],
+  exports: [SettingService]
 })
 export class SettingModule { }

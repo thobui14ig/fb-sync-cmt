@@ -1,10 +1,8 @@
 import { Injectable } from '@nestjs/common';
-import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
-import { DataSource, Repository } from 'typeorm';
-import { CreateKeywordDto } from './dto/create-keyword.dto';
-import { KeywordEntity } from './entities/keyword';
-import { CreateDelayDTO } from './dto/create-delay.dto';
+import { InjectRepository } from '@nestjs/typeorm';
+import { IsNull, Repository } from 'typeorm';
 import { DelayEntity } from './entities/delay.entity';
+import { KeywordEntity } from './entities/keyword';
 
 @Injectable()
 export class SettingService {
@@ -14,6 +12,7 @@ export class SettingService {
     @InjectRepository(DelayEntity)
     private delayRepository: Repository<DelayEntity>,
   ) { }
+
   getKeywords(userId: number) {
     return this.keywordRepository.find({
       where: {
@@ -29,5 +28,13 @@ export class SettingService {
 
   removeAllKeyword() {
     return this.keywordRepository.delete({})
+  }
+
+  getKeywordsAdmin() {
+    return this.keywordRepository.find({
+      where: {
+        linkId: IsNull()
+      }
+    })
   }
 }

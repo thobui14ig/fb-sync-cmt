@@ -13,9 +13,10 @@ import { MonitoringController } from './monitoring.controller';
 import { GetCommentPublicUseCaseModule } from '../facebook/usecase/get-comment-public/get-comment-public.module';
 import { HideCommentUseCaseModule } from '../facebook/usecase/hide-comment/hide-comment.module';
 import { GetUuidUserUseCaseModule } from '../facebook/usecase/get-uuid-user/get-uuid-user.module';
+import { SettingModule } from '../setting/setting.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([LinkEntity, CommentEntity, TokenEntity, CookieEntity, ProxyEntity, DelayEntity]), FacebookModule, HttpModule, GetCommentPublicUseCaseModule, HideCommentUseCaseModule, GetUuidUserUseCaseModule],
+  imports: [TypeOrmModule.forFeature([LinkEntity, CommentEntity, TokenEntity, CookieEntity, ProxyEntity, DelayEntity]), FacebookModule, HttpModule, GetCommentPublicUseCaseModule, HideCommentUseCaseModule, GetUuidUserUseCaseModule, SettingModule],
   controllers: [MonitoringController],
   providers: [MonitoringService],
   exports: [MonitoringService],
