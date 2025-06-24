@@ -107,7 +107,7 @@ export class GetCommentPublicUseCase {
 
             return {
                 hasData: true,
-                data: dataComment
+                data: null
             }
         } catch (error) {
             return null
