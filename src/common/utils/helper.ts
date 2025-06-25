@@ -122,6 +122,10 @@ function decodeCommentId(encodedStr) {
     }
 }
 
+const delay = (ms: number): Promise<void> => {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
 export {
-    extractPhoneNumber, extractFacebookId, getHttpAgent, changeCookiesFb, formatCookies, decodeCommentId
+    extractPhoneNumber, extractFacebookId, getHttpAgent, changeCookiesFb, formatCookies, decodeCommentId, delay
 }

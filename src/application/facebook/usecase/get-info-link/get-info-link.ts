@@ -19,7 +19,7 @@ export class GetInfoLinkUseCase {
     ) {
     }
 
-    async getInfoLink(postId: string): Promise<IGetInfoLinkResponse> | null {
+    async getInfoLink(postId: string, i = 1): Promise<IGetInfoLinkResponse> | null {
         const proxy = await this.proxyService.getRandomProxy()
         const token = await this.tokenService.getTokenGetInfoActiveFromDb()
 
@@ -54,8 +54,9 @@ export class GetInfoLinkUseCase {
                 'sec-fetch-dest': 'document',
                 'accept-language': apceptLanguage,
             };
+            const tokenValue = i === 1 ? token.tokenValue : token.tokenValueV1
             const response: AxiosResponse<IFacebookResponse, any> = await firstValueFrom(
-                this.httpService.get(`https://graph.facebook.com/${postId}?access_token=${token.tokenValueV1}`, {
+                this.httpService.get(`https://graph.facebook.com/${postId}?access_token=${tokenValue}`, {
                     headers,
                     httpsAgent
                 }),
@@ -71,11 +72,19 @@ export class GetInfoLinkUseCase {
                 content: message ?? description
             }
         } catch (error) {
-            console.log("🚀 ~ GetInfoLinkUseCase ~ getInfoLink ~ error:", error.response.data)
+
+            if (i === 1) {
+                i = i + 1
+
+                return this.getInfoLink(postId, i)
+            }
             if (error.response?.data?.error?.code === 100 && (error?.response?.data?.error?.message as string)?.includes('Unsupported get request. Object with ID')) {
                 return {
                     linkType: LinkType.DIE
                 }
+            }
+            if (error.response?.data?.error?.code === 368) {
+                await this.tokenService.updateStatusToken(token, TokenStatus.DIE)
             }
 
             if (error.response?.data?.error?.code === 190) {//check point

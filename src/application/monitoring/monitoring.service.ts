@@ -181,15 +181,18 @@ export class MonitoringService implements OnModuleInit {
 
           if (totalCount) {
             link.countBefore = totalCount;
-            if (totalCount !== oldCountCmt) {
-              link.countAfter = totalCount - (oldCountCmt ?? 0);
+            const difference = totalCount - (oldCountCmt ?? 0)
+
+            if (totalCount > difference) {
+              link.countAfter = difference
             }
           }
 
           if (totalLike) {
             link.likeBefore = totalLike;
-            if (totalLike !== oldLike) {
-              link.likeAfter = totalLike - (oldLike ?? 0);
+            const difference = totalLike - (oldLike ?? 0)
+            if (totalLike > difference) {
+              link.likeAfter = difference
             }
           }
 
@@ -223,13 +226,16 @@ export class MonitoringService implements OnModuleInit {
             const oldLike = link.likeBefore;
 
             link.countBefore = res.totalCountCmt;
-            if (res.totalCountCmt !== oldCountCmt) {
-              link.countAfter = res.totalCountCmt - (oldCountCmt ?? 0);
+            const differenceCmt = res.totalCountCmt - (oldCountCmt ?? 0)
+
+            if (res.totalCountCmt > differenceCmt) {
+              link.countAfter = differenceCmt
             }
 
             link.likeBefore = res.totalCountLike;
-            if (res.totalCountLike !== oldLike) {
-              link.likeAfter = res.totalCountLike - (oldLike ?? 0);
+            const differenceLike = res.totalCountLike - (oldLike ?? 0)
+            if (res.totalCountLike > differenceLike) {
+              link.likeAfter = differenceLike
             }
 
             await this.linkRepository.save(link);

@@ -5,10 +5,11 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { ProxyEntity, ProxyStatus } from './entities/proxy.entity';
 import { Cron, CronExpression } from '@nestjs/schedule';
+import { delay } from 'src/common/utils/helper';
 
 @Injectable()
 export class ProxyService {
-  proxies: ProxyEntity[]
+  proxies: ProxyEntity[] = []
   constructor(
     @InjectRepository(ProxyEntity)
     private repo: Repository<ProxyEntity>,
@@ -34,7 +35,10 @@ export class ProxyService {
   }
 
   async getRandomProxy() {
-    if (this.proxies.length === 0) return this.getRandomProxy()
+    if (this.proxies.length === 0) {
+      await delay(5000)
+      return this.getRandomProxy()
+    }
     const randomIndex = Math.floor(Math.random() * this.proxies?.length);
     const randomProxy = this.proxies[randomIndex];
 
