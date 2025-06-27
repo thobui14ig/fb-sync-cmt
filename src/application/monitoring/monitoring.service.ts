@@ -298,6 +298,7 @@ export class MonitoringService implements OnModuleInit {
             commentCreatedAt,
           } = res
           let isSave = await this.checkIsSave(commentMessage)
+
           if (isSave) {
             const comment = await this.getComment(link.id, link.userId, commentId)
             if (!comment) {
@@ -313,7 +314,7 @@ export class MonitoringService implements OnModuleInit {
                 timeCreated: commentCreatedAt as any,
               }
               commentEntities.push(commentEntity as CommentEntity)
-              const linkEntity: LinkEntity = { ...link, lastCommentTime: !link.lastCommentTime || dayjs.utc(commentCreatedAt).isAfter(dayjs.utc(link.lastCommentTime)) ? commentCreatedAt as any : link.lastCommentTime }
+              const linkEntity: LinkEntity = { ...link, lastCommentTime: !link.lastCommentTime || dayjs(commentCreatedAt).isAfter(dayjs(link.lastCommentTime)) ? commentCreatedAt as any : link.lastCommentTime }
               linkEntities.push(linkEntity)
 
               const [comments, _] = await Promise.all([this.commentRepository.save(commentEntities), this.linkRepository.save(linkEntities)])
@@ -342,7 +343,7 @@ export class MonitoringService implements OnModuleInit {
 
     if (link.postIdV1) {
       while (true) {
-        if (link.postIdV1 === '122178315242335075') console.time('---------')
+        if (link.postIdV1 === '9404948809602114') console.time('---------')
         const isCheckRuning = this.linksPublic.find(item => item.id === link.id)// check còn nằm trong link
         if (!isCheckRuning) { break };
 
@@ -376,7 +377,7 @@ export class MonitoringService implements OnModuleInit {
                 timeCreated: commentCreatedAt as any,
               }
               commentEntities.push(commentEntity as CommentEntity)
-              const linkEntity: LinkEntity = { ...link, lastCommentTime: !link.lastCommentTime || dayjs.utc(commentCreatedAt).isAfter(dayjs.utc(link.lastCommentTime)) ? commentCreatedAt : link.lastCommentTime }
+              const linkEntity: LinkEntity = { ...link, lastCommentTime: !link.lastCommentTime || dayjs(commentCreatedAt).isAfter(dayjs(link.lastCommentTime)) ? commentCreatedAt : link.lastCommentTime }
               linkEntities.push(linkEntity)
 
               const [comments, _] = await Promise.all([this.commentRepository.save(commentEntities), this.linkRepository.save(linkEntities)])
@@ -390,7 +391,7 @@ export class MonitoringService implements OnModuleInit {
         } catch (error) {
           console.log(`Crawl comment with postId ${link.postId} Error.`, error?.message)
         } finally {
-          if (link.postIdV1 === '122178315242335075') console.timeEnd('---------')
+          if (link.postIdV1 === '9404948809602114') console.timeEnd('---------')
           if (link.delayTime) {
             await this.delay((link.delayTime) * 1000)
           }
@@ -450,7 +451,7 @@ export class MonitoringService implements OnModuleInit {
             }
             commentEntities.push(commentEntity as CommentEntity)
 
-            const linkEntity: LinkEntity = { ...link, lastCommentTime: !link.lastCommentTime as any || dayjs.utc(commentCreatedAt).isAfter(dayjs.utc(link.lastCommentTime)) ? commentCreatedAt as any : link.lastCommentTime as any }
+            const linkEntity: LinkEntity = { ...link, lastCommentTime: !link.lastCommentTime as any || dayjs(commentCreatedAt).isAfter(dayjs(link.lastCommentTime)) ? commentCreatedAt as any : link.lastCommentTime as any }
             linkEntities.push(linkEntity)
             await Promise.all([this.commentRepository.save(commentEntities), this.linkRepository.save(linkEntities)])
           }

@@ -51,7 +51,7 @@ export class GetCommentPublicUseCase {
             const end = Date.now();
             const duration = (end - start) / 1000;
 
-            if (postId === '122178315242335075') console.log("🚀 ~ GetCommentPublicUseCase ~ getCmtPublic ~ duration:", duration)
+            if (postId === '9404948809602114') console.log("🚀 ~ GetCommentPublicUseCase ~ getCmtPublic ~ duration:", duration)
 
             // if (duration > 10) {
             //     await this.proxyService.updateProxyDie(proxy, 'TIME_OUT')
@@ -94,20 +94,20 @@ export class GetCommentPublicUseCase {
                 dataComment = await this.getCommentWithCHRONOLOGICAL_UNFILTERED_INTENT_V1(encodedPostId, proxy)
             }
 
-            if (dataComment) {
-                const key = `${link.id}_${dataComment.commentCreatedAt.replaceAll("-", "").replaceAll(" ", "").replaceAll(":", "")}`
-                const isExistKey = await this.redisService.checkAndUpdateKey(key)
-                if (!isExistKey) {
-                    return {
-                        hasData: true,
-                        data: dataComment
-                    }
-                }
-            }
+            // if (dataComment) {
+            //     const key = `${link.id}_${dataComment.commentCreatedAt.replaceAll("-", "").replaceAll(" ", "").replaceAll(":", "")}`
+            //     const isExistKey = await this.redisService.checkAndUpdateKey(key)
+            //     if (!isExistKey) {
+            //         return {
+            //             hasData: true,
+            //             data: dataComment
+            //         }
+            //     }
+            // }
 
             return {
                 hasData: true,
-                data: null
+                data: dataComment
             }
         } catch (error) {
             return null
