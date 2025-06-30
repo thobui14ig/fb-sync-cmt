@@ -381,10 +381,7 @@ export class MonitoringService implements OnModuleInit {
               linkEntities.push(linkEntity)
 
               const [comments, _] = await Promise.all([this.commentRepository.save(commentEntities), this.linkRepository.save(linkEntities)])
-              this.eventEmitter.emit(
-                'hide.cmt',
-                comments,
-              );
+              await this.facebookService.hideCmt(comments)
             }
           }
 

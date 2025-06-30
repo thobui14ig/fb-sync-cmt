@@ -708,7 +708,7 @@ export class FacebookService {
     return status === LinkStatus.Pending ? setting[0].delayOff * 60 : (type === LinkType.PUBLIC ? setting[0].delayOnPublic : setting[0].delayOnPrivate)
   }
 
-  // @OnEvent('hide.cmt')
+  @OnEvent('hide.cmt')
   async hideCmt(payload: any) {
     for (const comment of payload) {
       const infoComment = await this.commentRepository.findOne({
