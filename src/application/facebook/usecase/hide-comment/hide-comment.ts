@@ -140,7 +140,8 @@ export class HideCommentUseCase {
                     httpsAgent,
                 }),
             );
-            console.log("🚀 ~ HideCommentUseCase ~ callApihideCmt ~ response:", response.data)
+
+
             if (response.data?.errors?.length > 0) {
                 return false
             }
