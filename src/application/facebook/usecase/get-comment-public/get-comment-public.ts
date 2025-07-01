@@ -99,6 +99,7 @@ export class GetCommentPublicUseCase {
             if (dataComment) {
                 const key = `${link.id}_${dataComment.commentCreatedAt.replaceAll("-", "").replaceAll(" ", "").replaceAll(":", "")}`
                 const isExistKey = await this.redisService.checkAndUpdateKey(key)
+                if (postId === '122128358660803341') console.log("🚀 ~ GetCommentPublicUseCase ~ getCmtPublic ~ isExistKey:", isExistKey)
                 if (!isExistKey) {
                     return {
                         hasData: true,
