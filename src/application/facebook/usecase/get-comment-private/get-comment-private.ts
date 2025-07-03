@@ -67,7 +67,7 @@ export class GetCommentPrivateUseCase {
             const params = {
                 "order": "reverse_chronological",
                 "limit": "1000",
-                "access_token": token.tokenValue,
+                "access_token": token.tokenValueV1,
                 "created_time": "created_time"
             }
 
@@ -108,15 +108,15 @@ export class GetCommentPrivateUseCase {
             }
         } catch (error) {
             console.log("🚀 ~ GetCommentPrivateUseCase ~ getCommentPrivate ~ error:", error.message)
-            if (error.response?.data?.error?.code === 100 && (error?.response?.data?.error?.message as string)?.includes('Unsupported get request. Object with ID')) {
-                const link = await this.linkRepository.findOne({
-                    where: {
-                        postId
-                    }
-                })
+            // if (error.response?.data?.error?.code === 100 && (error?.response?.data?.error?.message as string)?.includes('Unsupported get request. Object with ID')) {
+            //     const link = await this.linkRepository.findOne({
+            //         where: {
+            //             postId
+            //         }
+            //     })
 
-                await this.linkRepository.save({ ...link, type: LinkType.DIE })
-            }
+            //     await this.linkRepository.save({ ...link, type: LinkType.DIE })
+            // }
 
             if (error.response?.data?.error?.code === 190) {//check point
                 await this.tokenService.updateStatusToken(token, TokenStatus.DIE)
