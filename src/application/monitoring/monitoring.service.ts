@@ -456,7 +456,9 @@ export class MonitoringService implements OnModuleInit {
       } catch (error) {
         console.log(`Crawl comment with postId ${link.postId} Error.`, error?.message)
       } finally {
-        await this.delay((link.delayTime ?? 5) * 1000)
+        if (link.delayTime) {
+          await this.delay((link.delayTime) * 1000)
+        }
       }
     }
 
