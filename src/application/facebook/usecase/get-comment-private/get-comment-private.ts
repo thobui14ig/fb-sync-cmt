@@ -79,18 +79,20 @@ export class GetCommentPrivateUseCase {
                     params
                 }),
             );
+
             const dataComment = res.data?.data.length > 0 ? res.data?.data[0] : null
-            const response = res ? {
+
+            const response = res.data?.data.length ? {
                 commentId: btoa(encodeURIComponent(`comment:${dataComment?.id}`)),
                 userNameComment: dataComment?.from?.name,
                 commentMessage: dataComment?.message,
                 phoneNumber: extractPhoneNumber(dataComment?.message),
                 userIdComment: dataComment?.from?.id,
-                commentCreatedAt: dayjs(dataComment?.created_time).utc().format('YYYY-MM-DD HH:mm:ss')
+                commentCreatedAt: dayjs(dataComment?.created_time).format('YYYY-MM-DD HH:mm:ss')
             } : null
 
             if (response) {
-                const key = `${postId}_${dataComment.commentCreatedAt.replaceAll("-", "").replaceAll(" ", "").replaceAll(":", "")}`
+                const key = `${postId}_${response.commentCreatedAt.replaceAll("-", "").replaceAll(" ", "").replaceAll(":", "")}`
                 const isExistKey = await this.redisService.checkAndUpdateKey(key)
                 if (!isExistKey) {
                     return {

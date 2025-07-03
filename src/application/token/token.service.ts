@@ -28,7 +28,7 @@ export class TokenService {
   async getTokenGetInfoActiveFromDb(): Promise<TokenEntity> {
     const tokens = await this.repo.find({
       where: {
-        status: In([TokenStatus.ACTIVE, TokenStatus.LIMIT]),
+        status: In([TokenStatus.ACTIVE]),
         tokenValueV1: Not(IsNull()),
         type: TokenHandle.GET_INFO
       }
