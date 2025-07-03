@@ -273,7 +273,7 @@ export class MonitoringService implements OnModuleInit {
     }
     else {
       this.linksPrivate = links
-      return this.handlePostsPrivate(linksRunning)
+      // return this.handlePostsPrivate(linksRunning)
     }
   }
 
