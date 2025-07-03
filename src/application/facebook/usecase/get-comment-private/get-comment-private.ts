@@ -107,7 +107,7 @@ export class GetCommentPrivateUseCase {
                 data: null
             }
         } catch (error) {
-            console.log("🚀 ~ GetCommentPrivateUseCase ~ getCommentPrivate ~ error:", error.message)
+            console.log("🚀 ~ GetCommentPrivateUseCase ~ getCommentPrivate ~ error:", error?.response?.data?.error?.message)
             // if (error.response?.data?.error?.code === 100 && (error?.response?.data?.error?.message as string)?.includes('Unsupported get request. Object with ID')) {
             //     const link = await this.linkRepository.findOne({
             //         where: {
@@ -132,16 +132,16 @@ export class GetCommentPrivateUseCase {
                 if (error.response?.data?.error?.code === 190) {
                     await this.tokenService.updateStatusToken(token, TokenStatus.DIE)
                 }
-                if (error.response?.data?.error?.code === 100 && (error?.response?.data?.error?.message as string)?.includes('Unsupported get request. Object with ID')) {
-                    const link = await this.linkRepository.findOne({
-                        where: {
-                            postId
-                        }
-                    })
+                // if (error.response?.data?.error?.code === 100 && (error?.response?.data?.error?.message as string)?.includes('Unsupported get request. Object with ID')) {
+                //     const link = await this.linkRepository.findOne({
+                //         where: {
+                //             postId
+                //         }
+                //     })
 
-                    await this.linkRepository.save({ ...link, type: LinkType.DIE })
+                //     await this.linkRepository.save({ ...link, type: LinkType.DIE })
 
-                }
+                // }
                 if (error.response?.data?.error?.code === 10) {
                     await this.tokenService.updateStatusToken(token, TokenStatus.DIE)
                 }
