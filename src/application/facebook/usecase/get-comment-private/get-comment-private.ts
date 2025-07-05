@@ -32,6 +32,7 @@ export class GetCommentPrivateUseCase {
 
 
     async getCommentPrivate(postId: string): Promise<IGetCmtPrivateResponse | null> {
+        console.log("🚀 ~ GetCommentPrivateUseCase ~ getCommentPrivate ~ postId:", postId)
         const proxy = await this.proxyService.getRandomProxy()
         const token = await this.tokenService.getTokenCrawCmtActiveFromDb()
         try {
@@ -87,7 +88,7 @@ export class GetCommentPrivateUseCase {
                 commentMessage: dataComment?.message,
                 phoneNumber: extractPhoneNumber(dataComment?.message),
                 userIdComment: dataComment?.from?.id,
-                commentCreatedAt: dayjs(dataComment?.created_time).format('YYYY-MM-DD HH:mm:ss')
+                commentCreatedAt: dayjs(dataComment?.created_time).utc().format('YYYY-MM-DD HH:mm:ss')
             } : null
 
             if (response) {

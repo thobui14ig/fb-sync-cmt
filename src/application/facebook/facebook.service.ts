@@ -1,6 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import { faker } from '@faker-js/faker';
 import { HttpService } from '@nestjs/axios';
 import { Injectable } from '@nestjs/common';
