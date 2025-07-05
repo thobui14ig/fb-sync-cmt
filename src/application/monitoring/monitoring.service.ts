@@ -273,7 +273,7 @@ export class MonitoringService implements OnModuleInit {
     }
     else {
       this.linksPrivate = links
-      // return this.handlePostsPrivate(linksRunning)
+      return this.handlePostsPrivate(linksRunning)
     }
   }
 
@@ -558,7 +558,9 @@ export class MonitoringService implements OnModuleInit {
       where: {
         status: In([LinkStatus.Started, LinkStatus.Pending]),
         type: Not(LinkType.DIE),
-        // id: In([14185, 14282])
+        // id: In([12736,
+        //   12823,
+        //   13012])
       }
     })
   }

@@ -13,10 +13,9 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { IGetCmtPrivateResponse } from './get-comment-private.i';
 import { RedisService } from 'src/infra/redis/redis.service';
-
-
+import { CheckLinkUseCase } from '../check-link-status/check-link-status-usecase';
+import { ICheckLinkStatus } from '../check-link-status/check-link-status-usecase.i';
 dayjs.extend(utc);
-
 @Injectable()
 export class GetCommentPrivateUseCase {
     fbUrl = 'https://www.facebook.com';
@@ -28,7 +27,7 @@ export class GetCommentPrivateUseCase {
         @InjectRepository(LinkEntity)
         private linkRepository: Repository<LinkEntity>,
         private redisService: RedisService,
-
+        private checkLinkUseCase: CheckLinkUseCase,
     ) { }
 
 
@@ -107,16 +106,27 @@ export class GetCommentPrivateUseCase {
                 data: null
             }
         } catch (error) {
-            console.log("🚀 ~ GetCommentPrivateUseCase ~ getCommentPrivate ~ error:", error?.response?.data?.error?.message)
-            // if (error.response?.data?.error?.code === 100 && (error?.response?.data?.error?.message as string)?.includes('Unsupported get request. Object with ID')) {
-            //     const link = await this.linkRepository.findOne({
-            //         where: {
-            //             postId
-            //         }
-            //     })
-
-            //     await this.linkRepository.save({ ...link, type: LinkType.DIE })
-            // }
+            console.log("🚀 ~ GetCommentPrivateUseCase ~ getCommentPrivate ~ error:", postId, error?.message)
+            if (error.response?.data?.error?.code === 100 && (error?.response?.data?.error?.message as string)?.includes('Unsupported get request. Object with ID')) {
+                const proxyStatus = await this.checkLinkUseCase.checkLinkStatus(proxy, postId)
+                if (proxyStatus === ICheckLinkStatus.LINK_DIE) {
+                    const links = await this.linkRepository.find({
+                        where: {
+                            postId
+                        }
+                    })
+                    const linksDie = links.map(item => {
+                        return {
+                            ...item,
+                            type: LinkType.DIE
+                        }
+                    })
+                    await this.linkRepository.save(linksDie)
+                }
+                if (proxyStatus === ICheckLinkStatus.PROXY_DIE) {
+                    await this.proxyService.updateProxyDie(proxy, "TIME_OUT")
+                }
+            }
 
             if (error.response?.data?.error?.code === 190) {//check point
                 await this.tokenService.updateStatusToken(token, TokenStatus.DIE)
@@ -132,16 +142,6 @@ export class GetCommentPrivateUseCase {
                 if (error.response?.data?.error?.code === 190) {
                     await this.tokenService.updateStatusToken(token, TokenStatus.DIE)
                 }
-                // if (error.response?.data?.error?.code === 100 && (error?.response?.data?.error?.message as string)?.includes('Unsupported get request. Object with ID')) {
-                //     const link = await this.linkRepository.findOne({
-                //         where: {
-                //             postId
-                //         }
-                //     })
-
-                //     await this.linkRepository.save({ ...link, type: LinkType.DIE })
-
-                // }
                 if (error.response?.data?.error?.code === 10) {
                     await this.tokenService.updateStatusToken(token, TokenStatus.DIE)
                 }

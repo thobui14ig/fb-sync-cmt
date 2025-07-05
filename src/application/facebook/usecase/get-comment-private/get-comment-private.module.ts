@@ -6,9 +6,10 @@ import { TypeOrmModule } from "@nestjs/typeorm";
 import { LinkEntity } from "src/application/links/entities/links.entity";
 import { GetCommentPrivateUseCase } from "./get-comment-private";
 import { RedisModule } from "@nestjs-modules/ioredis";
+import { CheckLinkUseCaseModule } from "../check-link-status/check-link-status-usecase.module";
 
 @Module({
-    imports: [HttpModule, forwardRef(() => TokenModule), ProxyModule, TypeOrmModule.forFeature([LinkEntity]), RedisModule],
+    imports: [HttpModule, forwardRef(() => TokenModule), ProxyModule, TypeOrmModule.forFeature([LinkEntity]), RedisModule, CheckLinkUseCaseModule],
     controllers: [],
     providers: [GetCommentPrivateUseCase],
     exports: [GetCommentPrivateUseCase],

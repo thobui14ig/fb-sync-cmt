@@ -11,7 +11,7 @@ import * as dayjs from 'dayjs';
 import * as utc from 'dayjs/plugin/utc';
 import { HttpsProxyAgent } from 'https-proxy-agent';
 import { firstValueFrom } from 'rxjs';
-import { extractFacebookId } from 'src/common/utils/helper';
+import { extractFacebookId, getHttpAgent } from 'src/common/utils/helper';
 import { In, IsNull, Not, Repository } from 'typeorm';
 import { CommentEntity } from '../comments/entities/comment.entity';
 import { CookieEntity, CookieStatus } from '../cookie/entities/cookie.entity';
@@ -25,7 +25,9 @@ import { GetInfoLinkUseCase } from './usecase/get-info-link/get-info-link';
 import { GetUuidUserUseCase } from './usecase/get-uuid-user/get-uuid-user';
 import { HideCommentUseCase } from './usecase/hide-comment/hide-comment';
 import {
+  getBodyComment,
   getBodyToken,
+  getHeaderComment,
   getHeaderProfileFb,
   getHeaderToken
 } from './utils';
@@ -259,7 +261,7 @@ export class FacebookService {
       if (!proxy) {
         return res
       }
-      const httpsAgent = this.getHttpAgent(proxy)
+      const httpsAgent = getHttpAgent(proxy)
       const response = await firstValueFrom(
         this.httpService.get(url, {
           headers: {
@@ -311,7 +313,6 @@ export class FacebookService {
           res.totalLike = matchLike2[1]
         }
       }
-
       return res
     } catch (error) {
       if ((error?.message as string)?.includes('connect ECONNREFUSED') || error?.status === 407 || (error?.message as string)?.includes('connect EHOSTUNREACH') || (error?.message as string)?.includes('Proxy connection ended before receiving CONNECT')) {
@@ -324,7 +325,7 @@ export class FacebookService {
 
   async checkProxyBlock(proxy: ProxyEntity) {
     try {
-      const httpsAgent = this.getHttpAgent(proxy)
+      const httpsAgent = getHttpAgent(proxy)
 
       const response = await firstValueFrom(
         this.httpService.get("https://www.facebook.com/630629966359111", {
@@ -365,7 +366,6 @@ export class FacebookService {
         return true
       }
 
-
       return false
     } catch (error) {
       return true
@@ -375,7 +375,7 @@ export class FacebookService {
   async getPostIdPublicV2(url: string) {
     try {
       const proxy = await this.getRandomProxy()
-      const httpsAgent = this.getHttpAgent(proxy)
+      const httpsAgent = getHttpAgent(proxy)
 
       const response = await firstValueFrom(
         this.httpService.get(url, {
@@ -436,7 +436,7 @@ export class FacebookService {
       try {
         const proxy = await this.getRandomProxy();
         if (!proxy) return null
-        const httpsAgent = this.getHttpAgent(proxy);
+        const httpsAgent = getHttpAgent(proxy);
         const cookies = this.changeCookiesFb(cookie);
 
         const dataUser = await firstValueFrom(
@@ -478,7 +478,7 @@ export class FacebookService {
 
       if (!proxy || !token) { return null }
 
-      const httpsAgent = this.getHttpAgent(proxy)
+      const httpsAgent = getHttpAgent(proxy)
       const languages = [
         'en-US,en;q=0.9',
         'vi-VN,vi;q=0.9,en-US;q=0.8,en;q=0.7',
@@ -562,14 +562,6 @@ export class FacebookService {
         type: LinkType.DIE
       }
     }))
-  }
-
-  getHttpAgent(proxy: ProxyEntity) {
-    const proxyArr = proxy?.proxyAddress.split(':')
-    const agent = `http://${proxyArr[2]}:${proxyArr[3]}@${proxyArr[0]}:${proxyArr[1]}`
-    const httpsAgent = new HttpsProxyAgent(agent);
-
-    return httpsAgent;
   }
 
   async getCookieActiveFromDb(): Promise<CookieEntity> {

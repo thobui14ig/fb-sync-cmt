@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import * as dayjs from 'dayjs';
 import * as timezone from 'dayjs/plugin/timezone';
 import * as utc from 'dayjs/plugin/utc';
-import { In, Repository } from 'typeorm';
+import { In, Not, Repository } from 'typeorm';
 import { LEVEL } from '../user/entities/user.entity';
 import { UpdateLinkDTO } from './dto/update-link.dto';
 import { HideBy, LinkEntity, LinkStatus, LinkType } from './entities/links.entity';
@@ -109,5 +109,14 @@ export class LinkService {
         type: LinkType.DIE
       }
     }))
+  }
+
+  getLinkOrtherId(postId: string) {
+    return this.repo.findOne({
+      where: {
+        postId: Not(postId),
+        type: LinkType.PRIVATE
+      }
+    })
   }
 }
