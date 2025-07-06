@@ -57,6 +57,8 @@ export class GetCommentPrivateUseCase {
             if ((!dataComment || !(dataComment as any)?.commentId)) {
                 dataComment = await this.getCommentWithCookie(postId, postIdV1)
             }
+            console.log("🚀 ~ GetCommentPrivateUseCase ~ getCommentPrivate ~ dataComment:", dataComment)
+
         }
 
         if (dataComment?.data?.commentId) {
