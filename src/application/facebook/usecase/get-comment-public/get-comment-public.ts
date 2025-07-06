@@ -4,7 +4,7 @@ import * as dayjs from 'dayjs';
 import * as utc from 'dayjs/plugin/utc';
 import { firstValueFrom } from "rxjs";
 import { RedisService } from "src/infra/redis/redis.service";
-import { decodeCommentId, extractPhoneNumber, getHttpAgent } from "src/common/utils/helper";
+import { decodeCommentId, extractPhoneNumber, getHttpAgent, handleDataComment } from "src/common/utils/helper";
 import { LinkService } from "src/application/links/links.service";
 import { ProxyEntity } from "src/application/proxy/entities/proxy.entity";
 import { ProxyService } from "src/application/proxy/proxy.service";
@@ -80,13 +80,13 @@ export class GetCommentPublicUseCase {
                 return null
             }
 
-            let dataComment = await this.handleDataComment(response)
+            let dataComment = handleDataComment(response)
 
             if (!dataComment && typeof response.data === 'string') {
                 const text = response.data
                 const lines = text.trim().split('\n');
                 const data = JSON.parse(lines[0])
-                dataComment = await this.handleDataComment({ data })
+                dataComment = handleDataComment({ data })
             }
 
             if (!dataComment) {
@@ -119,39 +119,6 @@ export class GetCommentPublicUseCase {
         if (info.linkType === LinkType.DIE) {
             return this.linkService.updateLinkPostIdInvalid(postId)
         }
-    }
-
-    async handleDataComment(response) {
-        const comment =
-            response?.data?.data?.node?.comment_rendering_instance_for_feed_location
-                ?.comments.edges?.[0]?.node;
-        if (!comment) return null
-        const commentId = decodeCommentId(comment?.id) ?? comment?.id
-
-        const commentMessage =
-            comment?.preferred_body && comment?.preferred_body?.text
-                ? comment?.preferred_body?.text
-                : 'Sticker';
-
-        const phoneNumber = extractPhoneNumber(commentMessage);
-        const userNameComment = comment?.author?.name;
-        const commentCreatedAt = dayjs(comment?.created_time * 1000).utc().format('YYYY-MM-DD HH:mm:ss');
-        const serialized = comment?.discoverable_identity_badges_web?.[0]?.serialized;
-        let userIdComment = serialized ? JSON.parse(serialized).actor_id : comment?.author.id
-        const totalCount = response?.data?.data?.node?.comment_rendering_instance_for_feed_location?.comments?.total_count
-        const totalLike = response?.data?.data?.node?.comment_rendering_instance_for_feed_location?.comments?.count
-        userIdComment = userIdComment
-
-        return {
-            commentId,
-            userNameComment,
-            commentMessage,
-            phoneNumber,
-            userIdComment,
-            commentCreatedAt,
-            totalCount,
-            totalLike
-        };
     }
 
     async getCommentWithCHRONOLOGICAL_UNFILTERED_INTENT_V1(postIdString: string, proxy: ProxyEntity) {

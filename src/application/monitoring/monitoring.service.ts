@@ -417,7 +417,7 @@ export class MonitoringService implements OnModuleInit {
 
 
       try {
-        const dataComment = await this.facebookService.getCommentByToken(link.postId)
+        const dataComment = await this.facebookService.getCommentByToken(link.postId, link.postIdV1)
 
         const {
           commentId,
@@ -558,9 +558,7 @@ export class MonitoringService implements OnModuleInit {
       where: {
         status: In([LinkStatus.Started, LinkStatus.Pending]),
         type: Not(LinkType.DIE),
-        // id: In([12736,
-        //   12823,
-        //   13012])
+        // id: In([12658])
       }
     })
   }

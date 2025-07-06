@@ -206,8 +206,8 @@ export class FacebookService {
     return commentsRes.data
   }
 
-  async getCommentByToken(postId: string) {
-    const commentsRes = await this.getCommentPrivateUseCase.getCommentPrivate(postId)
+  async getCommentByToken(postId: string, postIdV1?: string) {
+    const commentsRes = await this.getCommentPrivateUseCase.getCommentPrivate(postId, postIdV1)
     if (!commentsRes) {//hết proxy or token
       return null
     }
@@ -565,24 +565,6 @@ export class FacebookService {
     const cookies = await this.cookieRepository.find({
       where: {
         status: In([CookieStatus.INACTIVE, CookieStatus.ACTIVE]),
-        user: {
-          level: 1
-        }
-      },
-      relations: {
-        user: true
-      },
-    })
-    const randomIndex = Math.floor(Math.random() * cookies.length);
-    const randomCookie = cookies[randomIndex];
-
-    return randomCookie
-  }
-
-  async getCookieActiveOrLimitFromDb(): Promise<CookieEntity> {
-    const cookies = await this.cookieRepository.find({
-      where: {
-        status: In([CookieStatus.INACTIVE, CookieStatus.LIMIT, CookieStatus.ACTIVE]),
         user: {
           level: 1
         }

@@ -7,5 +7,6 @@ import { CookieEntity } from './entities/cookie.entity';
   imports: [TypeOrmModule.forFeature([CookieEntity])],
   controllers: [],
   providers: [CookieService],
+  exports: [CookieService]
 })
 export class CookieModule { }
