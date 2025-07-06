@@ -20,8 +20,14 @@ import { ProxyEntity } from 'src/application/proxy/entities/proxy.entity';
 import { CookieService } from 'src/application/cookie/cookie.service';
 import { CookieStatus } from 'src/application/cookie/entities/cookie.entity';
 dayjs.extend(utc);
+
+interface IUniqueProxyCookie {
+    cookieId: number,
+    proxy: ProxyEntity
+}
 @Injectable()
 export class GetCommentPrivateUseCase {
+    uniqueCookieProxy: IUniqueProxyCookie[] = []
     fbUrl = 'https://www.facebook.com';
     fbGraphql = `https://www.facebook.com/api/graphql`;
 
@@ -34,7 +40,6 @@ export class GetCommentPrivateUseCase {
         private checkLinkUseCase: CheckLinkUseCase,
         private cookieService: CookieService,
     ) { }
-
 
     async getCommentPrivate(postId: string, postIdV1?: string): Promise<IGetCmtPrivateResponse | null> {
         const random = getRandomNumber()
@@ -184,20 +189,38 @@ export class GetCommentPrivateUseCase {
     }
 
     private async getCommentWithCookie(postId: string, postIdV1?: string) {
-        const proxy = await this.proxyService.getRandomProxy()
-        let dataComment = await this.getCommentByCookie(proxy, postId)
+        let dataComment = await this.getCommentByCookie(postId)
 
         if ((!dataComment || !(dataComment as any)?.commentId) && postIdV1) {
-            dataComment = await this.getCommentByCookie(proxy, postIdV1)
+            dataComment = await this.getCommentByCookie(postIdV1)
         }
 
         return dataComment
     }
 
-    async getCommentByCookie(proxy: ProxyEntity, postId: string) {
+    async getCommentByCookie(postId: string) {
+        let proxy = null
         const cookieEntity = await this.cookieService.getCookieActiveFromDb()
         if (!cookieEntity) return null
-
+        const defaultProxy = this.uniqueCookieProxy.find(item => item.cookieId === cookieEntity.id)
+        if (defaultProxy) {
+            const isLive = this.proxyService.proxies.some(item => item.id === defaultProxy.proxy.id)
+            if (!isLive) { //die
+                const newProxy = await this.proxyService.getRandomProxy()
+                proxy = newProxy
+                defaultProxy.proxy = newProxy
+            } else {
+                proxy = defaultProxy.proxy
+            }
+        } else {
+            const newProxy = await this.proxyService.getRandomProxy()
+            this.uniqueCookieProxy.push({
+                cookieId: cookieEntity.id,
+                proxy: newProxy
+            })
+            proxy = newProxy
+        }
+        if (!proxy) return null
         try {
             const id = `feedback:${postId}`;
             const encodedPostId = Buffer.from(id, 'utf-8').toString('base64');
