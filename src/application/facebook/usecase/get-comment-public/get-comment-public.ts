@@ -91,7 +91,8 @@ export class GetCommentPublicUseCase {
 
             if (!dataComment) {
                 //bai viet ko co cmt moi nhat => lay all
-                dataComment = await this.getCommentWithCHRONOLOGICAL_UNFILTERED_INTENT_V1(encodedPostId, proxy)
+                await this.getCommentWithCHRONOLOGICAL_UNFILTERED_INTENT_V1(encodedPostId, proxy, link)
+                return null
             }
 
             if (dataComment) {
@@ -121,7 +122,7 @@ export class GetCommentPublicUseCase {
         }
     }
 
-    async getCommentWithCHRONOLOGICAL_UNFILTERED_INTENT_V1(postIdString: string, proxy: ProxyEntity) {
+    async getCommentWithCHRONOLOGICAL_UNFILTERED_INTENT_V1(postIdString: string, proxy: ProxyEntity, link: LinkEntity) {
         const httpsAgent = getHttpAgent(proxy)
 
         const fetchCm = async (after = null) => {
@@ -213,48 +214,11 @@ export class GetCommentPublicUseCase {
         }
 
         let after = null;
-        let hasNextPage = true;
-        let responsExpected = null;
-        let commentCount = null
-        let likeCount = null
-
-        while (hasNextPage) {
-            const response = await fetchCm(after);
-            const pageInfo = response?.data?.data?.node?.comment_rendering_instance_for_feed_location?.comments?.page_info || {};
-            responsExpected = response
-            hasNextPage = pageInfo.has_next_page;
-            after = pageInfo.end_cursor;
+        const response = await fetchCm(after);
+        if (response?.data?.data?.node) {
+            link.type = LinkType.PRIVATE
+            return this.linkService.updateType(link)
         }
 
-        const comment =
-            responsExpected?.data?.data?.node?.comment_rendering_instance_for_feed_location
-                ?.comments.edges?.reverse()?.[0]?.node;
-
-        if (!comment) return null
-        const commentId = decodeCommentId(comment?.id) ?? comment?.id
-        const commentMessage =
-            comment?.preferred_body && comment?.preferred_body?.text
-                ? comment?.preferred_body?.text
-                : 'Sticker';
-
-        const phoneNumber = extractPhoneNumber(commentMessage);
-        const userNameComment = comment?.author?.name;
-        const commentCreatedAt = dayjs(comment?.created_time * 1000).utc().format('YYYY-MM-DD HH:mm:ss');
-        const serialized = comment?.discoverable_identity_badges_web?.[0]?.serialized;
-        let userIdComment = serialized ? JSON.parse(serialized).actor_id : comment?.author.id
-
-        const totalCount = commentCount
-        const totalLike = likeCount
-
-        return {
-            commentId,
-            userNameComment,
-            commentMessage,
-            phoneNumber,
-            userIdComment,
-            commentCreatedAt,
-            totalCount,
-            totalLike
-        };
     }
 }

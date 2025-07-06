@@ -119,4 +119,8 @@ export class LinkService {
       }
     })
   }
+
+  updateType(link: LinkEntity) {
+    return this.repo.save(link)
+  }
 }
