@@ -50,7 +50,6 @@ export class GetCommentPrivateUseCase {
     async getCommentPrivate(postId: string, postIdV1?: string): Promise<IGetCmtPrivateResponse | null> {
         const random = getRandomNumber()
         let dataComment = await this.getCommentByToken(postId)
-        if (postId === '122128358660803341') console.log("🚀 ~ GetCommentPublicUseCase ~ getCmtPublic ~ duration:", dataComment)
         // if (random % 2 === 0) {
         //     dataComment = await this.getCommentWithCookie(postId, postIdV1)
 
@@ -84,7 +83,7 @@ export class GetCommentPrivateUseCase {
     }
 
     async getCommentByToken(postId: string) {
-        if (postId === '122128358660803341') console.log("🚀 ~ GetCommentPublicUseCase ~ getCmtPublic ~ duration:", postId)
+        if (postId === '1134812597573746') console.log("🚀 ~ GetCommentPublicUseCase ~ getCmtPublic ~ duration:", postId)
         let proxy = null
         const token = await this.tokenService.getTokenCrawCmtActiveFromDb()
         const defaultProxy = this.uniqueTokenProxy.find(item => item.tokenId === token.id)
