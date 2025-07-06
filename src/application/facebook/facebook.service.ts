@@ -8,7 +8,7 @@ import * as dayjs from 'dayjs';
 import * as utc from 'dayjs/plugin/utc';
 import { HttpsProxyAgent } from 'https-proxy-agent';
 import { firstValueFrom } from 'rxjs';
-import { extractFacebookId, getHttpAgent } from 'src/common/utils/helper';
+import { changeCookiesFb, extractFacebookId, formatCookies, getHttpAgent } from 'src/common/utils/helper';
 import { In, IsNull, Not, Repository } from 'typeorm';
 import { CommentEntity } from '../comments/entities/comment.entity';
 import { CookieEntity, CookieStatus } from '../cookie/entities/cookie.entity';
@@ -28,6 +28,8 @@ import {
   getHeaderProfileFb,
   getHeaderToken
 } from './utils';
+import { GetTotalCountUseCase } from './usecase/get-total-count/get-total-count-usecase';
+import { CheckProxyBlockUseCase } from './usecase/check-proxy-block/check-proxy-block-usecase';
 
 dayjs.extend(utc);
 // dayjs.extend(timezone);
@@ -59,6 +61,8 @@ export class FacebookService {
     private getCommentPrivateUseCase: GetCommentPrivateUseCase,
     private getUuidUserUseCase: GetUuidUserUseCase,
     private hideCommentUseCase: HideCommentUseCase,
+    private getTotalCountUseCase: GetTotalCountUseCase,
+    private CheckProxyBlockUseCase: CheckProxyBlockUseCase,
   ) {
   }
 
@@ -78,7 +82,7 @@ export class FacebookService {
     cookie: string,
     type: TokenType
   ): Promise<{ login: boolean; accessToken?: string }> {
-    const cookies = this.changeCookiesFb(cookie);
+    const cookies = changeCookiesFb(cookie);
     const headers = getHeaderProfileFb();
     const config: AxiosRequestConfig = {
       headers,
@@ -91,7 +95,7 @@ export class FacebookService {
       const response = await firstValueFrom(
         this.httpService.get(this.fbUrl, {
           ...config,
-          headers: { ...config.headers, Cookie: this.formatCookies(cookies) },
+          headers: { ...config.headers, Cookie: formatCookies(cookies) },
         }),
       );
 
@@ -125,41 +129,6 @@ export class FacebookService {
     }
   }
 
-  private changeCookiesFb(cookies: string): Record<string, string> {
-    cookies = cookies.trim()?.replace(/;$/, '');
-    const result = {};
-
-    try {
-      cookies
-        .trim()
-        .split(';')
-        .forEach((item) => {
-          const parts = item.trim().split('=');
-          if (parts.length === 2) {
-            result[parts[0]] = parts[1];
-          }
-        });
-      return result;
-    } catch (_e) {
-      cookies
-        .trim()
-        .split('; ')
-        .forEach((item) => {
-          const parts = item.trim().split('=');
-          if (parts.length === 2) {
-            result[parts[0]] = parts[1];
-          }
-        });
-      return result;
-    }
-  }
-
-  private formatCookies(cookies: Record<string, string>): string {
-    return Object.entries(cookies)
-      .map(([key, value]) => `${key}=${value}`)
-      .join('; ');
-  }
-
   private async getToken(
     fbDtsg: string,
     lsd: string,
@@ -178,7 +147,7 @@ export class FacebookService {
     const response = await firstValueFrom(
       this.httpService.post(this.fbGraphql, body, {
         ...config,
-        headers: { ...config.headers, Cookie: this.formatCookies(cookies) },
+        headers: { ...config.headers, Cookie: formatCookies(cookies) },
       }),
     );
 
@@ -248,125 +217,11 @@ export class FacebookService {
   }
 
   async getCountLikePublic(url: string) {
-    const proxy = await this.getRandomProxy()
-    const res = {
-      totalCount: null,
-      totalLike: null
-    }
-
-    try {
-      if (!proxy) {
-        return res
-      }
-      const httpsAgent = getHttpAgent(proxy)
-      const response = await firstValueFrom(
-        this.httpService.get(url, {
-          headers: {
-            "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
-            "accept-language": "en-US,en;q=0.9,vi;q=0.8",
-            "cache-control": "max-age=0",
-            "dpr": "1",
-            "priority": "u=0, i",
-            "sec-ch-prefers-color-scheme": "light",
-            "sec-ch-ua": "\"Chromium\";v=\"136\", \"Google Chrome\";v=\"136\", \"Not.A/Brand\";v=\"99\"",
-            "sec-ch-ua-full-version-list": "\"Chromium\";v=\"136.0.7103.93\", \"Google Chrome\";v=\"136.0.7103.93\", \"Not.A/Brand\";v=\"99.0.0.0\"",
-            "sec-ch-ua-mobile": "?0",
-            "sec-ch-ua-model": "\"\"",
-            "sec-ch-ua-platform": "\"Windows\"",
-            "sec-ch-ua-platform-version": "\"10.0.0\"",
-            "sec-fetch-dest": "document",
-            "sec-fetch-mode": "navigate",
-            "sec-fetch-site": "same-origin",
-            "sec-fetch-user": "?1",
-            "upgrade-insecure-requests": "1",
-            "viewport-width": "856",
-            "cookie": "sb=IpN2Z63pdgaswLIv6HwTPQe2; ps_l=1; ps_n=1; datr=Xr4NaIxUf5ztTudh--LM1AJd; ar_debug=1; fr=1UkVxZvyucxVG78mk.AWevqY9nf_vHWJzPoe3hBWtadWsJ80XJ0HFGnqPtdNh439ijAVg.BoHzIp..AAA.0.0.BoH3O0.AWfmrWmPXac1pUoDOR6Hlr4s3r0; wd=856x953",
-            "Referrer-Policy": "origin-when-cross-origin"
-          },
-          httpsAgent,
-        }),
-      );
-
-      const htmlContent = response.data
-      const matchComment = htmlContent.match(/"reaction_count":\{"count":(\d+),/);
-      if (matchComment && matchComment[1]) {
-        res.totalCount = matchComment[1]
-      }
-      if (!res.totalCount) {
-        const matchComment = htmlContent.match(/"total_comment_count":(\d+)/);
-        if (matchComment && matchComment[1]) {
-          res.totalCount = matchComment[1]
-        }
-      }
-
-
-      const matchLike = htmlContent.match(/"total_count":(\d+)/);
-      if (matchLike && matchLike[1]) {
-        res.totalLike = matchLike[1]
-      }
-      if (!res.totalLike) {
-        const matchLike2 = htmlContent.match(/"likers":\{"count":(\d+)}/);
-        if (matchLike2 && matchLike2[1]) {
-          res.totalLike = matchLike2[1]
-        }
-      }
-      return res
-    } catch (error) {
-      if ((error?.message as string)?.includes('connect ECONNREFUSED') || error?.status === 407 || (error?.message as string)?.includes('connect EHOSTUNREACH') || (error?.message as string)?.includes('Proxy connection ended before receiving CONNECT')) {
-        await this.updateProxyDie(proxy)
-      }
-
-      return res
-    }
+    return this.getTotalCountUseCase.getTotalCountPublic(url)
   }
 
   async checkProxyBlock(proxy: ProxyEntity) {
-    try {
-      const httpsAgent = getHttpAgent(proxy)
-
-      const response = await firstValueFrom(
-        this.httpService.get("https://www.facebook.com/630629966359111", {
-          headers: {
-            "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
-            "accept-language": "en-US,en;q=0.9,vi;q=0.8",
-            "cache-control": "max-age=0",
-            "dpr": "1",
-            "priority": "u=0, i",
-            "sec-ch-prefers-color-scheme": "light",
-            "sec-ch-ua": "\"Chromium\";v=\"136\", \"Google Chrome\";v=\"136\", \"Not.A/Brand\";v=\"99\"",
-            "sec-ch-ua-full-version-list": "\"Chromium\";v=\"136.0.7103.93\", \"Google Chrome\";v=\"136.0.7103.93\", \"Not.A/Brand\";v=\"99.0.0.0\"",
-            "sec-ch-ua-mobile": "?0",
-            "sec-ch-ua-model": "\"\"",
-            "sec-ch-ua-platform": "\"Windows\"",
-            "sec-ch-ua-platform-version": "\"10.0.0\"",
-            "sec-fetch-dest": "document",
-            "sec-fetch-mode": "navigate",
-            "sec-fetch-site": "same-origin",
-            "sec-fetch-user": "?1",
-            "upgrade-insecure-requests": "1",
-            "viewport-width": "856",
-            "cookie": "sb=IpN2Z63pdgaswLIv6HwTPQe2; ps_l=1; ps_n=1; datr=Xr4NaIxUf5ztTudh--LM1AJd; ar_debug=1; fr=1UkVxZvyucxVG78mk.AWevqY9nf_vHWJzPoe3hBWtadWsJ80XJ0HFGnqPtdNh439ijAVg.BoHzIp..AAA.0.0.BoH3O0.AWfmrWmPXac1pUoDOR6Hlr4s3r0; wd=856x953",
-            "Referrer-Policy": "origin-when-cross-origin"
-          },
-          httpsAgent,
-        }),
-      );
-      const htmlContent = response.data
-      const isBlockProxy = (htmlContent as string).includes('Temporarily Blocked')
-
-      if (isBlockProxy) {
-        return true
-      }
-
-      const isCookieDie = (htmlContent as string).includes('You must log in to continue')
-      if (isCookieDie) {
-        return true
-      }
-
-      return false
-    } catch (error) {
-      return true
-    }
+    return this.CheckProxyBlockUseCase.execute(proxy)
   }
 
   async getPostIdPublicV2(url: string) {
@@ -426,207 +281,16 @@ export class FacebookService {
     }
   }
 
-  async getInfoAccountsByCookie(cookie: string) {
-    const maxRetries = 3;
-
-    for (let attempt = 1; attempt <= maxRetries; attempt++) {
-      try {
-        const proxy = await this.getRandomProxy();
-        if (!proxy) return null
-        const httpsAgent = getHttpAgent(proxy);
-        const cookies = this.changeCookiesFb(cookie);
-
-        const dataUser = await firstValueFrom(
-          this.httpService.get('https://www.facebook.com', {
-            headers: {
-              Cookie: this.formatCookies(cookies),
-            },
-            httpsAgent,
-          }),
-        );
-
-        const dtsgMatch = dataUser.data.match(/DTSGInitialData",\[\],{"token":"(.*?)"}/);
-        const jazoestMatch = dataUser.data.match(/&jazoest=(.*?)"/);
-        const userIdMatch = dataUser.data.match(/"USER_ID":"(.*?)"/);
-
-        if (dtsgMatch && jazoestMatch && userIdMatch) {
-          const fbDtsg = dtsgMatch[1];
-          const jazoest = jazoestMatch[1];
-          const facebookId = userIdMatch[1];
-          return { fbDtsg, jazoest, facebookId };
-        }
-
-      } catch (error) {
-        console.warn(`⚠️ Attempt ${attempt} failed: ${error.message}`);
-      }
-
-      // Optional: delay giữa các lần thử (nếu cần tránh spam)
-      await new Promise(resolve => setTimeout(resolve, 1000)); // 1 giây
-    }
-
-    // Sau 3 lần đều fail
-    return null;
-  }
-
   async getTotalCountWithToken(link: LinkEntity) {
-    const proxy = await this.getRandomProxy()
-    const token = await this.getTokenGetInfoActiveFromDb()
-    try {
-
-      if (!proxy || !token) { return null }
-
-      const httpsAgent = getHttpAgent(proxy)
-      const languages = [
-        'en-US,en;q=0.9',
-        'vi-VN,vi;q=0.9,en-US;q=0.8,en;q=0.7',
-        'fr-FR,fr;q=0.9,en-US;q=0.8,en;q=0.7'
-      ];
-
-      const userAgent = faker.internet.userAgent()
-      const apceptLanguage = languages[Math.floor(Math.random() * languages.length)]
-
-      const headers = {
-        'authority': 'graph.facebook.com',
-        'sec-ch-ua': '" Not A;Brand";v="99", "Chromium";v="99", "Opera";v="85"',
-        'sec-ch-ua-mobile': '?0',
-        'sec-ch-ua-platform': '"Windows"',
-        'upgrade-insecure-requests': '1',
-        'user-agent': userAgent,
-        'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
-        'sec-fetch-site': 'none',
-        'sec-fetch-mode': 'navigate',
-        'sec-fetch-user': '?1',
-        'sec-fetch-dest': 'document',
-        'accept-language': apceptLanguage,
-      };
-      const id = `${link.pageId}_${link.postId}`
-
-      const dataCommentToken = await firstValueFrom(
-        this.httpService.get(`https://graph.facebook.com/${id}?fields=comments.summary(count),reactions.summary(total_count)&access_token=${token.tokenValueV1}`, {
-          headers,
-          httpsAgent
-        }),
-      );
-      const { comments, reactions } = dataCommentToken.data || {}
-      const totalCountLike = reactions?.summary?.total_count
-      const totalCountCmt = comments?.count
-
-      return {
-        totalCountLike, totalCountCmt
-      }
-    } catch (error) {
-      if (error.response?.data?.error?.code === 190) {
-        await this.updateStatusTokenDie(token, TokenStatus.DIE)
-      }
-    }
-
-  }
-
-  updateStatusTokenDie(token: TokenEntity, status: TokenStatus) {
-    // console.log("🚀 ~ updateTokenDie ~ token:", token)
-    return this.tokenRepository.save({ ...token, status })
-  }
-
-  updateStatusCookie(cookie: CookieEntity, status: CookieStatus, message?: string) {
-    console.log(`🚀 ~ updateStatusCookie ~ cookie: ${status}`, cookie, message)
-    return this.cookieRepository.save({ ...cookie, status })
+    return this.getTotalCountUseCase.getTotalCountWithToken(link)
   }
 
   updateProxyDie(proxy: ProxyEntity) {
     return this.proxyRepository.save({ ...proxy, status: ProxyStatus.IN_ACTIVE })
   }
 
-  updateProxyFbBlock(proxy: ProxyEntity) {
-    return this.proxyRepository.save({ ...proxy, isFbBlock: true })
-  }
-
   updateProxyActive(proxy: ProxyEntity) {
     return this.proxyRepository.save({ ...proxy, status: ProxyStatus.ACTIVE, isFbBlock: false })
-  }
-
-  async updateLinkPostIdInvalid(postId: string) {
-    const links = await this.linkRepository.find({
-      where: {
-        postId,
-        lastCommentTime: IsNull()
-      }
-    })
-
-    return this.linkRepository.save(links.map((item) => {
-      return {
-        ...item,
-        errorMessage: `PostId: ${postId} NotFound.`,
-        type: LinkType.DIE
-      }
-    }))
-  }
-
-  async getCookieActiveFromDb(): Promise<CookieEntity> {
-    const cookies = await this.cookieRepository.find({
-      where: {
-        status: In([CookieStatus.INACTIVE, CookieStatus.ACTIVE]),
-        user: {
-          level: 1
-        }
-      },
-      relations: {
-        user: true
-      },
-    })
-    const randomIndex = Math.floor(Math.random() * cookies.length);
-    const randomCookie = cookies[randomIndex];
-
-    return randomCookie
-  }
-
-  async getTokenActiveFromDb(): Promise<TokenEntity> {
-    const tokens = await this.tokenRepository.find({
-      where: {
-        status: TokenStatus.ACTIVE,
-        type: TokenHandle.CRAWL_CMT
-      }
-    })
-
-    const randomIndex = Math.floor(Math.random() * tokens.length);
-    const randomToken = tokens[randomIndex];
-
-    return randomToken
-  }
-
-  async getTokenEAAAAAYActiveFromDb(): Promise<TokenEntity> {
-    const tokens = await this.tokenRepository.find({
-      where: {
-        status: In([TokenStatus.LIMIT, TokenStatus.ACTIVE]),
-        tokenValueV1: Not(IsNull()),
-        type: TokenHandle.CRAWL_CMT
-
-      }
-    })
-
-    const randomIndex = Math.floor(Math.random() * tokens.length);
-    const randomToken = tokens[randomIndex];
-
-    return randomToken
-  }
-
-  async getTokenGetInfoActiveFromDb(): Promise<TokenEntity> {
-    const tokens = await this.tokenRepository.find({
-      where: {
-        status: In([TokenStatus.ACTIVE]),
-        tokenValueV1: Not(IsNull()),
-        type: TokenHandle.CRAWL_CMT
-      }
-    })
-
-    const randomIndex = Math.floor(Math.random() * tokens.length);
-    const randomToken = tokens[randomIndex];
-
-    return randomToken
-  }
-
-
-  private delay(ms: number): Promise<void> {
-    return new Promise(resolve => setTimeout(resolve, ms));
   }
 
   async updateUUIDUser() {
@@ -657,21 +321,6 @@ export class FacebookService {
     const randomProxy = proxies[randomIndex];
 
     return randomProxy
-  }
-
-  parseCookieString(cookieStr: string) {
-    return cookieStr.split(';').map(cookie => {
-      const [name, ...rest] = cookie.trim().split('=');
-      const value = rest.join('=');
-      return {
-        name,
-        value,
-        domain: '.facebook.com',
-        path: '/',
-        httpOnly: false,
-        secure: true
-      };
-    });
   }
 
   async getDelayTime(status: LinkStatus, type: LinkType) {

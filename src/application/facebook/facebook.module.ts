@@ -13,9 +13,21 @@ import { GetCommentPublicUseCaseModule } from './usecase/get-comment-public/get-
 import { GetCommentPrivateUseCaseModule } from './usecase/get-comment-private/get-comment-private.module';
 import { GetUuidUserUseCaseModule } from './usecase/get-uuid-user/get-uuid-user.module';
 import { HideCommentUseCaseModule } from './usecase/hide-comment/hide-comment.module';
+import { GetTotalCountUseCaseModule } from './usecase/get-total-count/get-total-count-usecase.module';
+import { CheckProxyBlockUseCaseModule } from './usecase/check-proxy-block/check-proxy-block-usecase.module';
 
 @Module({
-  imports: [HttpModule, GetInfoLinkUseCaseModule, GetCommentPublicUseCaseModule, GetCommentPrivateUseCaseModule, GetUuidUserUseCaseModule, HideCommentUseCaseModule, TypeOrmModule.forFeature([TokenEntity, CookieEntity, ProxyEntity, LinkEntity, CommentEntity, DelayEntity])],
+  imports: [
+    HttpModule,
+    GetInfoLinkUseCaseModule,
+    GetCommentPublicUseCaseModule,
+    GetCommentPrivateUseCaseModule,
+    GetUuidUserUseCaseModule,
+    HideCommentUseCaseModule,
+    GetTotalCountUseCaseModule,
+    CheckProxyBlockUseCaseModule,
+    TypeOrmModule.forFeature([TokenEntity, CookieEntity, ProxyEntity, LinkEntity, CommentEntity, DelayEntity])
+  ],
   controllers: [],
   providers: [FacebookService],
   exports: [FacebookService],
