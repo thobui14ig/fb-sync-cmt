@@ -122,6 +122,17 @@ export class MonitoringService implements OnModuleInit {
   async startMonitoring() {
     const postsStarted = await this.getPostStarted()
     const groupPost = this.groupPostsByType(postsStarted || []);
+    for (const element of postsStarted) {
+      const itemPublic = this.linksPublic.find(item => item.id === element.id)
+      if (itemPublic) {
+        itemPublic.delayTime = element.delayTime
+      }
+
+      const itemPrivate = this.linksPrivate.find(item => item.id === element.id)
+      if (itemPrivate) {
+        itemPrivate.delayTime = element.delayTime
+      }
+    }
 
     return Promise.all([this.handleStartMonitoring((groupPost.public || []), LinkType.PUBLIC), this.handleStartMonitoring((groupPost.private || []), LinkType.PRIVATE)])
   }
@@ -330,7 +341,7 @@ export class MonitoringService implements OnModuleInit {
         } finally {
 
           if (link.delayTime) {
-            await this.delay((link.delayTime) * 1000)
+            await this.delay((isCheckRuning.delayTime) * 1000)
           }
         }
       }
@@ -390,7 +401,7 @@ export class MonitoringService implements OnModuleInit {
         } finally {
           if (link.postIdV1 === '122128358660803341') console.timeEnd('---------')
           if (link.delayTime) {
-            await this.delay((link.delayTime) * 1000)
+            await this.delay((isCheckRuning.delayTime) * 1000)
           }
         }
 
@@ -457,7 +468,7 @@ export class MonitoringService implements OnModuleInit {
         console.log(`Crawl comment with postId ${link.postId} Error.`, error?.message)
       } finally {
         if (link.delayTime) {
-          await this.delay((link.delayTime) * 1000)
+          await this.delay((isCheckRuning.delayTime) * 1000)
         }
       }
     }
