@@ -118,7 +118,7 @@ export class MonitoringService implements OnModuleInit {
     }
   }
 
-  // @Cron(CronExpression.EVERY_5_SECONDS)
+  @Cron(CronExpression.EVERY_5_SECONDS)
   async startMonitoring() {
     const postsStarted = await this.getPostStarted()
     const groupPost = this.groupPostsByType(postsStarted || []);
@@ -558,7 +558,6 @@ export class MonitoringService implements OnModuleInit {
       where: {
         status: In([LinkStatus.Started, LinkStatus.Pending]),
         type: Not(LinkType.DIE),
-        // id: In([12658])
       }
     })
   }
