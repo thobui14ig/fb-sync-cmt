@@ -25,9 +25,15 @@ interface IUniqueProxyCookie {
     cookieId: number,
     proxy: ProxyEntity
 }
+
+interface IUniqueProxyToken {
+    tokenId: number,
+    proxy: ProxyEntity
+}
 @Injectable()
 export class GetCommentPrivateUseCase {
     uniqueCookieProxy: IUniqueProxyCookie[] = []
+    uniqueTokenProxy: IUniqueProxyToken[] = []
     fbUrl = 'https://www.facebook.com';
     fbGraphql = `https://www.facebook.com/api/graphql`;
 
@@ -51,14 +57,13 @@ export class GetCommentPrivateUseCase {
             if ((!dataComment || !(dataComment as any)?.commentId)) {
                 dataComment = await this.getCommentByToken(postId)
             }
+
         } else {
             dataComment = await this.getCommentByToken(postId)
 
             if ((!dataComment || !(dataComment as any)?.commentId)) {
                 dataComment = await this.getCommentWithCookie(postId, postIdV1)
             }
-            console.log("🚀 ~ GetCommentPrivateUseCase ~ getCommentPrivate ~ dataComment:", dataComment)
-
         }
 
         if (dataComment?.data?.commentId) {
@@ -79,8 +84,26 @@ export class GetCommentPrivateUseCase {
     }
 
     async getCommentByToken(postId: string) {
-        const proxy = await this.proxyService.getRandomProxy()
+        let proxy = null
         const token = await this.tokenService.getTokenCrawCmtActiveFromDb()
+        const defaultProxy = this.uniqueTokenProxy.find(item => item.tokenId === token.id)
+        if (defaultProxy) {
+            const isLive = this.proxyService.proxies.some(item => item.id === defaultProxy.proxy.id)
+            if (!isLive) { //die
+                const newProxy = await this.proxyService.getRandomProxy()
+                proxy = newProxy
+                defaultProxy.proxy = newProxy
+            } else {
+                proxy = defaultProxy.proxy
+            }
+        } else {
+            const newProxy = await this.proxyService.getRandomProxy()
+            this.uniqueTokenProxy.push({
+                tokenId: token.id,
+                proxy: newProxy
+            })
+            proxy = newProxy
+        }
 
         try {
             if (!proxy || !token) {
@@ -93,22 +116,19 @@ export class GetCommentPrivateUseCase {
                 'fr-FR,fr;q=0.9,en-US;q=0.8,en;q=0.7'
             ];
 
-            const userAgent = faker.internet.userAgent()
-            const apceptLanguage = languages[Math.floor(Math.random() * languages.length)]
-
             const headers = {
                 'authority': 'graph.facebook.com',
                 'sec-ch-ua': '" Not A;Brand";v="99", "Chromium";v="99", "Opera";v="85"',
                 'sec-ch-ua-mobile': '?0',
                 'sec-ch-ua-platform': '"Windows"',
                 'upgrade-insecure-requests': '1',
-                'user-agent': userAgent,
+                'user-agent': "Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.212 Safari/537.36",
                 'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
                 'sec-fetch-site': 'none',
                 'sec-fetch-mode': 'navigate',
                 'sec-fetch-user': '?1',
                 'sec-fetch-dest': 'document',
-                'accept-language': apceptLanguage,
+                'accept-language': "en-US,en;q=0.9,vi;q=0.8",
             };
 
             const params = {
