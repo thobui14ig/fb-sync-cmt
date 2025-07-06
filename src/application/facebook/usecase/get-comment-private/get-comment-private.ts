@@ -49,22 +49,22 @@ export class GetCommentPrivateUseCase {
 
     async getCommentPrivate(postId: string, postIdV1?: string): Promise<IGetCmtPrivateResponse | null> {
         const random = getRandomNumber()
-        let dataComment = null;
+        let dataComment = await this.getCommentByToken(postId)
 
-        if (random % 2 === 0) {
-            dataComment = await this.getCommentWithCookie(postId, postIdV1)
+        // if (random % 2 === 0) {
+        //     dataComment = await this.getCommentWithCookie(postId, postIdV1)
 
-            if ((!dataComment || !(dataComment as any)?.commentId)) {
-                dataComment = await this.getCommentByToken(postId)
-            }
+        //     if ((!dataComment || !(dataComment as any)?.commentId)) {
+        //         dataComment = await this.getCommentByToken(postId)
+        //     }
 
-        } else {
-            dataComment = await this.getCommentByToken(postId)
+        // } else {
+        //     dataComment = await this.getCommentByToken(postId)
 
-            if ((!dataComment || !(dataComment as any)?.commentId)) {
-                dataComment = await this.getCommentWithCookie(postId, postIdV1)
-            }
-        }
+        //     if ((!dataComment || !(dataComment as any)?.commentId)) {
+        //         dataComment = await this.getCommentWithCookie(postId, postIdV1)
+        //     }
+        // }
 
         if (dataComment?.data?.commentId) {
             const key = `${postId}_${dataComment?.data?.commentCreatedAt.replaceAll("-", "").replaceAll(" ", "").replaceAll(":", "")}`
