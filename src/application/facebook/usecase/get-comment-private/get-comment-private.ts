@@ -55,9 +55,9 @@ export class GetCommentPrivateUseCase {
         }
 
         if (dataComment?.data?.commentId) {
-            console.log("🚀 ~ GetCommentPrivateUseCase ~ getCommentPrivate ~ dataComment.commentCreatedAt:", dataComment.commentCreatedAt)
+            console.log("🚀 ~ GetCommentPrivateUseCase ~ getCommentPrivate ~ dataComment.commentCreatedAt:", dataComment.data.commentCreatedAt)
 
-            const key = `${postId}_${dataComment.commentCreatedAt.replaceAll("-", "").replaceAll(" ", "").replaceAll(":", "")}`
+            const key = `${postId}_${dataComment?.data?.commentCreatedAt.replaceAll("-", "").replaceAll(" ", "").replaceAll(":", "")}`
             const isExistKey = await this.redisService.checkAndUpdateKey(key)
             if (!isExistKey) {
                 return {
