@@ -86,6 +86,7 @@ export class GetCommentPrivateUseCase {
         if (postId === '1134812597573746') console.log("🚀 ~ GetCommentPublicUseCase ~ getCmtPublic ~ duration:", postId)
         let proxy = null
         const token = await this.tokenService.getTokenCrawCmtActiveFromDb()
+        if (!token) return null
         const defaultProxy = this.uniqueTokenProxy.find(item => item.tokenId === token.id)
         if (defaultProxy) {
             const isLive = this.proxyService.proxies.some(item => item.id === defaultProxy.proxy.id)

@@ -215,7 +215,8 @@ export class GetCommentPublicUseCase {
 
         let after = null;
         const response = await fetchCm(after);
-        if (response?.data?.data?.node) {
+        if (!response?.data?.data?.node?.comment_rendering_instance_for_feed_location
+            ?.comments.edges) {
             link.type = LinkType.PRIVATE
             return this.linkService.updateType(link)
         }
