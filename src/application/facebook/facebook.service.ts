@@ -194,6 +194,7 @@ export class FacebookService {
     }
 
     const cmtResponse = await this.getCommentPublicUseCase.getCmtPublic(info.id, true);
+    console.log("🚀 ~ getProfileLink ~ cmtResponse:", cmtResponse)
     if (!cmtResponse) return { type: LinkType.UNDEFINED };
 
     const baseInfo = {

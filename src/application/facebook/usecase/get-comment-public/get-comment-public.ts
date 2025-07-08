@@ -152,7 +152,7 @@ export class GetCommentPublicUseCase {
                     fb_api_caller_class: 'RelayModern',
                     fb_api_req_friendly_name: 'CommentListComponentsRootQuery',
                     variables: `{
-              "commentsIntentToken": "CHRONOLOGICAL_UNFILTERED_INTENT_V1",
+              "commentsIntentToken": "RECENT_ACTIVITY_INTENT_V1",
               "feedLocation": "PERMALINK",
               "feedbackSource": 2,
               "focusCommentID": null,
@@ -215,6 +215,7 @@ export class GetCommentPublicUseCase {
 
         let after = null;
         const response = await fetchCm(after);
+
         if (!response?.data?.data?.node?.comment_rendering_instance_for_feed_location
             ?.comments.edges) {
             link.type = LinkType.PRIVATE
