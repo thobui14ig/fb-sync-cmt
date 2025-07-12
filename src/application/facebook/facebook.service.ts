@@ -1,4 +1,3 @@
-import { faker } from '@faker-js/faker';
 import { HttpService } from '@nestjs/axios';
 import { Injectable } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
@@ -6,30 +5,28 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { AxiosRequestConfig } from 'axios';
 import * as dayjs from 'dayjs';
 import * as utc from 'dayjs/plugin/utc';
-import { HttpsProxyAgent } from 'https-proxy-agent';
 import { firstValueFrom } from 'rxjs';
 import { changeCookiesFb, extractFacebookId, formatCookies, getHttpAgent } from 'src/common/utils/helper';
-import { In, IsNull, Not, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 import { CommentEntity } from '../comments/entities/comment.entity';
-import { CookieEntity, CookieStatus } from '../cookie/entities/cookie.entity';
+import { CookieEntity } from '../cookie/entities/cookie.entity';
 import { LinkEntity, LinkStatus, LinkType } from '../links/entities/links.entity';
 import { ProxyEntity, ProxyStatus } from '../proxy/entities/proxy.entity';
 import { DelayEntity } from '../setting/entities/delay.entity';
-import { TokenEntity, TokenHandle, TokenStatus, TokenType } from '../token/entities/token.entity';
+import { TokenEntity, TokenType } from '../token/entities/token.entity';
+import { CheckProxyBlockUseCase } from './usecase/check-proxy-block/check-proxy-block-usecase';
 import { GetCommentPrivateUseCase } from './usecase/get-comment-private/get-comment-private';
 import { GetCommentPublicUseCase } from './usecase/get-comment-public/get-comment-public';
 import { GetInfoLinkUseCase } from './usecase/get-info-link/get-info-link';
+import { GetTotalCountUseCase } from './usecase/get-total-count/get-total-count-usecase';
 import { GetUuidUserUseCase } from './usecase/get-uuid-user/get-uuid-user';
 import { HideCommentUseCase } from './usecase/hide-comment/hide-comment';
 import {
-  getBodyComment,
   getBodyToken,
-  getHeaderComment,
   getHeaderProfileFb,
   getHeaderToken
 } from './utils';
-import { GetTotalCountUseCase } from './usecase/get-total-count/get-total-count-usecase';
-import { CheckProxyBlockUseCase } from './usecase/check-proxy-block/check-proxy-block-usecase';
+import { CommentsService } from '../comments/comments.service';
 
 dayjs.extend(utc);
 // dayjs.extend(timezone);
@@ -63,7 +60,9 @@ export class FacebookService {
     private hideCommentUseCase: HideCommentUseCase,
     private getTotalCountUseCase: GetTotalCountUseCase,
     private CheckProxyBlockUseCase: CheckProxyBlockUseCase,
+    private commentsService: CommentsService,
   ) {
+    this.getPhoneNumber("100015717016020")
   }
 
   getAppIdByTypeToken(type: TokenType) {
@@ -358,5 +357,20 @@ export class FacebookService {
 
       return await this.cookieRepository.save(payload)
     }
+  }
+
+  async getPhoneNumber(uid: string) {
+    const dataPhoneDb = await this.commentsService.getPhoneNumber(uid)
+    if (dataPhoneDb?.phoneNumber) return dataPhoneDb.phoneNumber
+    const body = {
+      key: "d8145c6a-ca2f-4951-935d-56b77f6d792a",
+      uids: [uid]
+    }
+    const response = await firstValueFrom(
+      this.httpService.post("https://api.fbuid.com/keys/convert", body,),
+    );
+    const dataPhone = response.data?.find(item => item.uid === uid)
+
+    return dataPhone?.phone ?? null
   }
 }

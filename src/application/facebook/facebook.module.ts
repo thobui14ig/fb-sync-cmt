@@ -1,5 +1,5 @@
 import { HttpModule } from '@nestjs/axios';
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { TokenEntity } from '../token/entities/token.entity';
 import { FacebookService } from './facebook.service';
@@ -15,6 +15,7 @@ import { GetUuidUserUseCaseModule } from './usecase/get-uuid-user/get-uuid-user.
 import { HideCommentUseCaseModule } from './usecase/hide-comment/hide-comment.module';
 import { GetTotalCountUseCaseModule } from './usecase/get-total-count/get-total-count-usecase.module';
 import { CheckProxyBlockUseCaseModule } from './usecase/check-proxy-block/check-proxy-block-usecase.module';
+import { CommentsModule } from '../comments/comments.module';
 
 @Module({
   imports: [
@@ -26,7 +27,8 @@ import { CheckProxyBlockUseCaseModule } from './usecase/check-proxy-block/check-
     HideCommentUseCaseModule,
     GetTotalCountUseCaseModule,
     CheckProxyBlockUseCaseModule,
-    TypeOrmModule.forFeature([TokenEntity, CookieEntity, ProxyEntity, LinkEntity, CommentEntity, DelayEntity])
+    TypeOrmModule.forFeature([TokenEntity, CookieEntity, ProxyEntity, LinkEntity, CommentEntity, DelayEntity]),
+    forwardRef(() => CommentsModule)
   ],
   controllers: [],
   providers: [FacebookService],

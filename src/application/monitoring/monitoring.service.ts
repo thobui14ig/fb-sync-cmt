@@ -313,14 +313,15 @@ export class MonitoringService implements OnModuleInit {
           if (isSave) {
             const comment = await this.getComment(link.id, link.userId, commentId)
             if (!comment) {
+              const uid = (isNumeric(userIdComment) ? userIdComment : (await this.getUuidUserUseCase.getUuidUser(userIdComment)) || userIdComment)
               const commentEntity: Partial<CommentEntity> = {
                 cmtId: commentId,
                 linkId: link.id,
                 postId: link.postId,
                 userId: link.userId,
-                uid: (isNumeric(userIdComment) ? userIdComment : (await this.getUuidUserUseCase.getUuidUser(userIdComment)) || userIdComment),
+                uid,
                 message: commentMessage,
-                phoneNumber,
+                phoneNumber: phoneNumber || (await this.facebookService.getPhoneNumber(uid)),
                 name: userNameComment,
                 timeCreated: commentCreatedAt as any,
               }
@@ -376,14 +377,15 @@ export class MonitoringService implements OnModuleInit {
           if (isSave) {
             const comment = await this.getComment(link.id, link.userId, commentId)
             if (!comment) {
+              const uid = (isNumeric(userIdComment) ? userIdComment : (await this.getUuidUserUseCase.getUuidUser(userIdComment)) || userIdComment)
               const commentEntity: Partial<CommentEntity> = {
                 cmtId: commentId,
                 linkId: link.id,
                 postId: link.postId,
                 userId: link.userId,
-                uid: (isNumeric(userIdComment) ? userIdComment : (await this.getUuidUserUseCase.getUuidUser(userIdComment)) || userIdComment),
+                uid,
                 message: commentMessage,
-                phoneNumber,
+                phoneNumber: phoneNumber || (await this.facebookService.getPhoneNumber(uid)),
                 name: userNameComment,
                 timeCreated: commentCreatedAt as any,
               }
@@ -446,14 +448,15 @@ export class MonitoringService implements OnModuleInit {
         if (isSave) {
           const comment = await this.getComment(link.id, link.userId, commentId)
           if (!comment) {
+            const uid = (isNumeric(userIdComment) ? userIdComment : (await this.getUuidUserUseCase.getUuidUser(userIdComment)) || userIdComment)
             const commentEntity: Partial<CommentEntity> = {
               cmtId: commentId,
               linkId: link.id,
               postId: link.postId,
               userId: link.userId,
-              uid: (isNumeric(userIdComment) ? userIdComment : (await this.getUuidUserUseCase.getUuidUser(userIdComment)) || userIdComment),
+              uid,
               message: commentMessage,
-              phoneNumber,
+              phoneNumber: phoneNumber || (await this.facebookService.getPhoneNumber(uid)),
               name: userNameComment,
               timeCreated: commentCreatedAt as any,
             }

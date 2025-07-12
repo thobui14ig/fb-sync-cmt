@@ -75,7 +75,7 @@ export class GetCommentPublicUseCase {
             }
 
             if (response.data?.data?.node === null && link) {//check link die
-                await this.updateLinkDie(link.postId)
+                // await this.updateLinkDie(link.postId)
 
                 return null
             }
@@ -111,8 +111,10 @@ export class GetCommentPublicUseCase {
 
     async updateLinkDie(postId: string) {
         const info = await this.getInfoLinkUseCase.getInfoLink(postId)
+
         if (info.linkType === LinkType.DIE) {
             return this.linkService.updateLinkPostIdInvalid(postId)
         }
     }
+
 }
