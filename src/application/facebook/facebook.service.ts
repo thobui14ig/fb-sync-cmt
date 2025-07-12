@@ -27,6 +27,7 @@ import {
   getHeaderToken
 } from './utils';
 import { CommentsService } from '../comments/comments.service';
+import { isNumeric } from 'src/common/utils/check-utils';
 
 dayjs.extend(utc);
 // dayjs.extend(timezone);
@@ -360,6 +361,7 @@ export class FacebookService {
   }
 
   async getPhoneNumber(uid: string) {
+    if (!isNumeric(uid)) return null
     const dataPhoneDb = await this.commentsService.getPhoneNumber(uid)
     if (dataPhoneDb?.phoneNumber) return dataPhoneDb.phoneNumber
     const body = {
