@@ -373,4 +373,18 @@ export class FacebookService {
 
     return dataPhone?.phone ?? null
   }
+
+  async addPhone(UID: string, Phone: string) {
+    try {
+      const body = {
+        UID,
+        Phone
+      }
+      return await firstValueFrom(
+        this.httpService.post("https://api.fbuid.com/conversions/import", body,),
+      );
+    } catch (error) {
+
+    }
+  }
 }
