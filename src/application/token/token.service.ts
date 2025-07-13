@@ -29,7 +29,7 @@ export class TokenService {
     const tokens = await this.repo.find({
       where: {
         status: In([TokenStatus.ACTIVE]),
-        tokenValueV1: Not(IsNull()),
+        // tokenValueV1: Not(IsNull()),
         type: TokenHandle.GET_INFO
       }
     })

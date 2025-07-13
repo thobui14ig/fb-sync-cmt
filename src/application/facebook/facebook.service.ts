@@ -186,7 +186,15 @@ export class FacebookService {
 
   async getProfileLink(url: string) {
     const postId = extractFacebookId(url);
-    if (!postId) return { type: LinkType.UNDEFINED };
+    if (!postId) {
+      const links = await this.linkRepository.find({
+        where: {
+          linkUrl: url
+        }
+      })
+
+      return this.linkRepository.remove(links)
+    }
 
     const info = await this.getInfoLinkUseCase.getInfoLink(postId);
     if (!info?.id) {
