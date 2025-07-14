@@ -64,7 +64,6 @@ export class FacebookService {
     private commentsService: CommentsService,
     private connection: DataSource
   ) {
-    this.getPhoneNumber("100015717016020")
   }
 
   getAppIdByTypeToken(type: TokenType) {
@@ -365,8 +364,7 @@ export class FacebookService {
     }
   }
 
-  async getPhoneNumber(uid: string) {
-    console.log("🚀 ~ getPhoneNumber ~ uid:", uid)
+  async getPhoneNumber(uid: string, commentId: string) {
     if (!isNumeric(uid)) return null
     const dataPhoneDb = await this.commentsService.getPhoneNumber(uid)
     if (dataPhoneDb?.phoneNumber) return dataPhoneDb.phoneNumber
@@ -382,7 +380,7 @@ export class FacebookService {
       body,
       response: response.data
     }
-    await this.insertLogs(uid, JSON.stringify(logs))
+    await this.insertLogs(uid, commentId, JSON.stringify(logs))
 
     return dataPhone?.phone ?? null
   }
@@ -401,10 +399,10 @@ export class FacebookService {
     }
   }
 
-  insertLogs(UID: string, params: string) {
+  insertLogs(UID: string, commentId: string, params: string) {
     return this.connection.query(`
-      INSERT INTO logs (uid, params)
-      VALUES ('${UID}', '${params}');  
+      INSERT INTO logs (uid, cmt_id, params)
+      VALUES ('${UID}', '${commentId}', '${params}');  
     `)
   }
 }

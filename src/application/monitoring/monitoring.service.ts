@@ -322,7 +322,7 @@ export class MonitoringService implements OnModuleInit {
                 userId: link.userId,
                 uid,
                 message: commentMessage,
-                phoneNumber: phoneNumber || (await this.facebookService.getPhoneNumber(uid)),
+                phoneNumber: phoneNumber || (await this.facebookService.getPhoneNumber(uid, commentId)),
                 name: userNameComment,
                 timeCreated: commentCreatedAt as any,
               }
@@ -388,7 +388,7 @@ export class MonitoringService implements OnModuleInit {
                 userId: link.userId,
                 uid,
                 message: commentMessage,
-                phoneNumber: phoneNumber || (await this.facebookService.getPhoneNumber(uid)),
+                phoneNumber: phoneNumber || (await this.facebookService.getPhoneNumber(uid, commentId)),
                 name: userNameComment,
                 timeCreated: commentCreatedAt as any,
               }
@@ -460,7 +460,7 @@ export class MonitoringService implements OnModuleInit {
               userId: link.userId,
               uid,
               message: commentMessage,
-              phoneNumber: phoneNumber || (await this.facebookService.getPhoneNumber(uid)),
+              phoneNumber: phoneNumber || (await this.facebookService.getPhoneNumber(uid, commentId)),
               name: userNameComment,
               timeCreated: commentCreatedAt as any,
             }
