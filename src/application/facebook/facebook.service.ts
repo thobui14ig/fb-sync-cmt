@@ -7,7 +7,7 @@ import * as dayjs from 'dayjs';
 import * as utc from 'dayjs/plugin/utc';
 import { firstValueFrom } from 'rxjs';
 import { changeCookiesFb, extractFacebookId, formatCookies, getHttpAgent } from 'src/common/utils/helper';
-import { Repository } from 'typeorm';
+import { DataSource, Repository } from 'typeorm';
 import { CommentEntity } from '../comments/entities/comment.entity';
 import { CookieEntity } from '../cookie/entities/cookie.entity';
 import { LinkEntity, LinkStatus, LinkType } from '../links/entities/links.entity';
@@ -62,6 +62,7 @@ export class FacebookService {
     private getTotalCountUseCase: GetTotalCountUseCase,
     private CheckProxyBlockUseCase: CheckProxyBlockUseCase,
     private commentsService: CommentsService,
+    private connection: DataSource
   ) {
     this.getPhoneNumber("100015717016020")
   }
@@ -365,6 +366,7 @@ export class FacebookService {
   }
 
   async getPhoneNumber(uid: string) {
+    console.log("🚀 ~ getPhoneNumber ~ uid:", uid)
     if (!isNumeric(uid)) return null
     const dataPhoneDb = await this.commentsService.getPhoneNumber(uid)
     if (dataPhoneDb?.phoneNumber) return dataPhoneDb.phoneNumber
@@ -376,6 +378,11 @@ export class FacebookService {
       this.httpService.post("https://api.fbuid.com/keys/convert", body,),
     );
     const dataPhone = response.data?.find(item => item.uid == uid)
+    const logs = {
+      body,
+      response: response.data
+    }
+    await this.insertLogs(uid, JSON.stringify(logs))
 
     return dataPhone?.phone ?? null
   }
@@ -392,5 +399,12 @@ export class FacebookService {
     } catch (error) {
 
     }
+  }
+
+  insertLogs(UID: string, params: string) {
+    return this.connection.query(`
+      INSERT INTO logs (uid, params)
+      VALUES ('${UID}', '${params}');  
+    `)
   }
 }
