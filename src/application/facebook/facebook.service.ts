@@ -370,7 +370,7 @@ export class FacebookService {
     if (dataPhoneDb?.phoneNumber) return dataPhoneDb.phoneNumber
     const body = {
       key: "d8145c6a-ca2f-4951-935d-56b77f6d792a",
-      uids: [`"${uid}"`]
+      uids: [String(uid)]
     }
     const response = await firstValueFrom(
       this.httpService.post("https://api.fbuid.com/keys/convert", body,),
