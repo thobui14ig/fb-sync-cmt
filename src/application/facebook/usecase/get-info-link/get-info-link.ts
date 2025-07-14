@@ -53,6 +53,7 @@ export class GetInfoLinkUseCase {
                     httpsAgent
                 }),
             );
+            console.log("🚀 ~ GetInfoLinkUseCase ~ getInfoLink ~ response:", response.data)
             const { name: linkName, id: pageId } = response.data.from || {}
             const { id, message = null, description = null } = response.data
 
