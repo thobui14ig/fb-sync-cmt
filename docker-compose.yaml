@@ -7,7 +7,7 @@ services:
     container_name: fb-sync
     restart: always
     depends_on:
-      - redis  
+      - redis
     environment:
       - PORT=7000
       - DB_TYPE=mysql
@@ -16,7 +16,7 @@ services:
       - DB_USER_NAME=root
       - DB_PASSWORD=HoangChuong@1111
       - DB_DATABASE=crawl-fb
-      - NODE_OPTIONS=--max-old-space-size=4096  
+      - NODE_OPTIONS=--max-old-space-size=4096
       # redis
       - REDIS_HOST=redis
       - REDIS_PORT=6379
@@ -27,7 +27,8 @@ services:
     image: redis:latest
     container_name: my-redis
     ports:
-      - "6379:6379"
+      - '6379:6379'
+    command: ['redis-server', '--appendonly', 'yes']
     volumes:
       - redis-data:/data
     restart: unless-stopped
