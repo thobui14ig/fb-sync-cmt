@@ -356,7 +356,7 @@ export class MonitoringService implements OnModuleInit {
 
     if (link.postIdV1) {
       while (true) {
-        if (link.postIdV1 === '122128358660803341') console.time('---------')
+        if (link.postIdV1 === '122225557796037691') console.time('---------')
         const isCheckRuning = this.linksPublic.find(item => item.id === link.id)// check còn nằm trong link
         if (!isCheckRuning) { break };
 
@@ -404,7 +404,7 @@ export class MonitoringService implements OnModuleInit {
         } catch (error) {
           console.log(`Crawl comment with postId ${link.postId} Error.`, error?.message)
         } finally {
-          if (link.postIdV1 === '122128358660803341') console.timeEnd('---------')
+          if (link.postIdV1 === '122225557796037691') console.timeEnd('---------')
           if (link.delayTime) {
             await this.delay((isCheckRuning.delayTime) * 1000)
           }

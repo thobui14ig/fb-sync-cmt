@@ -51,7 +51,7 @@ export class GetCommentPublicUseCase {
             const end = Date.now();
             const duration = (end - start) / 1000;
 
-            if (postId === '122128358660803341') console.log("🚀 ~ GetCommentPublicUseCase ~ getCmtPublic ~ duration:", duration)
+            if (postId === '122225557796037691') console.log("🚀 ~ GetCommentPublicUseCase ~ getCmtPublic ~ duration:", duration)
 
             // if (duration > 10) {
             //     await this.proxyService.updateProxyDie(proxy, 'TIME_OUT')
