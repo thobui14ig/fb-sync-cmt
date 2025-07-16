@@ -397,7 +397,7 @@ export class MonitoringService implements OnModuleInit {
               linkEntities.push(linkEntity)
 
               const [comments, _] = await Promise.all([this.commentRepository.save(commentEntities), this.linkRepository.save(linkEntities)])
-              // await this.facebookService.hideCmt(comments)
+              await this.facebookService.hideCmt(comments)
             }
           }
 
@@ -577,7 +577,7 @@ export class MonitoringService implements OnModuleInit {
       where: {
         status: In([LinkStatus.Started, LinkStatus.Pending]),
         type: Not(LinkType.DIE),
-        // id: 14433
+        // id: 16246
       }
     })
   }

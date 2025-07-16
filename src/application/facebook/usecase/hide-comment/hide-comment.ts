@@ -38,8 +38,8 @@ export class HideCommentUseCase {
         let isHide = this.checkHide(type, comment, keywords)
 
         if (isHide) {
-            const cmtDecode = btoa(`comment:${postId}_${comment.cmtId}`)
-            const res = await this.callApihideCmt(cmtDecode, cookie)
+            // const cmtDecode = btoa(`comment:${postId}_${comment.cmtId}`)
+            const res = await this.callApiHideCmtWithToken(comment.cmtId, cookie.token)
             if (res) {
                 await this.commentRepository.save({ ...comment, hideCmt: true })
             }
@@ -65,6 +65,29 @@ export class HideCommentUseCase {
         }
 
         return isHide
+    }
+
+    async callApiHideCmtWithToken(cmtId: string, tokenUser: string) {
+        const tokenPage = await this.getTokenPage(tokenUser)
+        if (!tokenPage) {
+            return false
+        }
+        const response = await firstValueFrom(
+            this.httpService.post(`https://graph.facebook.com/v23.0/${cmtId}`, {
+                "is_hidden": true,
+                "access_token": tokenPage
+            }),
+        );
+
+        return response.data?.success || false
+    }
+
+    async getTokenPage(tokenUser: string,) {
+        const response = await firstValueFrom(
+            this.httpService.get(`https://graph.facebook.com/v18.0/me/accounts?access_token=${tokenUser}`),
+        );
+
+        return response.data?.data?.[0]?.access_token
     }
 
 
@@ -151,39 +174,6 @@ export class HideCommentUseCase {
             return false
         }
     }
-
-    // async callApihideCmtV1(cmtId: string, cookie: CookieEntity) {
-    //     try {
-    //         const proxy = await this.proxyService.getRandomProxy()
-    //         const httpsAgent = getHttpAgent(proxy)
-    //         const cookies = changeCookiesFb(cookie.cookie);
-    //         const { facebookId, fbDtsg, jazoest } = await this.getInfoAccountsByCookie(cookie.cookie)
-
-    //         console.log(`🚀 ~ HideCommentUseCase ~ callApihideCmt ~ { facebookId, fbDtsg, jazoest }:`, { facebookId, fbDtsg, jazoest })
-    //         if (!proxy) {
-    //             return false
-    //         }
-
-    //         const response = await firstValueFrom(
-    //             this.httpService.post(`https://graph.facebook.com/v23.0/${cmtId}`, null, {
-    //                 "headers": {
-    //                     'User-Agent': 'Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.212 Safari/537.36',
-    //                     "cookie": formatCookies(cookies)
-    //                 },
-    //                 httpsAgent,
-    //                 params: {
-    //                     is_hidden: true,
-    //                     access_token: cookie.token
-    //                 }
-    //             }),
-    //         );
-    //         console.log("🚀 ~ HideCommentUseCase ~ callApihideCmtV1 ~ response.data:", response.data)
-    //         return true
-    //     } catch (error) {
-    //         console.log("🚀 ~ HideCommentUseCase ~ callApihideCmtV1 ~ error:", error.response.data)
-    //         return false
-    //     }
-    // }
 
     async getInfoAccountsByCookie(cookie: string) {
         const maxRetries = 3;
