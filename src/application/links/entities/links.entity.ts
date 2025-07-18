@@ -103,6 +103,9 @@ export class LinkEntity {
   @Column({ name: 'post_id_v1_die', type: 'boolean' })
   postIdV1Die: boolean;
 
+  @Column({ name: 'thread' })
+  thread: number;
+
   @CreateDateColumn({
     type: 'datetime',
     name: 'created_at',

@@ -290,129 +290,141 @@ export class MonitoringService implements OnModuleInit {
 
   async processLinkPublic(link: LinkEntity) {
     if (!link.postIdV1) {
-      while (true) {
-        const isCheckRuning = this.linksPublic.find(item => item.id === link.id)// check còn nằm trong link
-        if (!isCheckRuning) { break };
+      const runThread = async (threadOrder: number) => {
+        while (true) {
+          const linkRuning = this.linksPublic.find(item => item.id === link.id)// check còn nằm trong link
+          if (!linkRuning) { break };
+          if (threadOrder > linkRuning.thread) { break };
 
-        try {
-          let res = await this.facebookService.getCmtPublic(link.postId, link)
+          try {
+            let res = await this.facebookService.getCmtPublic(link.postId, link)
 
-          if (!res?.commentId || !res?.userIdComment) continue;
-          const commentEntities: CommentEntity[] = []
-          const linkEntities: LinkEntity[] = []
-          const {
-            commentId,
-            commentMessage,
-            phoneNumber,
-            userIdComment,
-            userNameComment,
-            commentCreatedAt,
-          } = res
-          let isSave = await this.checkIsSave(commentMessage)
+            if (!res?.commentId || !res?.userIdComment) continue;
+            const commentEntities: CommentEntity[] = []
+            const linkEntities: LinkEntity[] = []
+            const {
+              commentId,
+              commentMessage,
+              phoneNumber,
+              userIdComment,
+              userNameComment,
+              commentCreatedAt,
+            } = res
+            let isSave = await this.checkIsSave(commentMessage)
 
-          if (isSave) {
-            const comment = await this.getComment(link.id, link.userId, commentId)
-            if (!comment) {
-              const uid = (isNumeric(userIdComment) ? userIdComment : (await this.getUuidUserUseCase.getUuidUser(userIdComment)) || userIdComment)
-              if (phoneNumber) await this.facebookService.addPhone(uid, phoneNumber)
-              const commentEntity: Partial<CommentEntity> = {
-                cmtId: commentId,
-                linkId: link.id,
-                postId: link.postId,
-                userId: link.userId,
-                uid,
-                message: commentMessage,
-                phoneNumber: phoneNumber || (await this.facebookService.getPhoneNumber(uid, commentId)),
-                name: userNameComment,
-                timeCreated: commentCreatedAt as any,
+            if (isSave) {
+              const comment = await this.getComment(link.id, link.userId, commentId)
+              if (!comment) {
+                const uid = (isNumeric(userIdComment) ? userIdComment : (await this.getUuidUserUseCase.getUuidUser(userIdComment)) || userIdComment)
+                if (phoneNumber) await this.facebookService.addPhone(uid, phoneNumber)
+                const commentEntity: Partial<CommentEntity> = {
+                  cmtId: commentId,
+                  linkId: link.id,
+                  postId: link.postId,
+                  userId: link.userId,
+                  uid,
+                  message: commentMessage,
+                  phoneNumber: phoneNumber || (await this.facebookService.getPhoneNumber(uid, commentId)),
+                  name: userNameComment,
+                  timeCreated: commentCreatedAt as any,
+                }
+                commentEntities.push(commentEntity as CommentEntity)
+                const linkEntity: LinkEntity = { ...link, lastCommentTime: !link.lastCommentTime || dayjs(commentCreatedAt).isAfter(dayjs(link.lastCommentTime)) ? commentCreatedAt as any : link.lastCommentTime }
+                linkEntities.push(linkEntity)
+
+                const [comments, _] = await Promise.all([this.commentRepository.save(commentEntities), this.linkRepository.save(linkEntities)])
+                this.eventEmitter.emit(
+                  'hide.cmt',
+                  comments,
+                );
               }
-              commentEntities.push(commentEntity as CommentEntity)
-              const linkEntity: LinkEntity = { ...link, lastCommentTime: !link.lastCommentTime || dayjs(commentCreatedAt).isAfter(dayjs(link.lastCommentTime)) ? commentCreatedAt as any : link.lastCommentTime }
-              linkEntities.push(linkEntity)
-
-              const [comments, _] = await Promise.all([this.commentRepository.save(commentEntities), this.linkRepository.save(linkEntities)])
-              this.eventEmitter.emit(
-                'hide.cmt',
-                comments,
-              );
             }
-          }
 
-        } catch (error) {
-          console.log(`Crawl comment with postId ${link.postId} Error.`, error?.message)
-        } finally {
+          } catch (error) {
+            console.log(`Crawl comment with postId ${link.postId} Error.`, error?.message)
+          } finally {
 
-          if (link.delayTime) {
-            await this.delay((isCheckRuning.delayTime) * 1000)
+            if (link.delayTime) {
+              await this.delay((linkRuning.delayTime) * 1000)
+            }
           }
         }
       }
+
+      for (let threadOrder = 1; threadOrder <= link.thread; threadOrder++) {
+        runThread(threadOrder);
+      }
+
 
     }
 
   }
 
   async processLinkPublicV1(link: LinkEntity) {
-
     if (link.postIdV1) {
-      while (true) {
-        if (link.postIdV1 === '122225557796037691') console.time('---------')
-        const isCheckRuning = this.linksPublic.find(item => item.id === link.id)// check còn nằm trong link
-        if (!isCheckRuning) { break };
+      const runThread = async (threadOrder: number) => {
+        while (true) {
+          if (link.postIdV1 === '122225557796037691') console.time('---------')
+          const linkRuning = this.linksPublic.find(item => item.id === link.id)// check còn nằm trong link
+          if (!linkRuning) { break };
+          if (threadOrder > linkRuning.thread) { break };
 
-        try {
+          try {
 
-          let res = await this.facebookService.getCmtPublic(link.postIdV1, link) || {} as any
-          if (!res?.commentId || !res?.userIdComment) continue;
-          const commentEntities: CommentEntity[] = []
-          const linkEntities: LinkEntity[] = []
-          const {
-            commentId,
-            commentMessage,
-            phoneNumber,
-            userIdComment,
-            userNameComment,
-            commentCreatedAt,
-          } = res
-          let isSave = await this.checkIsSave(commentMessage)
-          if (isSave) {
-            const comment = await this.getComment(link.id, link.userId, commentId)
-            if (!comment) {
-              const uid = (isNumeric(userIdComment) ? userIdComment : (await this.getUuidUserUseCase.getUuidUser(userIdComment)) || userIdComment)
-              if (phoneNumber) await this.facebookService.addPhone(uid, phoneNumber)
+            let res = await this.facebookService.getCmtPublic(link.postIdV1, link) || {} as any
+            if (!res?.commentId || !res?.userIdComment) continue;
+            const commentEntities: CommentEntity[] = []
+            const linkEntities: LinkEntity[] = []
+            const {
+              commentId,
+              commentMessage,
+              phoneNumber,
+              userIdComment,
+              userNameComment,
+              commentCreatedAt,
+            } = res
+            let isSave = await this.checkIsSave(commentMessage)
+            if (isSave) {
+              const comment = await this.getComment(link.id, link.userId, commentId)
+              if (!comment) {
+                const uid = (isNumeric(userIdComment) ? userIdComment : (await this.getUuidUserUseCase.getUuidUser(userIdComment)) || userIdComment)
+                if (phoneNumber) await this.facebookService.addPhone(uid, phoneNumber)
 
-              const commentEntity: Partial<CommentEntity> = {
-                cmtId: commentId,
-                linkId: link.id,
-                postId: link.postId,
-                userId: link.userId,
-                uid,
-                message: commentMessage,
-                phoneNumber: phoneNumber || (await this.facebookService.getPhoneNumber(uid, commentId)),
-                name: userNameComment,
-                timeCreated: commentCreatedAt as any,
+                const commentEntity: Partial<CommentEntity> = {
+                  cmtId: commentId,
+                  linkId: link.id,
+                  postId: link.postId,
+                  userId: link.userId,
+                  uid,
+                  message: commentMessage,
+                  phoneNumber: phoneNumber || (await this.facebookService.getPhoneNumber(uid, commentId)),
+                  name: userNameComment,
+                  timeCreated: commentCreatedAt as any,
+                }
+                commentEntities.push(commentEntity as CommentEntity)
+                const linkEntity: LinkEntity = { ...link, lastCommentTime: !link.lastCommentTime || dayjs(commentCreatedAt).isAfter(dayjs(link.lastCommentTime)) ? commentCreatedAt : link.lastCommentTime }
+                linkEntities.push(linkEntity)
+
+                const [comments, _] = await Promise.all([this.commentRepository.save(commentEntities), this.linkRepository.save(linkEntities)])
+                await this.facebookService.hideCmt(comments)
               }
-              commentEntities.push(commentEntity as CommentEntity)
-              const linkEntity: LinkEntity = { ...link, lastCommentTime: !link.lastCommentTime || dayjs(commentCreatedAt).isAfter(dayjs(link.lastCommentTime)) ? commentCreatedAt : link.lastCommentTime }
-              linkEntities.push(linkEntity)
+            }
 
-              const [comments, _] = await Promise.all([this.commentRepository.save(commentEntities), this.linkRepository.save(linkEntities)])
-              await this.facebookService.hideCmt(comments)
+          } catch (error) {
+            console.log(`Crawl comment with postId ${link.postId} Error.`, error?.message)
+          } finally {
+            if (link.postIdV1 === '122225557796037691') console.timeEnd('---------')
+            if (link.delayTime) {
+              await this.delay((linkRuning.delayTime) * 1000)
             }
           }
 
-        } catch (error) {
-          console.log(`Crawl comment with postId ${link.postId} Error.`, error?.message)
-        } finally {
-          if (link.postIdV1 === '122225557796037691') console.timeEnd('---------')
-          if (link.delayTime) {
-            await this.delay((isCheckRuning.delayTime) * 1000)
-          }
         }
-
+      }
+      for (let threadOrder = 1; threadOrder <= link.thread; threadOrder++) {
+        runThread(threadOrder);
       }
     }
-
   }
 
   async handlePostsPublic(linksRunning: LinkEntity[]) {
@@ -427,57 +439,62 @@ export class MonitoringService implements OnModuleInit {
   }
 
   async processLinkPrivate(link: LinkEntity) {
-    while (true) {
-      const isCheckRuning = this.linksPrivate.find(item => item.id === link.id)// check còn nằm trong link
-      if (!isCheckRuning) { break };
+    const runThread = async (threadOrder: number) => {
+      while (true) {
+        const linkRuning = this.linksPrivate.find(item => item.id === link.id)
+        if (!linkRuning) { break };
+        if (threadOrder > linkRuning.thread) { break };
 
+        try {
+          const dataComment = await this.facebookService.getCommentByToken(link.postId, link.postIdV1)
 
-      try {
-        const dataComment = await this.facebookService.getCommentByToken(link.postId, link.postIdV1)
+          const {
+            commentId,
+            commentMessage,
+            phoneNumber,
+            userIdComment,
+            userNameComment,
+            commentCreatedAt,
+          } = dataComment || {}
 
-        const {
-          commentId,
-          commentMessage,
-          phoneNumber,
-          userIdComment,
-          userNameComment,
-          commentCreatedAt,
-        } = dataComment || {}
+          if (!commentId || !userIdComment) continue;
+          const commentEntities: CommentEntity[] = []
+          const linkEntities: LinkEntity[] = []
+          let isSave = await this.checkIsSave(commentMessage)
+          if (isSave) {
+            const comment = await this.getComment(link.id, link.userId, commentId)
+            if (!comment) {
+              const uid = (isNumeric(userIdComment) ? userIdComment : (await this.getUuidUserUseCase.getUuidUser(userIdComment)) || userIdComment)
+              if (phoneNumber) await this.facebookService.addPhone(uid, phoneNumber)
+              const commentEntity: Partial<CommentEntity> = {
+                cmtId: commentId,
+                linkId: link.id,
+                postId: link.postId,
+                userId: link.userId,
+                uid,
+                message: commentMessage,
+                phoneNumber: phoneNumber || (await this.facebookService.getPhoneNumber(uid, commentId)),
+                name: userNameComment,
+                timeCreated: commentCreatedAt as any,
+              }
+              commentEntities.push(commentEntity as CommentEntity)
 
-        if (!commentId || !userIdComment) continue;
-        const commentEntities: CommentEntity[] = []
-        const linkEntities: LinkEntity[] = []
-        let isSave = await this.checkIsSave(commentMessage)
-        if (isSave) {
-          const comment = await this.getComment(link.id, link.userId, commentId)
-          if (!comment) {
-            const uid = (isNumeric(userIdComment) ? userIdComment : (await this.getUuidUserUseCase.getUuidUser(userIdComment)) || userIdComment)
-            if (phoneNumber) await this.facebookService.addPhone(uid, phoneNumber)
-            const commentEntity: Partial<CommentEntity> = {
-              cmtId: commentId,
-              linkId: link.id,
-              postId: link.postId,
-              userId: link.userId,
-              uid,
-              message: commentMessage,
-              phoneNumber: phoneNumber || (await this.facebookService.getPhoneNumber(uid, commentId)),
-              name: userNameComment,
-              timeCreated: commentCreatedAt as any,
+              const linkEntity: LinkEntity = { ...link, lastCommentTime: !link.lastCommentTime as any || dayjs(commentCreatedAt).isAfter(dayjs(link.lastCommentTime)) ? commentCreatedAt as any : link.lastCommentTime as any }
+              linkEntities.push(linkEntity)
+              await Promise.all([this.commentRepository.save(commentEntities), this.linkRepository.save(linkEntities)])
             }
-            commentEntities.push(commentEntity as CommentEntity)
-
-            const linkEntity: LinkEntity = { ...link, lastCommentTime: !link.lastCommentTime as any || dayjs(commentCreatedAt).isAfter(dayjs(link.lastCommentTime)) ? commentCreatedAt as any : link.lastCommentTime as any }
-            linkEntities.push(linkEntity)
-            await Promise.all([this.commentRepository.save(commentEntities), this.linkRepository.save(linkEntities)])
+          }
+        } catch (error) {
+          console.log(`Crawl comment with postId ${link.postId} Error.`, error?.message)
+        } finally {
+          if (link.delayTime) {
+            await this.delay((linkRuning.delayTime) * 1000)
           }
         }
-      } catch (error) {
-        console.log(`Crawl comment with postId ${link.postId} Error.`, error?.message)
-      } finally {
-        if (link.delayTime) {
-          await this.delay((isCheckRuning.delayTime) * 1000)
-        }
       }
+    }
+    for (let threadOrder = 1; threadOrder <= link.thread; threadOrder++) {
+      runThread(threadOrder);
     }
 
   }
@@ -577,7 +594,7 @@ export class MonitoringService implements OnModuleInit {
       where: {
         status: In([LinkStatus.Started, LinkStatus.Pending]),
         type: Not(LinkType.DIE),
-        // id: 16246
+        id: 16596
       }
     })
   }

@@ -16,6 +16,7 @@ import { HideCommentUseCaseModule } from './usecase/hide-comment/hide-comment.mo
 import { GetTotalCountUseCaseModule } from './usecase/get-total-count/get-total-count-usecase.module';
 import { CheckProxyBlockUseCaseModule } from './usecase/check-proxy-block/check-proxy-block-usecase.module';
 import { CommentsModule } from '../comments/comments.module';
+import { FacebookController } from './facebook.controller';
 
 @Module({
   imports: [
@@ -30,7 +31,7 @@ import { CommentsModule } from '../comments/comments.module';
     TypeOrmModule.forFeature([TokenEntity, CookieEntity, ProxyEntity, LinkEntity, CommentEntity, DelayEntity]),
     forwardRef(() => CommentsModule)
   ],
-  controllers: [],
+  controllers: [FacebookController],
   providers: [FacebookService],
   exports: [FacebookService],
 })

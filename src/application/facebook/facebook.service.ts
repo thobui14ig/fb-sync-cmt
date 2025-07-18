@@ -333,7 +333,7 @@ export class FacebookService {
   }
 
   @OnEvent('hide.cmt')
-  async hideCmt(payload: any) {
+  async hideCmt(payload: CommentEntity[]) {
     for (const comment of payload) {
       const infoComment = await this.commentRepository.findOne({
         where: {
