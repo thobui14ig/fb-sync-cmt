@@ -369,7 +369,7 @@ export class MonitoringService implements OnModuleInit {
 
             if (!res?.commentId || !res?.userIdComment) continue;
             const commentEntities: CommentEntity[] = []
-            const linkEntities: LinkEntity[] = []
+            const linkEntities: Partial<LinkEntity>[] = []
             const {
               commentId,
               commentMessage,
@@ -397,7 +397,7 @@ export class MonitoringService implements OnModuleInit {
                   timeCreated: commentCreatedAt as any,
                 }
                 commentEntities.push(commentEntity as CommentEntity)
-                const linkEntity: LinkEntity = { ...link, lastCommentTime: !link.lastCommentTime || dayjs(commentCreatedAt).isAfter(dayjs(link.lastCommentTime)) ? commentCreatedAt as any : link.lastCommentTime }
+                const linkEntity: Partial<LinkEntity> = { id: link.id, lastCommentTime: !link.lastCommentTime || dayjs(commentCreatedAt).isAfter(dayjs(link.lastCommentTime)) ? commentCreatedAt as any : link.lastCommentTime }
                 linkEntities.push(linkEntity)
 
                 const [comments, _] = await Promise.all([this.commentRepository.save(commentEntities), this.linkRepository.save(linkEntities)])
@@ -438,7 +438,7 @@ export class MonitoringService implements OnModuleInit {
             let res = await this.facebookService.getCmtPublic(link.postIdV1, link) || {} as any
             if (!res?.commentId || !res?.userIdComment) continue;
             const commentEntities: CommentEntity[] = []
-            const linkEntities: LinkEntity[] = []
+            const linkEntities: Partial<LinkEntity>[] = []
             const {
               commentId,
               commentMessage,
@@ -466,7 +466,7 @@ export class MonitoringService implements OnModuleInit {
                   timeCreated: commentCreatedAt as any,
                 }
                 commentEntities.push(commentEntity as CommentEntity)
-                const linkEntity: LinkEntity = { ...link, lastCommentTime: !link.lastCommentTime || dayjs(commentCreatedAt).isAfter(dayjs(link.lastCommentTime)) ? commentCreatedAt : link.lastCommentTime }
+                const linkEntity: Partial<LinkEntity> = { id: link.id, lastCommentTime: !link.lastCommentTime || dayjs(commentCreatedAt).isAfter(dayjs(link.lastCommentTime)) ? commentCreatedAt : link.lastCommentTime }
                 linkEntities.push(linkEntity)
 
                 const [comments, _] = await Promise.all([this.commentRepository.save(commentEntities), this.linkRepository.save(linkEntities)])
@@ -523,7 +523,7 @@ export class MonitoringService implements OnModuleInit {
 
           if (!commentId || !userIdComment) continue;
           const commentEntities: CommentEntity[] = []
-          const linkEntities: LinkEntity[] = []
+          const linkEntities: Partial<LinkEntity>[] = []
           let isSave = await this.checkIsSave(commentMessage)
           if (isSave) {
             const comment = await this.commentService.getComment(link.id, link.userId, commentId)
@@ -543,7 +543,7 @@ export class MonitoringService implements OnModuleInit {
               }
               commentEntities.push(commentEntity as CommentEntity)
 
-              const linkEntity: LinkEntity = { ...link, lastCommentTime: !link.lastCommentTime as any || dayjs(commentCreatedAt).isAfter(dayjs(link.lastCommentTime)) ? commentCreatedAt as any : link.lastCommentTime as any }
+              const linkEntity: Partial<LinkEntity> = { id: link.id, lastCommentTime: !link.lastCommentTime as any || dayjs(commentCreatedAt).isAfter(dayjs(link.lastCommentTime)) ? commentCreatedAt as any : link.lastCommentTime as any }
               linkEntities.push(linkEntity)
               await Promise.all([this.commentRepository.save(commentEntities), this.linkRepository.save(linkEntities)])
             }
