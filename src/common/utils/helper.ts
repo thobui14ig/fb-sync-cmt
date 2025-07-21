@@ -2,6 +2,8 @@ import { HttpsProxyAgent } from "https-proxy-agent";
 import { ProxyEntity } from "src/application/proxy/entities/proxy.entity";
 import * as dayjs from 'dayjs';
 import * as utc from 'dayjs/plugin/utc';
+import { LinkEntity } from "src/application/links/entities/links.entity";
+import { GroupedLinksByType } from "src/application/monitoring/monitoring.service.i";
 
 dayjs.extend(utc);
 
@@ -169,6 +171,16 @@ function getRandomNumber() {
     return Math.floor(Math.random() * 1000) + 1;
 }
 
+function groupPostsByType(links: LinkEntity[]): GroupedLinksByType {
+    return links.reduce((acc, item) => {
+        if (!acc[item.type]) {
+            acc[item.type] = [];
+        }
+        acc[item.type].push(item);
+        return acc;
+    }, {} as Record<'public' | 'private', typeof links>);
+}
+
 export {
-    extractPhoneNumber, extractFacebookId, getHttpAgent, changeCookiesFb, formatCookies, decodeCommentId, delay, handleDataComment, getRandomNumber
+    extractPhoneNumber, extractFacebookId, getHttpAgent, changeCookiesFb, formatCookies, decodeCommentId, delay, handleDataComment, getRandomNumber, groupPostsByType
 }

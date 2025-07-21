@@ -55,4 +55,24 @@ export class ProxyService {
     }
     return this.repo.save({ ...proxy, status: ProxyStatus.IN_ACTIVE })
   }
+
+  updateProxyActive(proxy: ProxyEntity) {
+    return this.repo.save({ ...proxy, status: ProxyStatus.ACTIVE })
+  }
+
+
+  async updateActiveAllProxy() {
+    // const allProxy = await this.proxyRepository.find({
+    //   where: {
+    //     status: ProxyStatus.IN_ACTIVE
+    //   }
+    // })
+
+    // return this.proxyRepository.save(allProxy.map((item) => {
+    //   return {
+    //     ...item,
+    //     status: ProxyStatus.ACTIVE,
+    //   }
+    // }))
+  }
 }

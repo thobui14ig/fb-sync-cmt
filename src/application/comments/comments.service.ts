@@ -33,4 +33,18 @@ export class CommentsService {
       }
     })
   }
+
+
+  getComment(linkId: number, userId: number, cmtId: string) {
+    return this.repo.findOne({
+      where: {
+        linkId,
+        userId,
+        cmtId
+      },
+      select: {
+        id: true
+      }
+    })
+  }
 }

@@ -6,14 +6,15 @@ import { AxiosRequestConfig } from 'axios';
 import * as dayjs from 'dayjs';
 import * as utc from 'dayjs/plugin/utc';
 import { firstValueFrom } from 'rxjs';
+import { isNumeric } from 'src/common/utils/check-utils';
 import { changeCookiesFb, extractFacebookId, formatCookies, getHttpAgent } from 'src/common/utils/helper';
 import { DataSource, Repository } from 'typeorm';
+import { CommentsService } from '../comments/comments.service';
 import { CommentEntity } from '../comments/entities/comment.entity';
-import { CookieEntity } from '../cookie/entities/cookie.entity';
-import { LinkEntity, LinkStatus, LinkType } from '../links/entities/links.entity';
-import { ProxyEntity, ProxyStatus } from '../proxy/entities/proxy.entity';
-import { DelayEntity } from '../setting/entities/delay.entity';
-import { TokenEntity, TokenType } from '../token/entities/token.entity';
+import { LinkEntity, LinkType } from '../links/entities/links.entity';
+import { ProxyEntity } from '../proxy/entities/proxy.entity';
+import { ProxyService } from '../proxy/proxy.service';
+import { TokenType } from '../token/entities/token.entity';
 import { CheckProxyBlockUseCase } from './usecase/check-proxy-block/check-proxy-block-usecase';
 import { GetCommentPrivateUseCase } from './usecase/get-comment-private/get-comment-private';
 import { GetCommentPublicUseCase } from './usecase/get-comment-public/get-comment-public';
@@ -26,8 +27,6 @@ import {
   getHeaderProfileFb,
   getHeaderToken
 } from './utils';
-import { CommentsService } from '../comments/comments.service';
-import { isNumeric } from 'src/common/utils/check-utils';
 
 dayjs.extend(utc);
 // dayjs.extend(timezone);
@@ -42,18 +41,8 @@ export class FacebookService {
   browser = null
 
   constructor(private readonly httpService: HttpService,
-    @InjectRepository(TokenEntity)
-    private tokenRepository: Repository<TokenEntity>,
-    @InjectRepository(CookieEntity)
-    private cookieRepository: Repository<CookieEntity>,
-    @InjectRepository(ProxyEntity)
-    private proxyRepository: Repository<ProxyEntity>,
-    @InjectRepository(LinkEntity)
-    private linkRepository: Repository<LinkEntity>,
     @InjectRepository(CommentEntity)
     private commentRepository: Repository<CommentEntity>,
-    @InjectRepository(DelayEntity)
-    private delayRepository: Repository<DelayEntity>,
     private getInfoLinkUseCase: GetInfoLinkUseCase,
     private getCommentPublicUseCase: GetCommentPublicUseCase,
     private getCommentPrivateUseCase: GetCommentPrivateUseCase,
@@ -62,6 +51,7 @@ export class FacebookService {
     private getTotalCountUseCase: GetTotalCountUseCase,
     private CheckProxyBlockUseCase: CheckProxyBlockUseCase,
     private commentsService: CommentsService,
+    private proxyService: ProxyService,
     private connection: DataSource
   ) {
   }
@@ -230,7 +220,7 @@ export class FacebookService {
 
   async getPostIdPublicV2(url: string) {
     try {
-      const proxy = await this.getRandomProxy()
+      const proxy = await this.proxyService.getRandomProxy()
       const httpsAgent = getHttpAgent(proxy)
 
       const response = await firstValueFrom(
@@ -262,7 +252,6 @@ export class FacebookService {
       const match = htmlContent.match(/"subscription_target_id":"(.*?)"/);
       if (match && match[1]) {
         const postId = match[1]
-        console.log("🚀 ~ getPostIdPublicV2 ~ match:", postId)
         if (postId) {
           return postId
         }
@@ -272,7 +261,6 @@ export class FacebookService {
 
       if (matchV1 && matchV1[1]) {
         const postId = matchV1[1]
-        console.log("🚀 ~ getPostIdPublicV2 ~ match:", postId)
         if (postId) {
           return postId
         }
@@ -287,14 +275,6 @@ export class FacebookService {
 
   async getTotalCountWithToken(link: LinkEntity) {
     return this.getTotalCountUseCase.getTotalCountWithToken(link)
-  }
-
-  updateProxyDie(proxy: ProxyEntity) {
-    return this.proxyRepository.save({ ...proxy, status: ProxyStatus.IN_ACTIVE })
-  }
-
-  updateProxyActive(proxy: ProxyEntity) {
-    return this.proxyRepository.save({ ...proxy, status: ProxyStatus.ACTIVE, isFbBlock: false })
   }
 
   async updateUUIDUser() {
@@ -315,22 +295,6 @@ export class FacebookService {
     }
   }
 
-  async getRandomProxy() {
-    const proxies = await this.proxyRepository.find({
-      where: {
-        status: ProxyStatus.ACTIVE,
-      }
-    })
-    const randomIndex = Math.floor(Math.random() * proxies.length);
-    const randomProxy = proxies[randomIndex];
-
-    return randomProxy
-  }
-
-  async getDelayTime(status: LinkStatus, type: LinkType) {
-    const setting = await this.delayRepository.find()
-    return status === LinkStatus.Pending ? setting[0].delayOff * 60 : (type === LinkType.PUBLIC ? setting[0].delayOnPublic : setting[0].delayOnPrivate)
-  }
 
   @OnEvent('hide.cmt')
   async hideCmt(payload: CommentEntity[]) {
@@ -350,17 +314,6 @@ export class FacebookService {
       if (infoComment.link.hideCmt && !infoComment.hideCmt) {
         await this.hideCommentUseCase.hideComment(infoComment.link.userId, infoComment.link.hideBy, infoComment.postId, comment, keywords)
       }
-    }
-  }
-
-  @OnEvent('gen-token-user')
-  async genTokenByCookieUser(payload: CookieEntity) {
-    const { cookie } = payload
-    const profile = await this.getDataProfileFb(cookie, TokenType.EAADo1);
-    if (profile.accessToken) {
-      payload.token = profile.accessToken
-
-      return await this.cookieRepository.save(payload)
     }
   }
 

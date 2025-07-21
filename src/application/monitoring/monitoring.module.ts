@@ -14,9 +14,14 @@ import { SettingModule } from '../setting/setting.module';
 import { TokenEntity } from '../token/entities/token.entity';
 import { MonitoringController } from './monitoring.controller';
 import { MonitoringService } from './monitoring.service';
+import { ProxyModule } from '../proxy/proxy.module';
+import { LinkModule } from '../links/links.module';
+import { TokenModule } from '../token/token.module';
+import { CommentsModule } from '../comments/comments.module';
+import { CookieModule } from '../cookie/cookie.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([LinkEntity, CommentEntity, TokenEntity, CookieEntity, ProxyEntity, DelayEntity]), FacebookModule, HttpModule, GetCommentPublicUseCaseModule, HideCommentUseCaseModule, GetUuidUserUseCaseModule, SettingModule],
+  imports: [TypeOrmModule.forFeature([LinkEntity, CommentEntity, TokenEntity, CookieEntity, ProxyEntity, DelayEntity]), FacebookModule, HttpModule, GetCommentPublicUseCaseModule, HideCommentUseCaseModule, GetUuidUserUseCaseModule, SettingModule, ProxyModule, LinkModule, TokenModule, CommentsModule, CookieModule],
   controllers: [MonitoringController],
   providers: [MonitoringService],
   exports: [MonitoringService],

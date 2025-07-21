@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import * as dayjs from 'dayjs';
 import * as timezone from 'dayjs/plugin/timezone';
 import * as utc from 'dayjs/plugin/utc';
-import { In, Not, Repository } from 'typeorm';
+import { In, IsNull, MoreThan, Not, Repository } from 'typeorm';
 import { LEVEL } from '../user/entities/user.entity';
 import { UpdateLinkDTO } from './dto/update-link.dto';
 import { HideBy, LinkEntity, LinkStatus, LinkType } from './entities/links.entity';
@@ -122,5 +122,31 @@ export class LinkService {
 
   updateType(link: LinkEntity) {
     return this.repo.save(link)
+  }
+
+  getLinksWithoutProfile() {
+    return this.repo.find({
+      where: {
+        process: false,
+        postId: IsNull()
+      },
+      select: {
+        linkUrl: true,
+        id: true,
+        postId: true,
+        userId: true
+      }
+    })
+  }
+
+  getPostStarted(): Promise<LinkEntity[]> {
+    return this.repo.find({
+      where: {
+        status: In([LinkStatus.Started, LinkStatus.Pending]),
+        type: Not(LinkType.DIE),
+        delayTime: MoreThan(0),
+        id: 16596
+      }
+    })
   }
 }

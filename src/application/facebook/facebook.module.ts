@@ -17,6 +17,7 @@ import { GetTotalCountUseCaseModule } from './usecase/get-total-count/get-total-
 import { CheckProxyBlockUseCaseModule } from './usecase/check-proxy-block/check-proxy-block-usecase.module';
 import { CommentsModule } from '../comments/comments.module';
 import { FacebookController } from './facebook.controller';
+import { ProxyModule } from '../proxy/proxy.module';
 
 @Module({
   imports: [
@@ -29,7 +30,8 @@ import { FacebookController } from './facebook.controller';
     GetTotalCountUseCaseModule,
     CheckProxyBlockUseCaseModule,
     TypeOrmModule.forFeature([TokenEntity, CookieEntity, ProxyEntity, LinkEntity, CommentEntity, DelayEntity]),
-    forwardRef(() => CommentsModule)
+    forwardRef(() => CommentsModule),
+    ProxyModule
   ],
   controllers: [FacebookController],
   providers: [FacebookService],

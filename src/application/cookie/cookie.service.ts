@@ -48,4 +48,25 @@ export class CookieService {
   updateStatusCookie(cookie: CookieEntity, status: CookieStatus) {
     return this.repo.save({ ...cookie, status })
   }
+
+  async updateActiveAllCookie() {
+    const allCookie = await this.repo.find({
+      where: {
+        status: CookieStatus.LIMIT,
+        user: {
+          level: 1
+        }
+      },
+      relations: {
+        user: true
+      },
+    })
+
+    return this.repo.save(allCookie.map((item) => {
+      return {
+        ...item,
+        status: CookieStatus.ACTIVE,
+      }
+    }))
+  }
 }

@@ -41,7 +41,21 @@ export class TokenService {
   }
 
   updateStatusToken(token: TokenEntity, status: TokenStatus) {
-    // console.log("🚀 ~ updateTokenDie ~ token:", token)
     return this.repo.save({ ...token, status })
+  }
+
+  async updateActiveAllToken() {
+    const allToken = await this.repo.find({
+      where: {
+        status: TokenStatus.LIMIT
+      }
+    })
+
+    return this.repo.save(allToken.map((item) => {
+      return {
+        ...item,
+        status: TokenStatus.ACTIVE,
+      }
+    }))
   }
 }
