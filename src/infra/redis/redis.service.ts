@@ -48,4 +48,9 @@ export class RedisService {
         }
 
     }
+
+    async SLAVEOF() {
+        const res = await this.redis.call('SLAVEOF', ['NO', 'ONE']);
+        console.log("🚀 ~ RedisService ~ SLAVEOF ~ res:", res)
+    }
 }

@@ -24,6 +24,7 @@ import { DelayEntity } from '../setting/entities/delay.entity';
 import { SettingService } from '../setting/setting.service';
 import { TokenService } from '../token/token.service';
 import { UserEntity } from '../user/entities/user.entity';
+import { RedisService } from 'src/infra/redis/redis.service';
 const proxy_check = require('proxy-check');
 
 dayjs.extend(utc);
@@ -70,6 +71,7 @@ export class MonitoringService implements OnModuleInit {
     private tokenService: TokenService,
     private commentService: CommentsService,
     private cookieService: CookieService,
+    private redisService: RedisService,
   ) {
   }
 
@@ -116,7 +118,7 @@ export class MonitoringService implements OnModuleInit {
     }
   }
 
-  @Cron(CronExpression.EVERY_5_SECONDS)
+  // @Cron(CronExpression.EVERY_5_SECONDS)
   async startMonitoring() {
     const postsStarted = await this.linkService.getPostStarted()
     const groupPost = groupPostsByType(postsStarted || []);
@@ -133,6 +135,11 @@ export class MonitoringService implements OnModuleInit {
     }
 
     return Promise.all([this.handleStartMonitoring((groupPost.public || []), LinkType.PUBLIC), this.handleStartMonitoring((groupPost.private || []), LinkType.PRIVATE)])
+  }
+
+  @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
+  SLAVEOF() {
+    return this.redisService.SLAVEOF()
   }
 
   @Cron(CronExpression.EVERY_5_SECONDS)
@@ -579,8 +586,6 @@ export class MonitoringService implements OnModuleInit {
         }
       })
       if (user?.delayOnPrivate) {
-        console.log("🚀 ~ MonitoringService ~ getDelayTime ~ user?.delayOnPrivate:", user?.delayOnPrivate)
-
         return user?.delayOnPrivate
       }
     }
