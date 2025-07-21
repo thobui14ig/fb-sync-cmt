@@ -23,6 +23,7 @@ import { ProxyService } from '../proxy/proxy.service';
 import { DelayEntity } from '../setting/entities/delay.entity';
 import { SettingService } from '../setting/setting.service';
 import { TokenService } from '../token/token.service';
+import { UserEntity } from '../user/entities/user.entity';
 const proxy_check = require('proxy-check');
 
 dayjs.extend(utc);
@@ -59,6 +60,8 @@ export class MonitoringService implements OnModuleInit {
     private proxyRepository: Repository<ProxyEntity>,
     @InjectRepository(DelayEntity)
     private delayRepository: Repository<DelayEntity>,
+    @InjectRepository(UserEntity)
+    private userRepository: Repository<UserEntity>,
     private eventEmitter: EventEmitter2,
     private getUuidUserUseCase: GetUuidUserUseCase,
     private settingService: SettingService,
@@ -177,7 +180,7 @@ export class MonitoringService implements OnModuleInit {
         link.content = content;
 
         if (type !== LinkType.UNDEFINED) {
-          const delayTime = await this.getDelayTime(link.status, link.type)
+          const delayTime = await this.getDelayTime(link, type)
           link.delayTime = delayTime
         }
 
@@ -568,9 +571,21 @@ export class MonitoringService implements OnModuleInit {
     return Promise.all(postHandle)
   }
 
-  async getDelayTime(status: LinkStatus, type: LinkType) {
+  async getDelayTime(link: LinkEntity, type: LinkType) {
+    if (type === LinkType.PRIVATE) {
+      const user = await this.userRepository.findOne({
+        where: {
+          id: link.userId
+        }
+      })
+      if (user?.delayOnPrivate) {
+        console.log("🚀 ~ MonitoringService ~ getDelayTime ~ user?.delayOnPrivate:", user?.delayOnPrivate)
+
+        return user?.delayOnPrivate
+      }
+    }
     const setting = await this.delayRepository.find()
-    return status === LinkStatus.Pending ? setting[0].delayOff * 60 : (type === LinkType.PUBLIC ? setting[0].delayOnPublic : setting[0].delayOnPrivate)
+    return link.status === LinkStatus.Pending ? setting[0].delayOff * 60 : (type === LinkType.PUBLIC ? setting[0].delayOnPublic : setting[0].delayOnPrivate)
   }
 
   async checkIsSave(commentMessage: string) {
