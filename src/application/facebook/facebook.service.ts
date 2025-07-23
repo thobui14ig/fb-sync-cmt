@@ -298,7 +298,7 @@ export class FacebookService {
 
   @OnEvent('hide.cmt')
   async hideCmt(comment: CommentEntity, link: LinkEntity) {
-    if (comment.link.hideCmt && !comment.hideCmt) {
+    if (link.hideCmt && !comment.hideCmt) {
       await this.hideCommentUseCase.hideComment(link.hideBy, link.postId, comment, link.keywords, link.user.cookies[0])
     }
   }
