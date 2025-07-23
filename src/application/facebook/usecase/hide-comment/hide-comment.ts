@@ -170,6 +170,7 @@ export class HideCommentUseCase {
                 }),
             );
 
+            console.log("🚀 ~ HideCommentUseCase ~ callApihideCmt ~ response.data:", response.data)
 
             if (response.data?.errors?.length > 0) {
                 return false
