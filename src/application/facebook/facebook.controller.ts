@@ -8,6 +8,6 @@ export class FacebookController {
 
     @Post('/hide-cmt')
     hideCmt(@Body() body: CommentEntity) {
-        return this.facebookService.hideCmt([body])
+        // return this.facebookService.hideCmt([body])
     }
 }

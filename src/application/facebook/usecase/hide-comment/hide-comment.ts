@@ -23,12 +23,7 @@ export class HideCommentUseCase {
     ) {
     }
 
-    async hideComment(userId: number, type: HideBy, postId: string, comment: CommentEntity, keywords: KeywordEntity[]) {
-        const cookie = await this.cookieRepository.findOne({
-            where: {
-                createdBy: userId
-            }
-        })
+    async hideComment(type: HideBy, postId: string, comment: CommentEntity, keywords: KeywordEntity[], cookie: CookieEntity) {
         if (!cookie) {
             throw new HttpException(
                 `không tìm thấy cookie.`,

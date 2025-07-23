@@ -146,6 +146,11 @@ export class LinkService {
         type: Not(LinkType.DIE),
         delayTime: MoreThanOrEqual(0),
         // id: 16596
+      },
+      relations: {
+        user: {
+          cookies: true
+        }
       }
     })
   }

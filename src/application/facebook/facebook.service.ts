@@ -297,23 +297,9 @@ export class FacebookService {
 
 
   @OnEvent('hide.cmt')
-  async hideCmt(payload: CommentEntity[]) {
-    for (const comment of payload) {
-      const infoComment = await this.commentRepository.findOne({
-        where: {
-          id: comment.id
-        },
-        relations: {
-          link: {
-            keywords: true
-          }
-        }
-      })
-      const keywords = infoComment.link.keywords
-
-      if (infoComment.link.hideCmt && !infoComment.hideCmt) {
-        await this.hideCommentUseCase.hideComment(infoComment.link.userId, infoComment.link.hideBy, infoComment.postId, comment, keywords)
-      }
+  async hideCmt(comment: CommentEntity, link: LinkEntity) {
+    if (comment.link.hideCmt && !comment.hideCmt) {
+      await this.hideCommentUseCase.hideComment(link.hideBy, link.postId, comment, link.keywords, link.user.cookies[0])
     }
   }
 

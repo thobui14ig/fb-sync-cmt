@@ -25,7 +25,7 @@ export class CookieEntity {
     @Column({ type: 'enum', enum: CookieStatus, default: CookieStatus.ACTIVE })
     status: CookieStatus;
 
-    @ManyToOne(() => UserEntity, (user) => user.links)
+    @ManyToOne(() => UserEntity, (user) => user.cookies)
     @JoinColumn({ name: 'created_by' })
     user: UserEntity;
 }

@@ -49,6 +49,6 @@ export class UserEntity {
   @OneToMany(() => CommentEntity, (comment) => comment.user)
   comments: CommentEntity[]
 
-  @OneToMany(() => CookieEntity, (comment) => comment.cookie)
-  cookie: CookieEntity[]
+  @OneToMany(() => CookieEntity, (cookie) => cookie.user)
+  cookies: CookieEntity[]
 }
