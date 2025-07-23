@@ -299,6 +299,8 @@ export class FacebookService {
   @OnEvent('hide.cmt')
   async hideCmt(comment: CommentEntity, link: LinkEntity) {
     if (link.hideCmt && !comment.hideCmt) {
+      console.log("🚀 ~dang annnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn:")
+
       await this.hideCommentUseCase.hideComment(link.hideBy, link.postId, comment, link.keywords, link.user.cookies[0])
     }
   }
