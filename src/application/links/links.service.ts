@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import * as dayjs from 'dayjs';
 import * as timezone from 'dayjs/plugin/timezone';
 import * as utc from 'dayjs/plugin/utc';
-import { In, IsNull, MoreThan, Not, Repository } from 'typeorm';
+import { In, IsNull, MoreThan, MoreThanOrEqual, Not, Repository } from 'typeorm';
 import { LEVEL } from '../user/entities/user.entity';
 import { UpdateLinkDTO } from './dto/update-link.dto';
 import { HideBy, LinkEntity, LinkStatus, LinkType } from './entities/links.entity';
@@ -144,7 +144,7 @@ export class LinkService {
       where: {
         status: In([LinkStatus.Started, LinkStatus.Pending]),
         type: Not(LinkType.DIE),
-        delayTime: MoreThan(0),
+        delayTime: MoreThanOrEqual(0),
         // id: 16596
       }
     })
