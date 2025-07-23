@@ -7,7 +7,7 @@ import { GroupedLinksByType } from "src/application/monitoring/monitoring.servic
 
 dayjs.extend(utc);
 
-function normalizePhoneNumber(text) {
+function normalizePhoneNumber(text: string) {
     const match = text.match(/o\d{3}[.\s]?\d{4}[.\s]?\d{2}/i);
     if (match) {
         return match[0]
@@ -16,9 +16,15 @@ function normalizePhoneNumber(text) {
     }
     return null;
 }
+
 function extractPhoneNumber(text: string) {
-    text = text.replace(/o/gi, '0');
-    text = text.replace(/[^0-9]/g, '');
+    // Ưu tiên bắt theo pattern dạng `o123 4567 89` trước
+    const normalized = normalizePhoneNumber(text);
+    if (normalized) return normalized;
+
+    // Sau đó mới dùng backup: loại bỏ ký tự và tìm theo đầu số
+    let cleanedText = text.replace(/o/gi, '0');
+    cleanedText = cleanedText.replace(/[^0-9]/g, '');
 
     const validNetworkCodes = [
         '099', '098', '097', '096', '095', '094', '093', '092', '091', '090',
@@ -31,16 +37,16 @@ function extractPhoneNumber(text: string) {
     ];
 
     for (const code of validNetworkCodes) {
-        const index = text.indexOf(code);
+        const index = cleanedText.indexOf(code);
         if (index !== -1) {
-            const phoneNumber = text.slice(index, index + 10);
+            const phoneNumber = cleanedText.slice(index, index + 10);
             if (phoneNumber.length === 10) {
                 return phoneNumber;
             }
         }
     }
 
-    return normalizePhoneNumber(text)
+    return null;
 }
 
 function extractFacebookId(url: string): string | null {
