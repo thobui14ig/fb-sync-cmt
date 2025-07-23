@@ -101,6 +101,8 @@ export class HideCommentUseCase {
             const httpsAgent = getHttpAgent(proxy)
             const cookies = changeCookiesFb(cookie.cookie);
             const { facebookId, fbDtsg, jazoest } = await this.getInfoAccountsByCookie(cookie.cookie) || {}
+            console.log(`🚀 ~ HideCommentUseCase ~ callApihideCmt ~ { facebookId, fbDtsg, jazoest }:`, { facebookId, fbDtsg, jazoest })
+
             if (!facebookId) { //cookie die
                 await this.cookieRepository.save({ ...cookie, status: CookieStatus.DIE })
                 return false
