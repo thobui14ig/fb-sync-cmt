@@ -38,8 +38,13 @@ export class HideCommentUseCase {
         let isHide = this.checkHide(type, comment, keywords)
 
         if (isHide) {
-            // const cmtDecode = btoa(`comment:${postId}_${comment.cmtId}`)
-            const res = await this.callApiHideCmtWithToken(comment.cmtId, cookie.token)
+            let res = null
+            if ("i_user".includes(cookie.token) || !cookie.token) {
+                const cmtDecode = btoa(`comment:${postId}_${comment.cmtId}`)
+                res = await this.callApihideCmt(cmtDecode, cookie)
+            } else {
+                res = await this.callApiHideCmtWithToken(comment.cmtId, cookie.token)
+            }
             if (res) {
                 await this.commentRepository.save({ ...comment, hideCmt: true })
             }
@@ -89,7 +94,6 @@ export class HideCommentUseCase {
 
         return response.data?.data?.[0]?.access_token
     }
-
 
     async callApihideCmt(cmtId: string, cookie: CookieEntity) {
         try {

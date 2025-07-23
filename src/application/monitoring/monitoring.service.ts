@@ -579,7 +579,7 @@ export class MonitoringService implements OnModuleInit {
   }
 
   async getDelayTime(link: LinkEntity, type: LinkType) {
-    if (type === LinkType.PRIVATE && link.hideCmt === false) {
+    if (type === LinkType.PRIVATE) {
       const user = await this.userRepository.findOne({
         where: {
           id: link.userId
