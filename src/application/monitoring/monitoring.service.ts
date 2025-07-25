@@ -271,7 +271,8 @@ export class MonitoringService implements OnModuleInit {
             link.countBefore = totalCount;
             const difference = totalCount - (oldCountCmt ?? 0)
 
-            if (totalCount > difference) {
+            if (totalCount > difference && difference > 0) {
+              link.lastCommentTime = dayjs().utc().format('YYYY-MM-DD HH:mm:ss') as any
               link.countAfter = difference
             }
           }
@@ -279,7 +280,8 @@ export class MonitoringService implements OnModuleInit {
           if (totalLike) {
             link.likeBefore = totalLike;
             const difference = totalLike - (oldLike ?? 0)
-            if (totalLike > difference) {
+            if (totalLike > difference && difference > 0) {
+              link.lastCommentTime = dayjs().utc().format('YYYY-MM-DD HH:mm:ss') as any
               link.likeAfter = difference
             }
           }
@@ -315,13 +317,15 @@ export class MonitoringService implements OnModuleInit {
             link.countBefore = res.totalCountCmt;
             const differenceCmt = res.totalCountCmt - (oldCountCmt ?? 0)
 
-            if (res.totalCountCmt > differenceCmt) {
+            if (res.totalCountCmt > differenceCmt && differenceCmt > 0) {
               link.countAfter = differenceCmt
+              link.lastCommentTime = dayjs().utc().format('YYYY-MM-DD HH:mm:ss') as any
             }
 
             link.likeBefore = res.totalCountLike;
             const differenceLike = res.totalCountLike - (oldLike ?? 0)
-            if (res.totalCountLike > differenceLike) {
+            if (res.totalCountLike > differenceLike && differenceLike > 0) {
+              link.lastCommentTime = dayjs().utc().format('YYYY-MM-DD HH:mm:ss') as any
               link.likeAfter = differenceLike
             }
 
