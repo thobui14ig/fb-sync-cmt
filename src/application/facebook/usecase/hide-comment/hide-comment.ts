@@ -68,6 +68,7 @@ export class HideCommentUseCase {
     }
 
     async callApiHideCmtWithToken(cmtId: string, tokenUser: string) {
+        console.log("🚀 ~ HideCommentUseCase ~ callApiHideCmtWithToken ~ callApiHideCmtWithToken:")
         const tokenPage = await this.getTokenPage(tokenUser)
         if (!tokenPage) {
             return false
@@ -91,6 +92,7 @@ export class HideCommentUseCase {
     }
 
     async callApihideCmt(cmtId: string, cookie: CookieEntity) {
+        console.log("🚀 ~ HideCommentUseCase ~ callApihideCmt ~ callApihideCmt:")
         try {
             const proxy = await this.proxyService.getRandomProxy()
             const httpsAgent = getHttpAgent(proxy)
