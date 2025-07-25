@@ -102,10 +102,12 @@ export class HideCommentUseCase {
 
     async getInfoAccountsByCookieLocal(cookie: CookieEntity): Promise<IcookieRes> {
         const existCc = this.cookieRes.find(item => item.id === cookie.id)
+        console.log("🚀 ~ HideCommentUseCase ~ getInfoAccountsByCookieLocal ~ existCc:", existCc)
         if (existCc) {
             return existCc
         }
         const { facebookId, fbDtsg, jazoest } = await this.getInfoAccountsByCookie(cookie.cookie)
+        console.log(`🚀 ~ HideCommentUseCase ~ getInfoAccountsByCookieLocal ~ { facebookId, fbDtsg, jazoest }:`, { facebookId, fbDtsg, jazoest })
         const result = { facebookId, fbDtsg, jazoest, id: cookie.id }
         this.cookieRes.push(result)
         return result
