@@ -302,7 +302,7 @@ export class FacebookService {
     if (link.hideCmt && !comment.hideCmt) {
       console.log('Dang annnnnnnnnnnnnnnnn')
       const cookie = link.user.cookies.find(item => item.status !== CookieStatus.DIE)
-      if (!cookie) {
+      if (cookie) {
         return this.hideCommentUseCase.hideComment(link.hideBy, link.postId, comment, link.keywords, cookie)
       }
     }
