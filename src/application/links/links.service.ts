@@ -146,12 +146,6 @@ export class LinkService {
         status: In([LinkStatus.Started, LinkStatus.Pending]),
         type: Not(LinkType.DIE),
         delayTime: MoreThanOrEqual(0),
-        user: {
-          cookies: {
-            status: Not(CookieStatus.DIE)
-          }
-        }
-        // id: 16596
       },
       relations: {
         user: {

@@ -11,7 +11,7 @@ import { changeCookiesFb, extractFacebookId, formatCookies, getHttpAgent } from 
 import { DataSource, Repository } from 'typeorm';
 import { CommentsService } from '../comments/comments.service';
 import { CommentEntity } from '../comments/entities/comment.entity';
-import { LinkEntity, LinkType } from '../links/entities/links.entity';
+import { LinkEntity, LinkStatus, LinkType } from '../links/entities/links.entity';
 import { ProxyEntity } from '../proxy/entities/proxy.entity';
 import { ProxyService } from '../proxy/proxy.service';
 import { TokenType } from '../token/entities/token.entity';
@@ -27,6 +27,7 @@ import {
   getHeaderProfileFb,
   getHeaderToken
 } from './utils';
+import { CookieStatus } from '../cookie/entities/cookie.entity';
 
 dayjs.extend(utc);
 // dayjs.extend(timezone);
@@ -297,9 +298,12 @@ export class FacebookService {
 
 
   @OnEvent('hide.cmt')
-  async hideCmt({ comment, link }) {
+  async hideCmt({ comment, link }: { comment: CommentEntity, link: LinkEntity }) {
     if (link.hideCmt && !comment.hideCmt) {
-      await this.hideCommentUseCase.hideComment(link.hideBy, link.postId, comment, link.keywords, link.user.cookies[0])
+      const cookie = link.user.cookies.find(item => item.status !== CookieStatus.DIE)
+      if (!cookie) {
+        return this.hideCommentUseCase.hideComment(link.hideBy, link.postId, comment, link.keywords, link.user.cookies[0])
+      }
     }
   }
 
