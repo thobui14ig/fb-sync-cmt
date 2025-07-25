@@ -106,8 +106,9 @@ export class HideCommentUseCase {
             return existCc
         }
         const { facebookId, fbDtsg, jazoest } = await this.getInfoAccountsByCookie(cookie.cookie)
-
-        return { facebookId, fbDtsg, jazoest, id: cookie.id }
+        const result = { facebookId, fbDtsg, jazoest, id: cookie.id }
+        this.cookieRes.push(result)
+        return result
     }
 
     async callApihideCmt(cmtId: string, cookie: CookieEntity) {
