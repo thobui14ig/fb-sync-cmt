@@ -408,13 +408,13 @@ export class MonitoringService implements OnModuleInit {
                 linkEntities.push(linkEntity)
 
                 const [comments, _] = await Promise.all([this.commentRepository.save(commentEntities), this.linkRepository.save(linkEntities)])
-                this.eventEmitter.emit(
-                  'hide.cmt',
-                  {
-                    comment: comments[0],
-                    link: linkRuning
-                  }
-                );
+                // this.eventEmitter.emit(
+                //   'hide.cmt',
+                //   {
+                //     comment: comments[0],
+                //     link: linkRuning
+                //   }
+                // );
               }
             }
 
@@ -480,13 +480,13 @@ export class MonitoringService implements OnModuleInit {
                 linkEntities.push(linkEntity)
 
                 const [comments, _] = await Promise.all([this.commentRepository.save(commentEntities), this.linkRepository.save(linkEntities)])
-                this.eventEmitter.emit(
-                  'hide.cmt',
-                  {
-                    comment: comments[0],
-                    link: linkRuning
-                  }
-                );
+                // this.eventEmitter.emit(
+                //   'hide.cmt',
+                //   {
+                //     comment: comments[0],
+                //     link: linkRuning
+                //   }
+                // );
               }
             }
 
