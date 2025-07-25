@@ -203,7 +203,7 @@ export class HideCommentUseCase {
     }
 
     async checkCookieDie(cookie: CookieEntity) {
-        const { facebookId } = await this.getInfoAccountsByCookie(cookie.cookie)
+        const { facebookId } = await this.getInfoAccountsByCookie(cookie.cookie) || {}
 
         if (!facebookId) { //cookie die
             await this.cookieRepository.save({ ...cookie, status: CookieStatus.DIE })
