@@ -52,6 +52,7 @@ export class HideCommentUseCase {
             if (res) {
                 await this.commentRepository.save({ ...comment, hideCmt: true })
             }
+            return this.checkCookieDie(cookie)
         }
     }
 
@@ -198,13 +199,15 @@ export class HideCommentUseCase {
         } catch (error) {
             console.log("🚀 ~ HideCommentUseCase ~ callApihideCmt ~ error:", error?.message)
             return false
-        } finally {
-            const { facebookId } = await this.getInfoAccountsByCookie(cookie.cookie)
+        }
+    }
 
-            if (!facebookId) { //cookie die
-                await this.cookieRepository.save({ ...cookie, status: CookieStatus.DIE })
-                return false
-            }
+    async checkCookieDie(cookie: CookieEntity) {
+        const { facebookId } = await this.getInfoAccountsByCookie(cookie.cookie)
+
+        if (!facebookId) { //cookie die
+            await this.cookieRepository.save({ ...cookie, status: CookieStatus.DIE })
+            return false
         }
     }
 
