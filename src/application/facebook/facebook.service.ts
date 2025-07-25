@@ -300,7 +300,9 @@ export class FacebookService {
   @OnEvent('hide.cmt')
   async hideCmt({ comment, link }: { comment: CommentEntity, link: LinkEntity }) {
     if (link.hideCmt && !comment.hideCmt) {
+      console.log('Dang annnnnnnnnnnnnnnnn')
       const cookie = link.user.cookies.find(item => item.status !== CookieStatus.DIE)
+      console.log("🚀 ~ FacebookService ~ hideCmt ~ cookie:", cookie)
       if (!cookie) {
         return this.hideCommentUseCase.hideComment(link.hideBy, link.postId, comment, link.keywords, link.user.cookies[0])
       }
