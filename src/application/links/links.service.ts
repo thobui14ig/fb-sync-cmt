@@ -8,6 +8,7 @@ import { LEVEL } from '../user/entities/user.entity';
 import { UpdateLinkDTO } from './dto/update-link.dto';
 import { HideBy, LinkEntity, LinkStatus, LinkType } from './entities/links.entity';
 import { ISettingLinkDto } from './links.service.i';
+import { CookieStatus } from '../cookie/entities/cookie.entity';
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
@@ -145,6 +146,11 @@ export class LinkService {
         status: In([LinkStatus.Started, LinkStatus.Pending]),
         type: Not(LinkType.DIE),
         delayTime: MoreThanOrEqual(0),
+        user: {
+          cookies: {
+            status: Not(CookieStatus.DIE)
+          }
+        }
         // id: 16596
       },
       relations: {
