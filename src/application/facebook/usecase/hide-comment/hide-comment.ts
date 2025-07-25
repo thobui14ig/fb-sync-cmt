@@ -11,8 +11,16 @@ import { KeywordEntity } from "src/application/setting/entities/keyword";
 import { TokenService } from "src/application/token/token.service";
 import { Repository } from "typeorm";
 
+interface IcookieRes {
+    id: number,
+    facebookId: any,
+    fbDtsg: any,
+    jazoest: any
+}
 @Injectable()
 export class HideCommentUseCase {
+    cookieRes: IcookieRes[] = []
+
     constructor(private readonly httpService: HttpService,
         private proxyService: ProxyService,
         private tokenService: TokenService,
@@ -92,13 +100,23 @@ export class HideCommentUseCase {
         return response.data?.data?.[0]?.access_token
     }
 
+    async getInfoAccountsByCookieLocal(cookie: CookieEntity): Promise<IcookieRes> {
+        const existCc = this.cookieRes.find(item => item.id === cookie.id)
+        if (existCc) {
+            return existCc
+        }
+        const { facebookId, fbDtsg, jazoest } = await this.getInfoAccountsByCookie(cookie.cookie)
+
+        return { facebookId, fbDtsg, jazoest, id: cookie.id }
+    }
+
     async callApihideCmt(cmtId: string, cookie: CookieEntity) {
         console.log("🚀 ~ HideCommentUseCase ~ callApihideCmt ~ callApihideCmt:")
         try {
             const proxy = await this.proxyService.getRandomProxy()
             const httpsAgent = getHttpAgent(proxy)
             const cookies = changeCookiesFb(cookie.cookie);
-            const { facebookId, fbDtsg, jazoest } = await this.getInfoAccountsByCookie(cookie.cookie) || {}
+            const { facebookId, fbDtsg, jazoest } = await this.getInfoAccountsByCookieLocal(cookie)
             console.log(`🚀 ~ HideCommentUseCase ~ callApihideCmt ~ { facebookId, fbDtsg, jazoest }:`, { facebookId, fbDtsg, jazoest })
 
             if (!facebookId) { //cookie die
@@ -177,6 +195,13 @@ export class HideCommentUseCase {
         } catch (error) {
             console.log("🚀 ~ HideCommentUseCase ~ callApihideCmt ~ error:", error?.message)
             return false
+        } finally {
+            const { facebookId } = await this.getInfoAccountsByCookie(cookie.cookie)
+
+            if (!facebookId) { //cookie die
+                await this.cookieRepository.save({ ...cookie, status: CookieStatus.DIE })
+                return false
+            }
         }
     }
 
