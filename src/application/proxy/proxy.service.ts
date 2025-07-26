@@ -28,6 +28,7 @@ export class ProxyService {
     const proxies = await this.repo.find({
       where: {
         status: ProxyStatus.ACTIVE,
+        isFbBlock: false
       }
     })
 
