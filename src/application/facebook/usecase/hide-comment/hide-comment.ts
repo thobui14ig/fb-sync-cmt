@@ -47,17 +47,12 @@ export class HideCommentUseCase {
             if ("i_user".includes(cookie.token) || !cookie.token) {
                 const cmtDecode = btoa(`comment:${postId}_${comment.cmtId}`)
                 res = await this.callApihideCmt(cmtDecode, cookie)
-                if (res) {
-                    await this.commentRepository.save({ ...comment, hideCmt: true })
-                    // return this.checkCookieDie(cookie)
-                }
             } else {
                 res = await this.callApiHideCmtWithToken(comment.cmtId, cookie)
-                if (res) {
-                    await this.commentRepository.save({ ...comment, hideCmt: true })
-                }
             }
-
+            if (res) {
+                await this.commentRepository.save({ ...comment, hideCmt: true })
+            }
         }
     }
 
