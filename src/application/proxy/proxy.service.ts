@@ -55,7 +55,7 @@ export class ProxyService {
   }
 
   updateProxyActive(proxy: ProxyEntity) {
-    return this.repo.update(proxy.id, { status: ProxyStatus.ACTIVE })
+    return this.repo.update(proxy.id, { status: ProxyStatus.ACTIVE, isFbBlock: false })
   }
 
   async updateActiveAllProxy() {
