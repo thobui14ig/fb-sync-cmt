@@ -300,11 +300,14 @@ export class FacebookService {
   @OnEvent('hide.cmt')
   async hideCmt({ comment, link }: { comment: CommentEntity, link: LinkEntity }) {
     if (link.hideCmt && !comment.hideCmt) {
-      console.log('Dang annnnnnnnnnnnnnnnn')
+      console.log('Dang annnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn')
+      console.time('aaaaaaaaaaaaaaaaaaa')
       const cookie = link.user.cookies.find(item => item.status !== CookieStatus.DIE)
       if (cookie) {
-        return this.hideCommentUseCase.hideComment(link.hideBy, link.postId, comment, link.keywords, cookie)
+        await this.hideCommentUseCase.hideComment(link.hideBy, link.postId, comment, link.keywords, cookie)
       }
+      console.timeEnd('aaaaaaaaaaaaaaaaaaa')
+      console.log('Dang annnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn')
     }
   }
 
