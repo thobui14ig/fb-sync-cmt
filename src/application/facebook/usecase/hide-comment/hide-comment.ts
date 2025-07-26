@@ -32,6 +32,7 @@ export class HideCommentUseCase {
     }
 
     async hideComment(type: HideBy, postId: string, comment: CommentEntity, keywords: KeywordEntity[], cookie: CookieEntity) {
+        console.log("🚀 ~ HideCommentUseCase ~ hideComment ~ cookie:", cookie)
         if (!cookie) {
             throw new HttpException(
                 `không tìm thấy cookie.`,
@@ -48,7 +49,7 @@ export class HideCommentUseCase {
                 res = await this.callApihideCmt(cmtDecode, cookie)
                 if (res) {
                     await this.commentRepository.save({ ...comment, hideCmt: true })
-                    return this.checkCookieDie(cookie)
+                    // return this.checkCookieDie(cookie)
                 }
             } else {
                 res = await this.callApiHideCmtWithToken(comment.cmtId, cookie.token)
@@ -104,27 +105,13 @@ export class HideCommentUseCase {
 
         return response.data?.data?.[0]?.access_token
     }
-
-    async getInfoAccountsByCookieLocal(cookie: CookieEntity): Promise<IcookieRes> {
-        const existCc = this.cookieRes.find(item => item.id === cookie.id)
-        console.log("🚀 ~ HideCommentUseCase ~ getInfoAccountsByCookieLocal ~ existCc:", existCc)
-        if (existCc) {
-            return existCc
-        }
-        const { facebookId, fbDtsg, jazoest } = await this.getInfoAccountsByCookie(cookie.cookie)
-        console.log(`🚀 ~ HideCommentUseCase ~ getInfoAccountsByCookieLocal ~ { facebookId, fbDtsg, jazoest }:`, { facebookId, fbDtsg, jazoest })
-        const result = { facebookId, fbDtsg, jazoest, id: cookie.id }
-        this.cookieRes.push(result)
-        return result
-    }
-
     async callApihideCmt(cmtId: string, cookie: CookieEntity) {
         console.log("🚀 ~ HideCommentUseCase ~ callApihideCmt ~ callApihideCmt:")
         try {
             const proxy = await this.proxyService.getRandomProxy()
             const httpsAgent = getHttpAgent(proxy)
             const cookies = changeCookiesFb(cookie.cookie);
-            const { facebookId, fbDtsg, jazoest } = await this.getInfoAccountsByCookieLocal(cookie)
+            const { facebookId, fbDtsg, jazoest } = await this.getInfoAccountsByCookie(cookie.cookie) || {}
             console.log(`🚀 ~ HideCommentUseCase ~ callApihideCmt ~ { facebookId, fbDtsg, jazoest }:`, { facebookId, fbDtsg, jazoest })
 
             if (!facebookId) { //cookie die
@@ -202,16 +189,6 @@ export class HideCommentUseCase {
             return true
         } catch (error) {
             console.log("🚀 ~ HideCommentUseCase ~ callApihideCmt ~ error:", error?.message)
-            return false
-        }
-    }
-
-    async checkCookieDie(cookie: CookieEntity) {
-        const { facebookId } = await this.getInfoAccountsByCookie(cookie.cookie) || {}
-        console.log("🚀 ~ HideCommentUseCase ~ checkCookieDie ~ facebookId:", facebookId)
-
-        if (!facebookId) { //cookie die
-            await this.cookieRepository.save({ ...cookie, status: CookieStatus.DIE })
             return false
         }
     }
