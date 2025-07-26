@@ -18,7 +18,7 @@ import {
   LinkType
 } from '../links/entities/links.entity';
 import { LinkService } from '../links/links.service';
-import { ProxyEntity } from '../proxy/entities/proxy.entity';
+import { ProxyEntity, ProxyStatus } from '../proxy/entities/proxy.entity';
 import { ProxyService } from '../proxy/proxy.service';
 import { DelayEntity } from '../setting/entities/delay.entity';
 import { SettingService } from '../setting/setting.service';
@@ -118,7 +118,7 @@ export class MonitoringService implements OnModuleInit {
     }
   }
 
-  @Cron(CronExpression.EVERY_5_SECONDS)
+  // @Cron(CronExpression.EVERY_5_SECONDS)
   async startMonitoring() {
     const postsStarted = await this.linkService.getPostStarted()
     const groupPost = groupPostsByType(postsStarted || []);
@@ -210,12 +210,7 @@ export class MonitoringService implements OnModuleInit {
     if (this.isCheckProxy) return
 
     this.isCheckProxy = true
-    const proxyInActive = await this.proxyRepository.find({
-      where: [
-        { errorCode: Not('TIME_OUT') },
-        { errorCode: IsNull() }
-      ]
-    })
+    const proxyInActive = await this.proxyRepository.find()
 
     for (const proxy of proxyInActive) {
       const [host, port, username, password] = proxy.proxyAddress.split(':');
@@ -230,7 +225,7 @@ export class MonitoringService implements OnModuleInit {
           if (!status) {
             await this.proxyService.updateProxyActive(proxy)
           } else {
-            await this.proxyService.updateProxyDie(proxy)
+            await this.proxyService.updateProxyFbBlock(proxy)
           }
         }
       }).catch(async (e) => {
@@ -281,7 +276,6 @@ export class MonitoringService implements OnModuleInit {
             link.likeBefore = totalLike;
             const difference = totalLike - (oldLike ?? 0)
             if (totalLike > difference && difference > 0) {
-              link.lastCommentTime = dayjs().utc().format('YYYY-MM-DD HH:mm:ss') as any
               link.likeAfter = difference
             }
           }
@@ -319,13 +313,11 @@ export class MonitoringService implements OnModuleInit {
 
             if (res.totalCountCmt > differenceCmt && differenceCmt > 0) {
               link.countAfter = differenceCmt
-              link.lastCommentTime = dayjs().utc().format('YYYY-MM-DD HH:mm:ss') as any
             }
 
             link.likeBefore = res.totalCountLike;
             const differenceLike = res.totalCountLike - (oldLike ?? 0)
             if (res.totalCountLike > differenceLike && differenceLike > 0) {
-              link.lastCommentTime = dayjs().utc().format('YYYY-MM-DD HH:mm:ss') as any
               link.likeAfter = differenceLike
             }
 

@@ -46,7 +46,7 @@ export class ProxyService {
   }
 
   updateProxyFbBlock(proxy: ProxyEntity) {
-    return this.repo.save({ ...proxy, isFbBlock: true })
+    return this.repo.update(proxy.id, { isFbBlock: true });
   }
 
   updateProxyDie(proxy: ProxyEntity, errorCode?: string) {
