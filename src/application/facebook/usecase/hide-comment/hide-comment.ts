@@ -96,8 +96,10 @@ export class HideCommentUseCase {
                 }),
             );
 
+            console.log("🚀 ~ HideCommentUseCase ~ callApiHideCmtWithToken ~ response.data:", response.data)
             return response.data?.success || false
         } catch (error) {
+            console.log("🚀 ~ HideCommentUseCase ~ callApiHideCmtWithToken ~ error.response?.data:", error.response?.data)
             if (error.response?.data?.error?.code === 100) {
                 await this.cookieRepository.update(cookie.id, { status: CookieStatus.DIE })
             }
