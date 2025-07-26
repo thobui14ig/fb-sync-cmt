@@ -5,8 +5,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import * as dayjs from 'dayjs';
 import * as utc from 'dayjs/plugin/utc';
 import { isNumeric } from 'src/common/utils/check-utils';
-import { delay, groupPostsByType } from 'src/common/utils/helper';
-import { IsNull, Not, Repository } from 'typeorm';
+import { delay, getHttpAgent, groupPostsByType } from 'src/common/utils/helper';
+import { In, IsNull, Not, Repository } from 'typeorm';
 import { CommentsService } from '../comments/comments.service';
 import { CommentEntity } from '../comments/entities/comment.entity';
 import { CookieService } from '../cookie/cookie.service';
@@ -25,6 +25,8 @@ import { SettingService } from '../setting/setting.service';
 import { TokenService } from '../token/token.service';
 import { UserEntity } from '../user/entities/user.entity';
 import { RedisService } from 'src/infra/redis/redis.service';
+import { firstValueFrom } from 'rxjs';
+import { HttpService } from '@nestjs/axios';
 const proxy_check = require('proxy-check');
 
 dayjs.extend(utc);
@@ -72,6 +74,7 @@ export class MonitoringService implements OnModuleInit {
     private commentService: CommentsService,
     private cookieService: CookieService,
     private redisService: RedisService,
+    private readonly httpService: HttpService,
   ) {
   }
 
@@ -118,7 +121,7 @@ export class MonitoringService implements OnModuleInit {
     }
   }
 
-  @Cron(CronExpression.EVERY_5_SECONDS)
+  // @Cron(CronExpression.EVERY_5_SECONDS)
   async startMonitoring() {
     const postsStarted = await this.linkService.getPostStarted()
     const groupPost = groupPostsByType(postsStarted || []);
@@ -213,24 +216,46 @@ export class MonitoringService implements OnModuleInit {
     const proxyInActive = await this.proxyRepository.find()
 
     for (const proxy of proxyInActive) {
-      const [host, port, username, password] = proxy.proxyAddress.split(':');
-      const config = {
-        host,
-        port,
-        proxyAuth: `${username}:${password}`
-      };
-      proxy_check(config).then(async (res) => {
-        if (res) {
+      const httpsAgent = getHttpAgent(proxy)
+      try {
+        const response = await firstValueFrom(
+          this.httpService.get("https://api.ipify.org/?format=json", { httpsAgent })
+        )
+        if (response?.data?.ip) {
           const status = await this.facebookService.checkProxyBlock(proxy)
           if (!status) {
             await this.proxyService.updateProxyActive(proxy)
           } else {
             await this.proxyService.updateProxyFbBlock(proxy)
           }
+        } else {
+          await this.proxyService.updateProxyDie(proxy)
         }
-      }).catch(async (e) => {
+      } catch (error) {
         await this.proxyService.updateProxyDie(proxy)
-      });
+      }
+
+      // const [host, port, username, password] = proxy.proxyAddress.split(':');
+      // const config = {
+      //   host,
+      //   port,
+      //   proxyAuth: `${username}:${password}`
+      // };
+      // proxy_check(config).then(async (res) => {
+      //   console.log("🚀 ~ MonitoringService ~ checkProxy ~ res:", res)
+      //   if (res) {
+      //     const status = await this.facebookService.checkProxyBlock(proxy)
+      //     console.log("🚀 ~ MonitoringService ~ checkProxy ~ status:", status, proxy.proxyAddress)
+      //     if (!status) {
+      //       await this.proxyService.updateProxyActive(proxy)
+      //     } else {
+      //       await this.proxyService.updateProxyFbBlock(proxy)
+      //     }
+      //   }
+      // }).catch(async (e) => {
+      //   console.log("🚀 ~ MonitoringService ~ checkProxy ~ e:", e, proxy.proxyAddress)
+      //   await this.proxyService.updateProxyDie(proxy)
+      // });
     }
     this.isCheckProxy = false
   }
