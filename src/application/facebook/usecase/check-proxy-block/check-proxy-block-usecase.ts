@@ -60,7 +60,7 @@ export class CheckProxyBlockUseCase {
 
             return false
         } catch (error) {
-            return true
+            return false
         }
     }
 }
