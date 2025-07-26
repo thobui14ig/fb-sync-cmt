@@ -52,7 +52,7 @@ export class HideCommentUseCase {
                     // return this.checkCookieDie(cookie)
                 }
             } else {
-                res = await this.callApiHideCmtWithToken(comment.cmtId, cookie.token)
+                res = await this.callApiHideCmtWithToken(comment.cmtId, cookie)
                 if (res) {
                     await this.commentRepository.save({ ...comment, hideCmt: true })
                 }
@@ -82,20 +82,27 @@ export class HideCommentUseCase {
         return isHide
     }
 
-    async callApiHideCmtWithToken(cmtId: string, tokenUser: string) {
+    async callApiHideCmtWithToken(cmtId: string, cookie: CookieEntity) {
         console.log("🚀 ~ HideCommentUseCase ~ callApiHideCmtWithToken ~ callApiHideCmtWithToken:")
-        const tokenPage = await this.getTokenPage(tokenUser)
-        if (!tokenPage) {
+        try {
+            const tokenPage = await this.getTokenPage(cookie.token)
+            if (!tokenPage) {
+                return false
+            }
+            const response = await firstValueFrom(
+                this.httpService.post(`https://graph.facebook.com/v23.0/${cmtId}`, {
+                    "is_hidden": true,
+                    "access_token": tokenPage
+                }),
+            );
+
+            return response.data?.success || false
+        } catch (error) {
+            if (error.response?.data?.error?.code === 100) {
+                await this.cookieRepository.update(cookie.id, { status: CookieStatus.DIE })
+            }
             return false
         }
-        const response = await firstValueFrom(
-            this.httpService.post(`https://graph.facebook.com/v23.0/${cmtId}`, {
-                "is_hidden": true,
-                "access_token": tokenPage
-            }),
-        );
-
-        return response.data?.success || false
     }
 
     async getTokenPage(tokenUser: string,) {
