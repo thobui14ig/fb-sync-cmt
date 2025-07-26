@@ -188,6 +188,10 @@ export class HideCommentUseCase {
             }
             return true
         } catch (error) {
+            console.log("🚀 ~ HideCommentUseCase ~ callApihideCmt ~ error.response?.data:", error.response?.data)
+            if (error.response?.data?.error?.code === 100) {
+                await this.cookieRepository.update(cookie.id, { status: CookieStatus.DIE })
+            }
             console.log("🚀 ~ HideCommentUseCase ~ callApihideCmt ~ error:", error?.message)
             return false
         }

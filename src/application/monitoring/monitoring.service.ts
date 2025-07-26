@@ -436,7 +436,7 @@ export class MonitoringService implements OnModuleInit {
     if (link.postIdV1) {
       const runThread = async (threadOrder: number) => {
         while (true) {
-          if (link.postIdV1 === '122225557796037691') console.time('---------')
+          if (link.postIdV1 === '917947140551487') console.time('---------')
           const linkRuning = this.linksPublic.find(item => item.id === link.id)
           if (!linkRuning) { break };
           if (threadOrder > linkRuning.thread) { break };
@@ -484,7 +484,7 @@ export class MonitoringService implements OnModuleInit {
           } catch (error) {
             console.log(`Crawl comment with postId ${link.postId} Error.`, error?.message)
           } finally {
-            if (link.postIdV1 === '122225557796037691') console.timeEnd('---------')
+            if (link.postIdV1 === '917947140551487') console.timeEnd('---------')
             if (link.delayTime) {
               await delay((linkRuning.delayTime) * 1000)
             }
