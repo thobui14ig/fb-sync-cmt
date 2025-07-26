@@ -118,7 +118,7 @@ export class MonitoringService implements OnModuleInit {
     }
   }
 
-  // @Cron(CronExpression.EVERY_5_SECONDS)
+  @Cron(CronExpression.EVERY_5_SECONDS)
   async startMonitoring() {
     const postsStarted = await this.linkService.getPostStarted()
     const groupPost = groupPostsByType(postsStarted || []);
