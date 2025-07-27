@@ -121,7 +121,7 @@ export class MonitoringService implements OnModuleInit {
     }
   }
 
-  @Cron(CronExpression.EVERY_5_SECONDS)
+  // @Cron(CronExpression.EVERY_5_SECONDS)
   async startMonitoring() {
     const postsStarted = await this.linkService.getPostStarted()
     const groupPost = groupPostsByType(postsStarted || []);
@@ -216,46 +216,24 @@ export class MonitoringService implements OnModuleInit {
     const proxyInActive = await this.proxyRepository.find()
 
     for (const proxy of proxyInActive) {
-      const httpsAgent = getHttpAgent(proxy)
-      try {
-        const response = await firstValueFrom(
-          this.httpService.get("https://api.ipify.org/?format=json", { httpsAgent })
-        )
-        if (response?.data?.ip) {
+      const [host, port, username, password] = proxy.proxyAddress.split(':');
+      const config = {
+        host,
+        port,
+        proxyAuth: `${username}:${password}`
+      };
+      proxy_check(config).then(async (res) => {
+        if (res) {
           const status = await this.facebookService.checkProxyBlock(proxy)
           if (!status) {
             await this.proxyService.updateProxyActive(proxy)
           } else {
             await this.proxyService.updateProxyFbBlock(proxy)
           }
-        } else {
-          await this.proxyService.updateProxyDie(proxy)
         }
-      } catch (error) {
+      }).catch(async (e) => {
         await this.proxyService.updateProxyDie(proxy)
-      }
-
-      // const [host, port, username, password] = proxy.proxyAddress.split(':');
-      // const config = {
-      //   host,
-      //   port,
-      //   proxyAuth: `${username}:${password}`
-      // };
-      // proxy_check(config).then(async (res) => {
-      //   console.log("🚀 ~ MonitoringService ~ checkProxy ~ res:", res)
-      //   if (res) {
-      //     const status = await this.facebookService.checkProxyBlock(proxy)
-      //     console.log("🚀 ~ MonitoringService ~ checkProxy ~ status:", status, proxy.proxyAddress)
-      //     if (!status) {
-      //       await this.proxyService.updateProxyActive(proxy)
-      //     } else {
-      //       await this.proxyService.updateProxyFbBlock(proxy)
-      //     }
-      //   }
-      // }).catch(async (e) => {
-      //   console.log("🚀 ~ MonitoringService ~ checkProxy ~ e:", e, proxy.proxyAddress)
-      //   await this.proxyService.updateProxyDie(proxy)
-      // });
+      });
     }
     this.isCheckProxy = false
   }
