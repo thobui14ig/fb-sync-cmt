@@ -167,20 +167,20 @@ export class GetCommentPrivateUseCase {
             console.log("🚀 ~ GetCommentPrivateUseCase ~ getCommentPrivate ~ error:", postId, error?.message)
             if (error.response?.data?.error?.code === 100 && (error?.response?.data?.error?.message as string)?.includes('Unsupported get request. Object with ID')) {
                 const proxyStatus = await this.checkLinkUseCase.checkLinkStatus(proxy, postId)
-                if (proxyStatus === ICheckLinkStatus.LINK_DIE) {
-                    const links = await this.linkRepository.find({
-                        where: {
-                            postId
-                        }
-                    })
-                    const linksDie = links.map(item => {
-                        return {
-                            ...item,
-                            type: LinkType.DIE
-                        }
-                    })
-                    await this.linkRepository.save(linksDie)
-                }
+                // if (proxyStatus === ICheckLinkStatus.LINK_DIE) {
+                //     const links = await this.linkRepository.find({
+                //         where: {
+                //             postId
+                //         }
+                //     })
+                //     const linksDie = links.map(item => {
+                //         return {
+                //             ...item,
+                //             type: LinkType.DIE
+                //         }
+                //     })
+                //     await this.linkRepository.save(linksDie)
+                // }
                 if (proxyStatus === ICheckLinkStatus.PROXY_DIE) {
                     await this.proxyService.updateProxyDie(proxy, "TIME_OUT")
                 }
