@@ -6,8 +6,6 @@ services:
       dockerfile: Dockerfile
     container_name: fb-sync
     restart: always
-    depends_on:
-      - redis
     environment:
       - PORT=7000
       - DB_TYPE=mysql
