@@ -16,7 +16,7 @@ services:
       - DB_DATABASE=crawl-fb
       - NODE_OPTIONS=--max-old-space-size=4096
       # redis
-      - REDIS_HOST=160.25.232.64
+      - REDIS_HOST=localhost
       - REDIS_PORT=6379
       - REDIS_TYPE=single
     ports:
