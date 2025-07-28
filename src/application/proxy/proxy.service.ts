@@ -68,4 +68,10 @@ export class ProxyService {
       await this.updateProxyActive(proxy)
     }
   }
+
+  deleteProxyDie() {
+    return this.repo.delete({
+      status: ProxyStatus.IN_ACTIVE
+    })
+  }
 }
