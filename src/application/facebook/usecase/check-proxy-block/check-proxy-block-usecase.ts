@@ -2,8 +2,6 @@ import { HttpService } from "@nestjs/axios";
 import { Injectable } from "@nestjs/common";
 import { firstValueFrom } from "rxjs";
 import { ProxyEntity } from "src/application/proxy/entities/proxy.entity";
-import { ProxyService } from "src/application/proxy/proxy.service";
-import { TokenService } from "src/application/token/token.service";
 import { getHttpAgent } from "src/common/utils/helper";
 
 @Injectable()

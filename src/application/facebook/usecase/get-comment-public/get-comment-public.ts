@@ -74,11 +74,11 @@ export class GetCommentPublicUseCase {
                 }
             }
 
-            if (response.data?.data?.node === null && link) {//check link die
-                // await this.updateLinkDie(link.postId)
+            // if (response.data?.data?.node === null && link) {//check link die
+            //     // await this.updateLinkDie(link.postId)
 
-                return null
-            }
+            //     return null
+            // }
 
             let dataComment = handleDataComment(response)
 
@@ -89,7 +89,6 @@ export class GetCommentPublicUseCase {
                 dataComment = handleDataComment({ data })
             }
 
-            if (postId === '917947140551487') console.log("🚀 ~ GetCommentPublicUseCase ~ getCmtPublic ~ dataComment:", dataComment, proxy.proxyAddress)
             if (dataComment) {
                 const key = `${link.id}_${dataComment.commentCreatedAt.replaceAll("-", "").replaceAll(" ", "").replaceAll(":", "")}`
                 const isExistKey = await this.redisService.checkAndUpdateKey(key)
