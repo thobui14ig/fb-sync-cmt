@@ -50,6 +50,12 @@ export class RedisService {
     }
 
     async SLAVEOF() {
-        const res = await this.redis.call('SLAVEOF', ['NO', 'ONE']);
+        await this.redis.call('SLAVEOF', ['NO', 'ONE']);
+
+        return this.clearAll()
+    }
+
+    async clearAll() {
+        await this.redis.flushall();
     }
 }

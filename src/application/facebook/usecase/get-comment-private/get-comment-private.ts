@@ -83,7 +83,6 @@ export class GetCommentPrivateUseCase {
     }
 
     async getCommentByToken(postId: string) {
-        if (postId === '1134812597573746') console.log("🚀 ~ GetCommentPublicUseCase ~ getCmtPublic ~ duration:", postId)
         let proxy = null
         const token = await this.tokenService.getTokenCrawCmtActiveFromDb()
         if (!token) return null
