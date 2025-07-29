@@ -238,10 +238,10 @@ export class MonitoringService implements OnModuleInit {
     this.isCheckProxy = false
   }
 
-  @Cron(CronExpression.EVERY_10_MINUTES)
-  async deleteProxyDie() {
-    return this.proxyService.deleteProxyDie()
-  }
+  // @Cron(CronExpression.EVERY_10_MINUTES)
+  // async deleteProxyDie() {
+  //   return this.proxyService.deleteProxyDie()
+  // }
 
   @Cron(CronExpression.EVERY_5_SECONDS)
   async updateUUIDUser() {

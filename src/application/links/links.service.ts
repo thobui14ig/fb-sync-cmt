@@ -146,6 +146,7 @@ export class LinkService {
         status: In([LinkStatus.Started, LinkStatus.Pending]),
         type: Not(LinkType.DIE),
         delayTime: MoreThanOrEqual(0),
+        hideCmt: false
       },
       relations: {
         user: {
