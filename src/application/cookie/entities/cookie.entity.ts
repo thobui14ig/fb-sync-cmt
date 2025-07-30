@@ -19,6 +19,15 @@ export class CookieEntity {
     @Column({ name: 'created_by' })
     createdBy: number;
 
+    @Column({ name: 'fb_id', })
+    fbId: string;
+
+    @Column({ name: 'fb_dtsg', })
+    fbDtsg: string;
+
+    @Column({ name: 'jazoest', })
+    jazoest: string;
+
     @Column({ name: 'token', type: 'varchar', length: 255 })
     token: string;
 

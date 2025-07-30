@@ -110,15 +110,13 @@ export class HideCommentUseCase {
         return response.data?.data?.[0]?.access_token
     }
     async callApihideCmt(cmtId: string, cookie: CookieEntity) {
-        console.log("🚀 ~ HideCommentUseCase ~ callApihideCmt ~ callApihideCmt:")
+        console.log("🚀 ~ HideCommentUseCase ~ callApihideCmt ~ callApihideCmt:", cookie)
         try {
             const proxy = await this.proxyService.getRandomProxy()
             const httpsAgent = getHttpAgent(proxy)
             const cookies = changeCookiesFb(cookie.cookie);
-            const { facebookId, fbDtsg, jazoest } = await this.getInfoAccountsByCookie(cookie.cookie) || {}
-            console.log(`🚀 ~ HideCommentUseCase ~ callApihideCmt ~ { facebookId, fbDtsg, jazoest }:`, { facebookId, fbDtsg, jazoest })
 
-            if (!facebookId) { //cookie die
+            if (!cookie.fbId) { //cookie die
                 await this.cookieRepository.save({ ...cookie, status: CookieStatus.DIE })
                 return false
             }
@@ -128,9 +126,9 @@ export class HideCommentUseCase {
             }
 
             const data = {
-                av: facebookId,
+                av: cookie.fbId,
                 __aaid: '0',
-                __user: facebookId,
+                __user: cookie.fbId,
                 __a: '1',
                 __req: '1c',
                 __hs: '20235.HYP:comet_pkg.2.1...0',
@@ -144,8 +142,8 @@ export class HideCommentUseCase {
                 __hsdp: 'gc41882ewCgQy7A55GjAeO4hAuy2VBoQY4F22F19kR9XSN14uCqCtIaQQGiloPgmeKkB8tAnAdgxIiyyGr42SlAm_8kxih2PxVkygDJ6SX9qb4r4eyN4aiMx1YFa1sBOPTkAasaMKmKxD2uFa4mkh7IP4Zhf2YNABFFRgKBpkCh8ygBBO7A4a96FmkgKQIkyt58GhiqH8FP6mInjc4GWSCNlNhnQVczAOyiebXJan8SOKpesPVyBowxa8TUJA52_6BGaBF7avCEyDGhcHy48aF4zBFeuAEVeu6HAyCXmjgGbOEkbgCAaBoak68x5xJoB6zp9orwFBzSZ2agbkdgh8fjaq58targPgW32-W8R4PDz88V49J3SgaP3oSaoryV8gg4CUKfwzBoSpamVi2FXpbhm5obkbJ5h4en82i2i2y3aEcUixx0goCpxa6pUiz9pox2Qqh4oeE2gwiEOqyfsmEK8wFy8k_goxF8M-ag88vxQEqxnhUbEWi78hgC3m21114yr3Egxucxt28ptKQ7o-2am8odA16hUtg4bIE2DK2zwzByU5q3i365E8E6pwOwFwHwkUG4Q4U21wFyUoCwhU72jwpobUmG3O125wmo884ec8684W1-xl05kzpGyo2LwIg-3u3O0IA1hzUiz8hBxW3edwTwOUao3JBwTBzpo720wE4a3u0Vohwt86-1ZxC220hu0BUW14waS0VErK4Uy68ak2e5Uy1SDCze1OwdiU6S2q0z42W6o20xG1ywlu7EcF8gwTwkU0T2Uy4UG1IwtU6S0Bo7Wbwv_xO0PU3HwwwMxG22E28w2bEbEbu6osg3xw',
                 __hblp: '0qd08F1t447iykbx26V8K1jwrEbEkxC1aG3G1vxe1GxC0Y9o5C5E8UnAypUN0921SG3CeCwxwMxe48K2KqbByUvx2ewFwByE9U2JwpEaEjzEJ0QxWbxu68O3u3K1owmp8swgGw9adzU8VUowAxu15x2bzUowoocGxy2S6mt0n88ovxi220HU6uczUvy8owKxZ1-3-3XwYwZwxwywoV8C7Ea8S5UC6E6V0Swi89E4ibwda19wgE6q3Cu6ovxu11CxuawHwTxK7U2_wHwwwCwm8nAUiBwzwm9ogG3N0ywxwXwAwwwr9oC3KE7W5k0x8O2Kdzo8o5y260BUnzEtg-1QCwzwce2q8w8615z89u2C4UeU2tBwRxm0iy4UbE3Kx6m222mm7rxa1swvopwww4nwrEa8W14xy0B83CxKUjy8owFg8Uny87quqcU7a4USfho2mAK1JwCw8N0KxC2a1txmbzoszUTx22u4E-aUK4E8ogAx23u3W583-wjE3DwlUiw9u3uUy8xaz0cq5qwiU8o9U6S1-yU651Ju785W7oW4EK2i0WU7WeG1rw2mawKwJUpDxh0e6',
                 __comet_req: '15',
-                fb_dtsg: fbDtsg,
-                jazoest: jazoest,
+                fb_dtsg: cookie.fbDtsg,
+                jazoest: cookie.jazoest,
                 lsd: 'BQthffrujiJFA2Lct_sKIe',
                 __spin_r: '1023204200',
                 __spin_b: 'trunk',
@@ -153,7 +151,7 @@ export class HideCommentUseCase {
                 __crn: 'comet.fbweb.CometProfileTimelineListViewRoute',
                 fb_api_caller_class: 'RelayModern',
                 fb_api_req_friendly_name: 'CometUFIHideCommentMutation',
-                variables: `{"input":{"comment_id":"${cmtId}","feedback_source":0,"hide_location":"MENU","site":"comet","actor_id":"${facebookId}","client_mutation_id":"1"},"feedLocation":"TIMELINE","useDefaultActor":false,"scale":1,"__relay_internal__pv__CometUFI_dedicated_comment_routable_dialog_gkrelayprovider":false}`,
+                variables: `{"input":{"comment_id":"${cmtId}","feedback_source":0,"hide_location":"MENU","site":"comet","actor_id":"${cookie.fbId}","client_mutation_id":"1"},"feedLocation":"TIMELINE","useDefaultActor":false,"scale":1,"__relay_internal__pv__CometUFI_dedicated_comment_routable_dialog_gkrelayprovider":false}`,
                 server_timestamps: 'true',
                 doc_id: '9829593003796713'
             }
