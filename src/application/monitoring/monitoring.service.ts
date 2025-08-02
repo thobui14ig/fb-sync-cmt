@@ -41,6 +41,7 @@ export class MonitoringService implements OnModuleInit {
   isReHandleUrl: boolean = false
   isHandleUuid: boolean = false
   isCheckProxy: boolean = false
+  isUpdatePostIdV1: boolean = false
   private jobIntervalHandlers: Record<RefreshKey, NodeJS.Timeout> = {
     refreshToken: null,
     refreshCookie: null,
@@ -196,7 +197,7 @@ export class MonitoringService implements OnModuleInit {
         if (postId) {
           link.postIdV1 =
             type === LinkType.PUBLIC
-              ? await this.facebookService.getPostIdPublicV2(link.linkUrl)
+              ? await this.facebookService.getPostIdPublicV1(link.linkUrl)
               : null;
         }
 
@@ -251,6 +252,23 @@ export class MonitoringService implements OnModuleInit {
       await this.facebookService.updateUUIDUser()
       this.isHandleUuid = false
     }
+  }
+
+  @Cron(CronExpression.EVERY_5_SECONDS)
+  async updatePostIdV1() {
+    if (this.isUpdatePostIdV1) return
+    this.isUpdatePostIdV1 = true
+    const links = await this.linkService.getAllLinkPublicPostIdV1Null()
+    for (const link of links) {
+      try {
+        const id = await this.facebookService.getPostIdPublicV1(link.linkUrl)
+        if (id) {
+          await this.linkRepository.update(link.id, { postIdV1: id })
+          this.linksPublic = this.linksPublic.filter(item => item.id === link.id)
+        }
+      } catch (error) { }
+    }
+    this.isUpdatePostIdV1 = false
   }
 
   async startProcessTotalCount() {
@@ -445,7 +463,7 @@ export class MonitoringService implements OnModuleInit {
     if (link.postIdV1) {
       const runThread = async (threadOrder: number) => {
         while (true) {
-          if (link.postIdV1 === '711099101579423') console.time('---------')
+          if (link.postIdV1 === '122212630808129480') console.time('---------')
           const linkRuning = this.linksPublic.find(item => item.id === link.id)
           if (!linkRuning) { break };
           if (threadOrder > linkRuning.thread) { break };
@@ -493,7 +511,7 @@ export class MonitoringService implements OnModuleInit {
           } catch (error) {
             console.log(`Crawl comment with postId ${link.postId} Error.`, error?.message)
           } finally {
-            if (link.postIdV1 === '711099101579423') console.timeEnd('---------')
+            if (link.postIdV1 === '122212630808129480') console.timeEnd('---------')
             if (link.delayTime) {
               await delay((linkRuning.delayTime) * 1000)
             }

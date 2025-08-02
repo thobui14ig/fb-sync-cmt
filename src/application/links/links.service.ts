@@ -146,12 +146,23 @@ export class LinkService {
         status: In([LinkStatus.Started, LinkStatus.Pending]),
         type: Not(LinkType.DIE),
         delayTime: MoreThanOrEqual(0),
-        hideCmt: false
+        hideCmt: false,
+
       },
       relations: {
         user: {
           cookies: true
         }
+      }
+    })
+  }
+
+  getAllLinkPublicPostIdV1Null() {
+    return this.repo.find({
+      where: {
+        status: In([LinkStatus.Started, LinkStatus.Pending]),
+        type: LinkType.PUBLIC,
+        postIdV1: IsNull(),
       }
     })
   }

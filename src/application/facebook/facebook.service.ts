@@ -219,7 +219,7 @@ export class FacebookService {
     return this.CheckProxyBlockUseCase.execute(proxy)
   }
 
-  async getPostIdPublicV2(url: string) {
+  async getPostIdPublicV1(url: string) {
     try {
       const proxy = await this.proxyService.getRandomProxy()
       const httpsAgent = getHttpAgent(proxy)
