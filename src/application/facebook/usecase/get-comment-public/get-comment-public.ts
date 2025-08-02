@@ -81,6 +81,7 @@ export class GetCommentPublicUseCase {
             // }
 
             let dataComment = handleDataComment(response)
+            console.log("🚀 ~ GetCommentPublicUseCase ~ getCmtPublic ~ dataComment:", dataComment)
 
             if (!dataComment && typeof response.data === 'string') {
                 const text = response.data
