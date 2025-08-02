@@ -43,6 +43,7 @@ export class RedisService {
             const setResult = await this.redis.set(newKey, '1', 'NX');
             return setResult === null ? true : false; // Nếu không set được (đã tồn tại) trả về true, ngược lại false            
         } catch (error) {
+            this.SLAVEOF()
             return false
         }
 
