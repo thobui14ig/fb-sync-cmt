@@ -69,4 +69,8 @@ export class CookieService {
       }
     }))
   }
+
+  deleteCookieDie() {
+    return this.repo.delete({ status: CookieStatus.DIE })
+  }
 }

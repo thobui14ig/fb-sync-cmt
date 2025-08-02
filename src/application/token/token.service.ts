@@ -58,4 +58,8 @@ export class TokenService {
       }
     }))
   }
+
+  deleteTokenDie() {
+    return this.repo.delete({ status: TokenStatus.DIE })
+  }
 }

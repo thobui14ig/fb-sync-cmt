@@ -74,7 +74,6 @@ export class MonitoringService implements OnModuleInit {
     private commentService: CommentsService,
     private cookieService: CookieService,
     private redisService: RedisService,
-    private readonly httpService: HttpService,
   ) {
   }
 
@@ -238,10 +237,12 @@ export class MonitoringService implements OnModuleInit {
     this.isCheckProxy = false
   }
 
-  // @Cron(CronExpression.EVERY_10_MINUTES)
-  // async deleteProxyDie() {
-  //   return this.proxyService.deleteProxyDie()
-  // }
+  @Cron(CronExpression.EVERY_10_MINUTES)
+  async deleteDataDie() {
+    // return this.proxyService.deleteProxyDie()
+    this.cookieService.deleteCookieDie()
+    this.tokenService.deleteTokenDie()
+  }
 
   @Cron(CronExpression.EVERY_5_SECONDS)
   async updateUUIDUser() {
