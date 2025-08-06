@@ -147,12 +147,9 @@ export class LinkService {
         type: Not(LinkType.DIE),
         delayTime: MoreThanOrEqual(0),
         hideCmt: false,
-
       },
       relations: {
-        user: {
-          cookies: true
-        }
+        user: true
       }
     })
   }

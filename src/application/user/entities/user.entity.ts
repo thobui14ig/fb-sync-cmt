@@ -40,6 +40,9 @@ export class UserEntity {
   @Column({ name: 'delay_on_private', default: 5 })
   delayOnPrivate?: number;
 
+  @Column({ default: true, name: 'get_phone' })
+  getPhone: Boolean;
+
   @CreateDateColumn({ type: 'datetime', name: 'created_at', default: () => 'CURRENT_TIMESTAMP' })
   createdAt: Date;
 

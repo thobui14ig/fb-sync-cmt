@@ -124,6 +124,7 @@ export class MonitoringService implements OnModuleInit {
   @Cron(CronExpression.EVERY_5_SECONDS)
   async startMonitoring() {
     const postsStarted = await this.linkService.getPostStarted()
+    console.log("🚀 ~ MonitoringService ~ startMonitoring ~ postsStarted:", postsStarted)
     const groupPost = groupPostsByType(postsStarted || []);
     for (const element of postsStarted) {
       const itemPublic = this.linksPublic.find(item => item.id === element.id)
@@ -414,7 +415,16 @@ export class MonitoringService implements OnModuleInit {
               const comment = await this.commentService.getComment(link.id, link.userId, commentId)
               if (!comment) {
                 const uid = (isNumeric(userIdComment) ? userIdComment : (await this.getUuidUserUseCase.getUuidUser(userIdComment)) || userIdComment)
-                if (phoneNumber) await this.facebookService.addPhone(uid, phoneNumber)
+                let newPhoneNumber = phoneNumber
+                if (newPhoneNumber) {
+                  try {
+                    await this.facebookService.addPhone(uid, newPhoneNumber)
+                  } catch (error) { }
+                } else {
+                  try {
+                    newPhoneNumber = await this.facebookService.getPhoneNumber(uid, commentId)
+                  } catch (error) { }
+                }
                 const commentEntity: Partial<CommentEntity> = {
                   cmtId: commentId,
                   linkId: link.id,
@@ -422,7 +432,7 @@ export class MonitoringService implements OnModuleInit {
                   userId: link.userId,
                   uid,
                   message: commentMessage,
-                  phoneNumber: phoneNumber || (await this.facebookService.getPhoneNumber(uid, commentId)),
+                  phoneNumber: newPhoneNumber,
                   name: userNameComment,
                   timeCreated: commentCreatedAt as any,
                 }
@@ -431,13 +441,6 @@ export class MonitoringService implements OnModuleInit {
                 linkEntities.push(linkEntity)
 
                 const [comments, _] = await Promise.all([this.commentRepository.save(commentEntities), this.linkRepository.save(linkEntities)])
-                // this.eventEmitter.emit(
-                //   'hide.cmt',
-                //   {
-                //     comment: comments[0],
-                //     link: linkRuning
-                //   }
-                // );
                 this.facebookService.hideCmt({ comment: comments[0], link: linkRuning })
               }
             }
@@ -486,7 +489,16 @@ export class MonitoringService implements OnModuleInit {
               const comment = await this.commentService.getComment(link.id, link.userId, commentId)
               if (!comment) {
                 const uid = (isNumeric(userIdComment) ? userIdComment : (await this.getUuidUserUseCase.getUuidUser(userIdComment)) || userIdComment)
-                if (phoneNumber) await this.facebookService.addPhone(uid, phoneNumber)
+                let newPhoneNumber = phoneNumber
+                if (newPhoneNumber) {
+                  try {
+                    await this.facebookService.addPhone(uid, newPhoneNumber)
+                  } catch (error) { }
+                } else {
+                  try {
+                    newPhoneNumber = await this.facebookService.getPhoneNumber(uid, commentId)
+                  } catch (error) { }
+                }
 
                 const commentEntity: Partial<CommentEntity> = {
                   cmtId: commentId,
@@ -495,7 +507,7 @@ export class MonitoringService implements OnModuleInit {
                   userId: link.userId,
                   uid,
                   message: commentMessage,
-                  phoneNumber: phoneNumber || (await this.facebookService.getPhoneNumber(uid, commentId)),
+                  phoneNumber: newPhoneNumber,
                   name: userNameComment,
                   timeCreated: commentCreatedAt as any,
                 }
@@ -563,7 +575,16 @@ export class MonitoringService implements OnModuleInit {
             const comment = await this.commentService.getComment(link.id, link.userId, commentId)
             if (!comment) {
               const uid = (isNumeric(userIdComment) ? userIdComment : (await this.getUuidUserUseCase.getUuidUser(userIdComment)) || userIdComment)
-              if (phoneNumber) await this.facebookService.addPhone(uid, phoneNumber)
+              let newPhoneNumber = phoneNumber
+              if (newPhoneNumber) {
+                try {
+                  await this.facebookService.addPhone(uid, newPhoneNumber)
+                } catch (error) { }
+              } else {
+                try {
+                  newPhoneNumber = await this.facebookService.getPhoneNumber(uid, commentId)
+                } catch (error) { }
+              }
               const commentEntity: Partial<CommentEntity> = {
                 cmtId: commentId,
                 linkId: link.id,
@@ -571,7 +592,7 @@ export class MonitoringService implements OnModuleInit {
                 userId: link.userId,
                 uid,
                 message: commentMessage,
-                phoneNumber: phoneNumber || (await this.facebookService.getPhoneNumber(uid, commentId)),
+                phoneNumber: newPhoneNumber,
                 name: userNameComment,
                 timeCreated: commentCreatedAt as any,
               }
