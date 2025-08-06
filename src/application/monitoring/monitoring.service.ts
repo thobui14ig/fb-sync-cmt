@@ -6,7 +6,7 @@ import * as dayjs from 'dayjs';
 import * as utc from 'dayjs/plugin/utc';
 import { isNumeric } from 'src/common/utils/check-utils';
 import { delay, getHttpAgent, groupPostsByType } from 'src/common/utils/helper';
-import { In, IsNull, Not, Repository } from 'typeorm';
+import { DataSource, In, IsNull, Not, Repository } from 'typeorm';
 import { CommentsService } from '../comments/comments.service';
 import { CommentEntity } from '../comments/entities/comment.entity';
 import { CookieService } from '../cookie/cookie.service';
@@ -66,7 +66,6 @@ export class MonitoringService implements OnModuleInit {
     private delayRepository: Repository<DelayEntity>,
     @InjectRepository(UserEntity)
     private userRepository: Repository<UserEntity>,
-    private eventEmitter: EventEmitter2,
     private getUuidUserUseCase: GetUuidUserUseCase,
     private settingService: SettingService,
     private proxyService: ProxyService,
@@ -75,6 +74,7 @@ export class MonitoringService implements OnModuleInit {
     private commentService: CommentsService,
     private cookieService: CookieService,
     private redisService: RedisService,
+    private connection: DataSource
   ) {
   }
 
@@ -269,6 +269,24 @@ export class MonitoringService implements OnModuleInit {
       } catch (error) { }
     }
     this.isUpdatePostIdV1 = false
+  }
+
+  @Cron(CronExpression.EVERY_30_SECONDS)
+  removeDupRow() {
+    return this.connection.query(`
+      WITH ranked AS (
+          SELECT *,
+                ROW_NUMBER() OVER (PARTITION BY post_id, cmtid, link_id ORDER BY post_id) AS rn
+          FROM comments
+        )
+
+        DELETE FROM comments
+        WHERE (post_id, cmtid, link_id, id) IN (
+          SELECT post_id, cmtid, link_id, id
+          FROM ranked
+          WHERE rn > 1
+        )
+      `)
   }
 
   async startProcessTotalCount() {
