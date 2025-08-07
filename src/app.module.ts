@@ -23,6 +23,7 @@ import { FacebookModule } from './application/facebook/facebook.module';
 import { MonitoringModule } from './application/monitoring/monitoring.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { EventEmitterModule } from '@nestjs/event-emitter';
+import { BullModule } from '@nestjs/bull';
 
 @Module({
   imports: [
@@ -59,6 +60,15 @@ import { EventEmitterModule } from '@nestjs/event-emitter';
     }),
     JwtModule.register({
       secret: 'reset',
+    }),
+    BullModule.forRootAsync({
+      useFactory: async (configService: ConfigService) => ({
+        redis: {
+          host: configService.get('REDIS_HOST', 'localhost'),
+          port: configService.get('REDIS_PORT', 6379),
+        },
+      }),
+      inject: [ConfigService],
     }),
     ScheduleModule.forRoot(),
     LinkModule,

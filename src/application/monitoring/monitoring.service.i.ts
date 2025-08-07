@@ -10,3 +10,7 @@ export interface IPostStarted {
     status: LinkStatus,
     type: LinkType
 }
+
+export enum KEY_PROCESS_QUEUE {
+    ADD_COMMENT = 'add-comment'
+}

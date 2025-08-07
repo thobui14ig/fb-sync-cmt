@@ -1,16 +1,18 @@
+import { InjectQueue } from '@nestjs/bullmq';
 import { Injectable, OnModuleInit } from '@nestjs/common';
-import { EventEmitter2 } from '@nestjs/event-emitter';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { InjectRepository } from '@nestjs/typeorm';
+import { Queue } from 'bullmq';
 import * as dayjs from 'dayjs';
 import * as utc from 'dayjs/plugin/utc';
-import { isNumeric } from 'src/common/utils/check-utils';
-import { delay, getHttpAgent, groupPostsByType } from 'src/common/utils/helper';
-import { DataSource, In, IsNull, Not, Repository } from 'typeorm';
+import { delay, groupPostsByType } from 'src/common/utils/helper';
+import { RedisService } from 'src/infra/redis/redis.service';
+import { DataSource, Repository } from 'typeorm';
 import { CommentsService } from '../comments/comments.service';
 import { CommentEntity } from '../comments/entities/comment.entity';
 import { CookieService } from '../cookie/cookie.service';
 import { FacebookService } from '../facebook/facebook.service';
+import { ICommentResponse } from '../facebook/facebook.service.i';
 import { GetUuidUserUseCase } from '../facebook/usecase/get-uuid-user/get-uuid-user';
 import {
   LinkEntity,
@@ -18,16 +20,13 @@ import {
   LinkType
 } from '../links/entities/links.entity';
 import { LinkService } from '../links/links.service';
-import { ProxyEntity, ProxyStatus } from '../proxy/entities/proxy.entity';
+import { ProxyEntity } from '../proxy/entities/proxy.entity';
 import { ProxyService } from '../proxy/proxy.service';
 import { DelayEntity } from '../setting/entities/delay.entity';
 import { SettingService } from '../setting/setting.service';
 import { TokenService } from '../token/token.service';
 import { UserEntity } from '../user/entities/user.entity';
-import { RedisService } from 'src/infra/redis/redis.service';
-import { firstValueFrom } from 'rxjs';
-import { HttpService } from '@nestjs/axios';
-import { ICommentResponse } from '../facebook/facebook.service.i';
+import { KEY_PROCESS_QUEUE } from './monitoring.service.i';
 const proxy_check = require('proxy-check');
 
 dayjs.extend(utc);
@@ -75,7 +74,8 @@ export class MonitoringService implements OnModuleInit {
     private commentService: CommentsService,
     private cookieService: CookieService,
     private redisService: RedisService,
-    private connection: DataSource
+    private connection: DataSource,
+    @InjectQueue(KEY_PROCESS_QUEUE.ADD_COMMENT) private monitoringQueue: Queue
   ) {
   }
 
@@ -122,7 +122,7 @@ export class MonitoringService implements OnModuleInit {
     }
   }
 
-  @Cron(CronExpression.EVERY_5_SECONDS)
+  @Cron(CronExpression.EVERY_10_SECONDS)
   async startMonitoring() {
     const postsStarted = await this.linkService.getPostStarted()
     const groupPost = groupPostsByType(postsStarted || []);
@@ -415,7 +415,7 @@ export class MonitoringService implements OnModuleInit {
 
           try {
             let dataComment = await this.facebookService.getCmtPublic(link.postId, link)
-            await this.handleSaveComment(dataComment, link)
+            await this.addQueueComment(dataComment, link)
 
           } catch (error) {
             console.log(`Crawl comment with postId ${link.postId} Error.`, error?.message)
@@ -445,7 +445,7 @@ export class MonitoringService implements OnModuleInit {
 
           try {
             let dataComment = await this.facebookService.getCmtPublic(link.postIdV1, link) || {} as any
-            await this.handleSaveComment(dataComment, link)
+            await this.addQueueComment(dataComment, link)
 
           } catch (error) {
             console.log(`Crawl comment with postId ${link.postId} Error.`, error?.message)
@@ -485,7 +485,7 @@ export class MonitoringService implements OnModuleInit {
         try {
           const dataComment = await this.facebookService.getCommentByToken(link.postId, link.postIdV1)
 
-          await this.handleSaveComment(dataComment, link)
+          await this.addQueueComment(dataComment, link)
         } catch (error) {
           console.log(`Crawl comment with postId ${link.postId} Error.`, error?.message)
         } finally {
@@ -524,69 +524,10 @@ export class MonitoringService implements OnModuleInit {
     return link.status === LinkStatus.Pending ? setting[0].delayOff * 60 : (type === LinkType.PUBLIC ? setting[0].delayOnPublic : setting[0].delayOnPrivate)
   }
 
-  async checkIsSave(commentMessage: string) {
-    let isSave = true;
-
-    const keywords = await this.settingService.getKeywordsAdmin()
-    for (const keyword of keywords) {
-      if (commentMessage.includes(keyword.keyword)) {
-        isSave = false;
-        break;
-      }
-    }
-
-    return isSave
-  }
-
-  async handlePhoneNumber(phoneNumber: string, uid: string, commentId: string, accountFbUuid: string) {
-    let newPhoneNumber = phoneNumber
-    if (newPhoneNumber) {
-      try {
-        this.facebookService.addPhone(uid, newPhoneNumber)
-      } catch (error) { }
-    } else {
-      try {
-        newPhoneNumber = await this.facebookService.getPhoneNumber(uid, commentId, accountFbUuid)
-      } catch (error) { }
-    }
-
-    return newPhoneNumber
-  }
-
-  async handleSaveComment(resComment: ICommentResponse, link: LinkEntity) {
-    try {
-      const {
-        commentId,
-        commentMessage,
-        phoneNumber,
-        userIdComment,
-        userNameComment,
-        commentCreatedAt,
-      } = resComment || {}
-      if (!resComment?.commentId || !resComment?.userIdComment) return
-      let isSave = await this.checkIsSave(commentMessage)
-      if (isSave) {
-        const comment = await this.commentService.getComment(link.id, link.userId, commentId)
-        if (!comment) {
-          const uid = (isNumeric(userIdComment) ? userIdComment : (await this.getUuidUserUseCase.getUuidUser(userIdComment)) || userIdComment)
-          let newPhoneNumber = await this.handlePhoneNumber(phoneNumber, uid, commentId, link.user?.accountFbUuid)
-
-          const commentEntity: Partial<CommentEntity> = {
-            cmtId: commentId,
-            linkId: link.id,
-            postId: link.postId,
-            userId: link.userId,
-            uid,
-            message: commentMessage,
-            phoneNumber: newPhoneNumber,
-            name: userNameComment,
-            timeCreated: commentCreatedAt as any,
-          }
-
-          const linkEntity: Partial<LinkEntity> = { id: link.id, lastCommentTime: !link.lastCommentTime as any || dayjs(commentCreatedAt).isAfter(dayjs(link.lastCommentTime)) as any ? commentCreatedAt : link.lastCommentTime as any }
-          await Promise.all([this.commentRepository.save(commentEntity), this.linkRepository.save(linkEntity)])
-        }
-      }
-    } catch (error) { }
+  async addQueueComment(resComment: ICommentResponse, link: LinkEntity) {
+    this.monitoringQueue.add('transcode', {
+      resComment,
+      link
+    });
   }
 }

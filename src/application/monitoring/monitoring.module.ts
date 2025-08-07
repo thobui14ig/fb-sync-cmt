@@ -20,11 +20,20 @@ import { TokenModule } from '../token/token.module';
 import { CommentsModule } from '../comments/comments.module';
 import { CookieModule } from '../cookie/cookie.module';
 import { UserEntity } from '../user/entities/user.entity';
+import { KEY_PROCESS_QUEUE } from './monitoring.service.i';
+import { BullModule } from '@nestjs/bull';
+import { MonitoringConsumer } from './monitoring.process';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([LinkEntity, CommentEntity, TokenEntity, CookieEntity, ProxyEntity, DelayEntity, UserEntity]), FacebookModule, HttpModule, GetCommentPublicUseCaseModule, HideCommentUseCaseModule, GetUuidUserUseCaseModule, SettingModule, ProxyModule, LinkModule, TokenModule, CommentsModule, CookieModule],
+  imports: [
+    TypeOrmModule.forFeature([LinkEntity, CommentEntity, TokenEntity, CookieEntity, ProxyEntity, DelayEntity, UserEntity]),
+    FacebookModule, HttpModule, GetCommentPublicUseCaseModule, HideCommentUseCaseModule, GetUuidUserUseCaseModule, SettingModule, ProxyModule, LinkModule, TokenModule, CommentsModule, CookieModule,
+    BullModule.registerQueue({
+      name: KEY_PROCESS_QUEUE.ADD_COMMENT,
+    })
+  ],
   controllers: [MonitoringController],
-  providers: [MonitoringService],
+  providers: [MonitoringService, MonitoringConsumer],
   exports: [MonitoringService],
 })
 export class MonitoringModule { }
