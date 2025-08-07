@@ -415,6 +415,7 @@ export class MonitoringService implements OnModuleInit {
 
           try {
             let dataComment = await this.facebookService.getCmtPublic(link.postId, link)
+            if (!dataComment?.commentId || !dataComment?.userIdComment) return
             await this.addQueueComment(dataComment, link)
 
           } catch (error) {
@@ -445,6 +446,7 @@ export class MonitoringService implements OnModuleInit {
 
           try {
             let dataComment = await this.facebookService.getCmtPublic(link.postIdV1, link) || {} as any
+            if (!dataComment?.commentId || !dataComment?.userIdComment) return
             await this.addQueueComment(dataComment, link)
 
           } catch (error) {
@@ -484,7 +486,7 @@ export class MonitoringService implements OnModuleInit {
 
         try {
           const dataComment = await this.facebookService.getCommentByToken(link.postId, link.postIdV1)
-
+          if (!dataComment?.commentId || !dataComment?.userIdComment) return
           await this.addQueueComment(dataComment, link)
         } catch (error) {
           console.log(`Crawl comment with postId ${link.postId} Error.`, error?.message)
