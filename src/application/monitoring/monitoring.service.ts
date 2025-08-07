@@ -1,8 +1,6 @@
-import { InjectQueue } from '@nestjs/bullmq';
 import { Injectable, OnModuleInit } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Queue } from 'bullmq';
 import * as dayjs from 'dayjs';
 import * as utc from 'dayjs/plugin/utc';
 import { delay, groupPostsByType } from 'src/common/utils/helper';
@@ -27,6 +25,8 @@ import { SettingService } from '../setting/setting.service';
 import { TokenService } from '../token/token.service';
 import { UserEntity } from '../user/entities/user.entity';
 import { KEY_PROCESS_QUEUE } from './monitoring.service.i';
+import { InjectQueue } from '@nestjs/bull';
+import { Queue } from 'bull';
 const proxy_check = require('proxy-check');
 
 dayjs.extend(utc);
