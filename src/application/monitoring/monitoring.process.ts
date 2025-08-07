@@ -1,5 +1,4 @@
 
-import { Job } from 'bullmq';
 import { KEY_PROCESS_QUEUE } from './monitoring.service.i';
 import { Process, Processor } from '@nestjs/bull';
 import { ICommentResponse } from '../facebook/facebook.service.i';
@@ -14,6 +13,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import * as dayjs from 'dayjs';
 import * as utc from 'dayjs/plugin/utc';
+import { Job } from 'bull';
 
 dayjs.extend(utc);
 
