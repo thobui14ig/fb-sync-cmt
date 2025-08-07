@@ -14,3 +14,14 @@ export interface ICommentResponse {
     userIdComment: string,
     commentCreatedAt: string,
 }
+
+export const FB_UUID = [
+    {
+        mail: "Beewisaka@gmail.com",
+        key: "d8145c6a-ca2f-4951-935d-56b77f6d792a"
+    },
+    {
+        mail: "chuongk57@gmail.com",
+        key: "cebd28c8-f61d-4b2a-a9f5-dc9cec2c5aa6"
+    }
+]

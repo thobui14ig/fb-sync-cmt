@@ -1,6 +1,5 @@
 import { HttpService } from '@nestjs/axios';
 import { Injectable } from '@nestjs/common';
-import { OnEvent } from '@nestjs/event-emitter';
 import { InjectRepository } from '@nestjs/typeorm';
 import { AxiosRequestConfig } from 'axios';
 import * as dayjs from 'dayjs';
@@ -11,10 +10,11 @@ import { changeCookiesFb, extractFacebookId, formatCookies, getHttpAgent } from 
 import { DataSource, Repository } from 'typeorm';
 import { CommentsService } from '../comments/comments.service';
 import { CommentEntity } from '../comments/entities/comment.entity';
-import { LinkEntity, LinkStatus, LinkType } from '../links/entities/links.entity';
+import { LinkEntity, LinkType } from '../links/entities/links.entity';
 import { ProxyEntity } from '../proxy/entities/proxy.entity';
 import { ProxyService } from '../proxy/proxy.service';
 import { TokenType } from '../token/entities/token.entity';
+import { FB_UUID } from './facebook.service.i';
 import { CheckProxyBlockUseCase } from './usecase/check-proxy-block/check-proxy-block-usecase';
 import { GetCommentPrivateUseCase } from './usecase/get-comment-private/get-comment-private';
 import { GetCommentPublicUseCase } from './usecase/get-comment-public/get-comment-public';
@@ -27,7 +27,6 @@ import {
   getHeaderProfileFb,
   getHeaderToken
 } from './utils';
-import { CookieStatus } from '../cookie/entities/cookie.entity';
 
 dayjs.extend(utc);
 // dayjs.extend(timezone);
@@ -296,27 +295,14 @@ export class FacebookService {
     }
   }
 
-
-  @OnEvent('hide.cmt')
-  async hideCmt({ comment, link }: { comment: CommentEntity, link: LinkEntity }) {
-    if (link.hideCmt && !comment.hideCmt) {
-      console.log('Dang annnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn')
-      console.time('aaaaaaaaaaaaaaaaaaa')
-      const cookie = link.user.cookies.find(item => item.status !== CookieStatus.DIE)
-      if (cookie) {
-        await this.hideCommentUseCase.hideComment(link.hideBy, link.postId, comment, link.keywords, cookie)
-      }
-      console.timeEnd('aaaaaaaaaaaaaaaaaaa')
-      console.log('Dang annnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn')
-    }
-  }
-
-  async getPhoneNumber(uid: string, commentId: string) {
+  async getPhoneNumber(uid: string, commentId: string, accountFbUuid: string) {
     if (!isNumeric(uid)) return null
     const dataPhoneDb = await this.commentsService.getPhoneNumber(uid)
     if (dataPhoneDb?.phoneNumber) return dataPhoneDb.phoneNumber
+    const account = FB_UUID.find(item => item.mail === accountFbUuid)
+    if (!account) return null
     const body = {
-      key: "d8145c6a-ca2f-4951-935d-56b77f6d792a",
+      key: account.key,
       uids: [String(uid)]
     }
     const response = await firstValueFrom(

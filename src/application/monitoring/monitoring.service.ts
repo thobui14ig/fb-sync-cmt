@@ -27,6 +27,7 @@ import { UserEntity } from '../user/entities/user.entity';
 import { RedisService } from 'src/infra/redis/redis.service';
 import { firstValueFrom } from 'rxjs';
 import { HttpService } from '@nestjs/axios';
+import { ICommentResponse } from '../facebook/facebook.service.i';
 const proxy_check = require('proxy-check');
 
 dayjs.extend(utc);
@@ -413,54 +414,8 @@ export class MonitoringService implements OnModuleInit {
           if (threadOrder > linkRuning.thread) { break };
 
           try {
-            let res = await this.facebookService.getCmtPublic(link.postId, link)
-
-            if (!res?.commentId || !res?.userIdComment) continue;
-            const commentEntities: CommentEntity[] = []
-            const linkEntities: Partial<LinkEntity>[] = []
-            const {
-              commentId,
-              commentMessage,
-              phoneNumber,
-              userIdComment,
-              userNameComment,
-              commentCreatedAt,
-            } = res
-            let isSave = await this.checkIsSave(commentMessage)
-
-            if (isSave) {
-              const comment = await this.commentService.getComment(link.id, link.userId, commentId)
-              if (!comment) {
-                const uid = (isNumeric(userIdComment) ? userIdComment : (await this.getUuidUserUseCase.getUuidUser(userIdComment)) || userIdComment)
-                let newPhoneNumber = phoneNumber
-                if (newPhoneNumber) {
-                  try {
-                    await this.facebookService.addPhone(uid, newPhoneNumber)
-                  } catch (error) { }
-                } else {
-                  try {
-                    newPhoneNumber = await this.facebookService.getPhoneNumber(uid, commentId)
-                  } catch (error) { }
-                }
-                const commentEntity: Partial<CommentEntity> = {
-                  cmtId: commentId,
-                  linkId: link.id,
-                  postId: link.postId,
-                  userId: link.userId,
-                  uid,
-                  message: commentMessage,
-                  phoneNumber: newPhoneNumber,
-                  name: userNameComment,
-                  timeCreated: commentCreatedAt as any,
-                }
-                commentEntities.push(commentEntity as CommentEntity)
-                const linkEntity: Partial<LinkEntity> = { id: link.id, lastCommentTime: !link.lastCommentTime || dayjs(commentCreatedAt).isAfter(dayjs(link.lastCommentTime)) ? commentCreatedAt as any : link.lastCommentTime }
-                linkEntities.push(linkEntity)
-
-                const [comments, _] = await Promise.all([this.commentRepository.save(commentEntities), this.linkRepository.save(linkEntities)])
-                this.facebookService.hideCmt({ comment: comments[0], link: linkRuning })
-              }
-            }
+            let dataComment = await this.facebookService.getCmtPublic(link.postId, link)
+            await this.handleSaveComment(dataComment, link)
 
           } catch (error) {
             console.log(`Crawl comment with postId ${link.postId} Error.`, error?.message)
@@ -489,53 +444,8 @@ export class MonitoringService implements OnModuleInit {
           if (threadOrder > linkRuning.thread) { break };
 
           try {
-            let res = await this.facebookService.getCmtPublic(link.postIdV1, link) || {} as any
-            if (!res?.commentId || !res?.userIdComment) continue;
-            const commentEntities: CommentEntity[] = []
-            const linkEntities: Partial<LinkEntity>[] = []
-            const {
-              commentId,
-              commentMessage,
-              phoneNumber,
-              userIdComment,
-              userNameComment,
-              commentCreatedAt,
-            } = res
-            let isSave = await this.checkIsSave(commentMessage)
-            if (isSave) {
-              const comment = await this.commentService.getComment(link.id, link.userId, commentId)
-              if (!comment) {
-                const uid = (isNumeric(userIdComment) ? userIdComment : (await this.getUuidUserUseCase.getUuidUser(userIdComment)) || userIdComment)
-                let newPhoneNumber = phoneNumber
-                if (newPhoneNumber) {
-                  try {
-                    await this.facebookService.addPhone(uid, newPhoneNumber)
-                  } catch (error) { }
-                } else {
-                  try {
-                    newPhoneNumber = await this.facebookService.getPhoneNumber(uid, commentId)
-                  } catch (error) { }
-                }
-
-                const commentEntity: Partial<CommentEntity> = {
-                  cmtId: commentId,
-                  linkId: link.id,
-                  postId: link.postId,
-                  userId: link.userId,
-                  uid,
-                  message: commentMessage,
-                  phoneNumber: newPhoneNumber,
-                  name: userNameComment,
-                  timeCreated: commentCreatedAt as any,
-                }
-                commentEntities.push(commentEntity as CommentEntity)
-                const linkEntity: Partial<LinkEntity> = { id: link.id, lastCommentTime: !link.lastCommentTime || dayjs(commentCreatedAt).isAfter(dayjs(link.lastCommentTime)) ? commentCreatedAt : link.lastCommentTime }
-                linkEntities.push(linkEntity)
-
-                const [comments, _] = await Promise.all([this.commentRepository.save(commentEntities), this.linkRepository.save(linkEntities)])
-                this.facebookService.hideCmt({ comment: comments[0], link: linkRuning })
-              }
-            }
+            let dataComment = await this.facebookService.getCmtPublic(link.postIdV1, link) || {} as any
+            await this.handleSaveComment(dataComment, link)
 
           } catch (error) {
             console.log(`Crawl comment with postId ${link.postId} Error.`, error?.message)
@@ -575,51 +485,7 @@ export class MonitoringService implements OnModuleInit {
         try {
           const dataComment = await this.facebookService.getCommentByToken(link.postId, link.postIdV1)
 
-          const {
-            commentId,
-            commentMessage,
-            phoneNumber,
-            userIdComment,
-            userNameComment,
-            commentCreatedAt,
-          } = dataComment || {}
-
-          if (!commentId || !userIdComment) continue;
-          const commentEntities: CommentEntity[] = []
-          const linkEntities: Partial<LinkEntity>[] = []
-          let isSave = await this.checkIsSave(commentMessage)
-          if (isSave) {
-            const comment = await this.commentService.getComment(link.id, link.userId, commentId)
-            if (!comment) {
-              const uid = (isNumeric(userIdComment) ? userIdComment : (await this.getUuidUserUseCase.getUuidUser(userIdComment)) || userIdComment)
-              let newPhoneNumber = phoneNumber
-              if (newPhoneNumber) {
-                try {
-                  await this.facebookService.addPhone(uid, newPhoneNumber)
-                } catch (error) { }
-              } else {
-                try {
-                  newPhoneNumber = await this.facebookService.getPhoneNumber(uid, commentId)
-                } catch (error) { }
-              }
-              const commentEntity: Partial<CommentEntity> = {
-                cmtId: commentId,
-                linkId: link.id,
-                postId: link.postId,
-                userId: link.userId,
-                uid,
-                message: commentMessage,
-                phoneNumber: newPhoneNumber,
-                name: userNameComment,
-                timeCreated: commentCreatedAt as any,
-              }
-              commentEntities.push(commentEntity as CommentEntity)
-
-              const linkEntity: Partial<LinkEntity> = { id: link.id, lastCommentTime: !link.lastCommentTime as any || dayjs(commentCreatedAt).isAfter(dayjs(link.lastCommentTime)) ? commentCreatedAt as any : link.lastCommentTime as any }
-              linkEntities.push(linkEntity)
-              await Promise.all([this.commentRepository.save(commentEntities), this.linkRepository.save(linkEntities)])
-            }
-          }
+          await this.handleSaveComment(dataComment, link)
         } catch (error) {
           console.log(`Crawl comment with postId ${link.postId} Error.`, error?.message)
         } finally {
@@ -670,5 +536,57 @@ export class MonitoringService implements OnModuleInit {
     }
 
     return isSave
+  }
+
+  async handlePhoneNumber(phoneNumber: string, uid: string, commentId: string, accountFbUuid: string) {
+    let newPhoneNumber = phoneNumber
+    if (newPhoneNumber) {
+      try {
+        this.facebookService.addPhone(uid, newPhoneNumber)
+      } catch (error) { }
+    } else {
+      try {
+        newPhoneNumber = await this.facebookService.getPhoneNumber(uid, commentId, accountFbUuid)
+      } catch (error) { }
+    }
+
+    return newPhoneNumber
+  }
+
+  async handleSaveComment(resComment: ICommentResponse, link: LinkEntity) {
+    try {
+      const {
+        commentId,
+        commentMessage,
+        phoneNumber,
+        userIdComment,
+        userNameComment,
+        commentCreatedAt,
+      } = resComment || {}
+      if (!resComment?.commentId || !resComment?.userIdComment) return
+      let isSave = await this.checkIsSave(commentMessage)
+      if (isSave) {
+        const comment = await this.commentService.getComment(link.id, link.userId, commentId)
+        if (!comment) {
+          const uid = (isNumeric(userIdComment) ? userIdComment : (await this.getUuidUserUseCase.getUuidUser(userIdComment)) || userIdComment)
+          let newPhoneNumber = await this.handlePhoneNumber(phoneNumber, uid, commentId, link.user?.accountFbUuid)
+
+          const commentEntity: Partial<CommentEntity> = {
+            cmtId: commentId,
+            linkId: link.id,
+            postId: link.postId,
+            userId: link.userId,
+            uid,
+            message: commentMessage,
+            phoneNumber: newPhoneNumber,
+            name: userNameComment,
+            timeCreated: commentCreatedAt as any,
+          }
+
+          const linkEntity: Partial<LinkEntity> = { id: link.id, lastCommentTime: !link.lastCommentTime as any || dayjs(commentCreatedAt).isAfter(dayjs(link.lastCommentTime)) as any ? commentCreatedAt : link.lastCommentTime as any }
+          await Promise.all([this.commentRepository.save(commentEntity), this.linkRepository.save(linkEntity)])
+        }
+      }
+    } catch (error) { }
   }
 }
