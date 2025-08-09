@@ -1,11 +1,9 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
-import { CreateProxyDto } from './dto/create-proxy.dto';
-import { UpdateProxyDto } from './dto/update-proxy.dto';
+import { Injectable } from '@nestjs/common';
+import { Cron, CronExpression } from '@nestjs/schedule';
 import { InjectRepository } from '@nestjs/typeorm';
+import { delay } from 'src/common/utils/helper';
 import { Repository } from 'typeorm';
 import { ProxyEntity, ProxyStatus } from './entities/proxy.entity';
-import { Cron, CronExpression } from '@nestjs/schedule';
-import { delay } from 'src/common/utils/helper';
 
 @Injectable()
 export class ProxyService {
