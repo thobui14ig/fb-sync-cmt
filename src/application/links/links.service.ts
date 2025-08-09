@@ -130,12 +130,6 @@ export class LinkService {
       where: {
         process: false,
         postId: IsNull()
-      },
-      select: {
-        linkUrl: true,
-        id: true,
-        postId: true,
-        userId: true
       }
     })
   }
