@@ -147,7 +147,7 @@ export class GetCommentPrivateUseCase {
             );
             const end = Date.now();
             const duration = (end - start) / 1000;
-            if (duration > delay?.timeRemoveProxySlow || 20) {
+            if (duration > (delay?.timeRemoveProxySlow ?? 20)) {
                 await this.proxyService.updateProxyDie(proxy, 'TIME_OUT')
                 return this.getCommentByToken(postId)
             }

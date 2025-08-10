@@ -54,13 +54,11 @@ export class GetCommentPublicUseCase {
             const end = Date.now();
             const duration = (end - start) / 1000;
 
-            if (postId === '122212630808129480') console.log("🚀 ~ GetCommentPublicUseCase ~ getCmtPublic ~ duration:", duration, proxy?.proxyAddress)
-
-            if (duration > delay?.timeRemoveProxySlow || 20) {
+            if (postId === '122212630808129480') console.log("🚀 ~ GetCommentPublicUseCase ~ getCmtPublic ~ duration:", duration, delay?.timeRemoveProxySlow, proxy?.proxyAddress)
+            if (duration > (delay?.timeRemoveProxySlow ?? 20)) {
                 await this.proxyService.updateProxyDie(proxy, 'TIME_OUT')
-                return this.getCmtPublic(postId)
+                // return this.getCmtPublic(postId)
             }
-
             if (response.data?.errors?.[0]?.code === 1675004) {
                 await this.proxyService.updateProxyFbBlock(proxy)
             }
@@ -84,6 +82,7 @@ export class GetCommentPublicUseCase {
             // }
 
             let dataComment = handleDataComment(response)
+            if (postId === '122212630808129480') console.log("🚀 ~ GetCommentPublicUseCase ~ getCmtPublic ~ dataComment:", dataComment)
 
             if (!dataComment && typeof response.data === 'string') {
                 const text = response.data
