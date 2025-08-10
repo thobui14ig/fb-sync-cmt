@@ -67,7 +67,7 @@ export class MonitoringConsumer {
                         timeCreated: commentCreatedAt as any,
                     }
                     const time = !link.lastCommentTime as any || dayjs(commentCreatedAt).isAfter(dayjs(link.lastCommentTime)) as any ? commentCreatedAt : link.lastCommentTime as any
-                    const linkEntity: Partial<LinkEntity> = { id: link.id, lastCommentTime: time, timeCrawUpdate: dayjs.utc().format('YYYY-MM-DD HH:mm:ss') as any }
+                    const linkEntity: Partial<LinkEntity> = { id: link.id, lastCommentTime: time, timeCrawUpdate: time }
                     await Promise.all([this.commentRepository.save(commentEntity), this.linkRepository.save(linkEntity)])
                 }
             }
