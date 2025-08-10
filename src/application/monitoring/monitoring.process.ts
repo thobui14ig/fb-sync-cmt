@@ -33,7 +33,7 @@ export class MonitoringConsumer {
     }
     @Process({
         name: 'transcode',
-        concurrency: 2
+        concurrency: 10
     })
     async process(job: Job<{ resComment: ICommentResponse, link: LinkEntity }>): Promise<any> {
         const { link, resComment } = job.data
