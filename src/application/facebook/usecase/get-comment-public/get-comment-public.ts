@@ -57,7 +57,7 @@ export class GetCommentPublicUseCase {
             if (postId === '122212630808129480') console.log("🚀 ~ GetCommentPublicUseCase ~ getCmtPublic ~ duration:", duration, delay?.timeRemoveProxySlow, proxy?.proxyAddress)
             if (duration > (delay?.timeRemoveProxySlow ?? 20)) {
                 await this.proxyService.updateProxyDie(proxy, 'TIME_OUT')
-                // return this.getCmtPublic(postId)
+                return this.getCmtPublic(postId)
             }
             if (response.data?.errors?.[0]?.code === 1675004) {
                 await this.proxyService.updateProxyFbBlock(proxy)
