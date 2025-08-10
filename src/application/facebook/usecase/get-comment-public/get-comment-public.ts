@@ -82,7 +82,7 @@ export class GetCommentPublicUseCase {
             // }
 
             let dataComment = handleDataComment(response)
-
+            if (postId === '1297577275710984') console.log(dataComment)
             if (!dataComment && typeof response.data === 'string') {
                 const text = response.data
                 const lines = text.trim().split('\n');
