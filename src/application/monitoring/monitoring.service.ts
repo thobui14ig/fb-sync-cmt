@@ -534,6 +534,6 @@ export class MonitoringService implements OnModuleInit {
   }
 
   async addQueueComment(resComment: ICommentResponse, link: LinkEntity) {
-    // return this.consumer.run(link, resComment)
+    return this.consumer.run(link, resComment)
   }
 }
