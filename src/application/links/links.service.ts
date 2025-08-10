@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import * as dayjs from 'dayjs';
 import * as timezone from 'dayjs/plugin/timezone';
 import * as utc from 'dayjs/plugin/utc';
-import { Between, In, IsNull, MoreThan, MoreThanOrEqual, Not, Repository } from 'typeorm';
+import { In, IsNull, MoreThan, MoreThanOrEqual, Not, Repository } from 'typeorm';
 import { LEVEL } from '../user/entities/user.entity';
 import { UpdateLinkDTO } from './dto/update-link.dto';
 import { HideBy, LinkEntity, LinkStatus, LinkType } from './entities/links.entity';
@@ -138,10 +138,9 @@ export class LinkService {
     return this.repo.find({
       where: {
         status: In([LinkStatus.Started, LinkStatus.Pending]),
-        type: Not(LinkType.PUBLIC),
+        type: Not(LinkType.DIE),
         delayTime: MoreThanOrEqual(0),
         hideCmt: false,
-        id: Between(15005, 17205)
       },
       relations: {
         user: true
