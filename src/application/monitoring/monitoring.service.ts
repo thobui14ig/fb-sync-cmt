@@ -523,7 +523,7 @@ export class MonitoringService implements OnModuleInit {
       }
     }
     const setting = await this.delayRepository.find()
-    return link.status === LinkStatus.Pending ? setting[0].delayOff * 60 : (type === LinkType.PUBLIC ? setting[0].delayOnPublic : setting[0].delayOnPrivate)
+    return link.status === LinkStatus.Pending ? setting[0].delayOff * 60 : (type === LinkType.PUBLIC ? setting[0].delayOnPublic : setting[0].delayOffPrivate)
   }
 
   async addQueueComment(resComment: ICommentResponse, link: LinkEntity) {
