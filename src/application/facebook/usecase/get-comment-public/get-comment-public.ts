@@ -89,7 +89,7 @@ export class GetCommentPublicUseCase {
                 const data = JSON.parse(lines[0])
                 dataComment = handleDataComment({ data })
             }
-            if (postId === '1297577275710984') console.log(dataComment)
+            // if (postId === '1297577275710984') console.log(dataComment)
             if (dataComment) {
                 const key = `${link.id}_${dataComment.commentCreatedAt.replaceAll("-", "").replaceAll(" ", "").replaceAll(":", "")}`
                 const isExistKey = await this.redisService.checkAndUpdateKey(key)
