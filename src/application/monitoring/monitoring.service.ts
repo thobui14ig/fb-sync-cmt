@@ -191,7 +191,7 @@ export class MonitoringService implements OnModuleInit {
         link.content = content;
 
         if (type !== LinkType.UNDEFINED) {
-          const delayTime = await this.getDelayTime(link, type)
+          const delayTime = await this.getDelayTime(link.status, type, link.user.delayOnPrivate)
           link.delayTime = delayTime
         }
 
@@ -511,19 +511,24 @@ export class MonitoringService implements OnModuleInit {
     return Promise.all(postHandle)
   }
 
-  async getDelayTime(link: LinkEntity, type: LinkType) {
-    if (type === LinkType.PRIVATE) {
-      const user = await this.userRepository.findOne({
-        where: {
-          id: link.userId
-        }
-      })
-      if (user?.delayOnPrivate) {
-        return user?.delayOnPrivate
-      }
-    }
+  async getDelayTime(status: LinkStatus, type: LinkType, delayOnPrivateUser: number) {
     const setting = await this.delayRepository.find()
-    return link.status === LinkStatus.Pending ? setting[0].delayOff * 60 : (type === LinkType.PUBLIC ? setting[0].delayOnPublic : setting[0].delayOffPrivate)
+
+    if (status === LinkStatus.Started && type === LinkType.PRIVATE) {
+      return delayOnPrivateUser
+    }
+
+    if (status === LinkStatus.Pending && type === LinkType.PRIVATE) {
+      return setting[0].delayOffPrivate
+    }
+
+    if (status === LinkStatus.Started && type === LinkType.PUBLIC) {
+      return setting[0].delayOnPublic
+    }
+
+    if (status === LinkStatus.Pending && type === LinkType.PUBLIC) {
+      return setting[0].delayOff
+    }
   }
 
   async addQueueComment(resComment: ICommentResponse, link: LinkEntity) {
