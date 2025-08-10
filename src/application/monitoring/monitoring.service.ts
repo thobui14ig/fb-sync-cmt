@@ -27,6 +27,7 @@ import { UserEntity } from '../user/entities/user.entity';
 import { KEY_PROCESS_QUEUE } from './monitoring.service.i';
 import { InjectQueue } from '@nestjs/bull';
 import { Queue } from 'bull';
+import { MonitoringConsumer } from './monitoring.process';
 const proxy_check = require('proxy-check');
 
 dayjs.extend(utc);
@@ -75,7 +76,8 @@ export class MonitoringService implements OnModuleInit {
     private cookieService: CookieService,
     private redisService: RedisService,
     private connection: DataSource,
-    @InjectQueue(KEY_PROCESS_QUEUE.ADD_COMMENT) private monitoringQueue: Queue
+    @InjectQueue(KEY_PROCESS_QUEUE.ADD_COMMENT) private monitoringQueue: Queue,
+    private consumer: MonitoringConsumer
   ) {
   }
 
@@ -532,9 +534,6 @@ export class MonitoringService implements OnModuleInit {
   }
 
   async addQueueComment(resComment: ICommentResponse, link: LinkEntity) {
-    this.monitoringQueue.add('transcode', {
-      resComment,
-      link
-    });
+    return this.consumer.run(link, resComment)
   }
 }

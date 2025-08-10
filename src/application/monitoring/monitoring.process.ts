@@ -37,6 +37,11 @@ export class MonitoringConsumer {
     })
     async process(job: Job<{ resComment: ICommentResponse, link: LinkEntity }>): Promise<any> {
         const { link, resComment } = job.data
+        return this.run(link, resComment)
+    }
+
+    async run(link, resComment) {
+
         try {
             const {
                 commentId,
