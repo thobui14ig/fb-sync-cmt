@@ -19,6 +19,7 @@ import { isArray } from 'class-validator';
 import { ProxyEntity } from 'src/application/proxy/entities/proxy.entity';
 import { CookieService } from 'src/application/cookie/cookie.service';
 import { CookieStatus } from 'src/application/cookie/entities/cookie.entity';
+import { SettingService } from 'src/application/setting/setting.service';
 dayjs.extend(utc);
 
 interface IUniqueProxyCookie {
@@ -45,6 +46,7 @@ export class GetCommentPrivateUseCase {
         private redisService: RedisService,
         private checkLinkUseCase: CheckLinkUseCase,
         private cookieService: CookieService,
+        private settingService: SettingService,
     ) { }
 
     async getCommentPrivate(postId: string, postIdV1?: string): Promise<IGetCmtPrivateResponse | null> {
@@ -110,11 +112,7 @@ export class GetCommentPrivateUseCase {
                 return null
             }
             const httpsAgent = getHttpAgent(proxy)
-            const languages = [
-                'en-US,en;q=0.9',
-                'vi-VN,vi;q=0.9,en-US;q=0.8,en;q=0.7',
-                'fr-FR,fr;q=0.9,en-US;q=0.8,en;q=0.7'
-            ];
+            const delay = this.settingService.delay
 
             const headers = {
                 'authority': 'graph.facebook.com',
@@ -138,6 +136,7 @@ export class GetCommentPrivateUseCase {
                 "created_time": "created_time"
             }
 
+            const start = Date.now();
 
             const res = await firstValueFrom(
                 this.httpService.get(`https://graph.facebook.com/${postId}/comments`, {
@@ -146,7 +145,12 @@ export class GetCommentPrivateUseCase {
                     params
                 }),
             );
-
+            const end = Date.now();
+            const duration = (end - start) / 1000;
+            if (duration > delay.timeRemoveProxySlow || 20) {
+                await this.proxyService.updateProxyDie(proxy, 'TIME_OUT')
+                return this.getCommentByToken(postId)
+            }
             const dataComment = res.data?.data.length > 0 ? res.data?.data[0] : null
 
             const response = res.data?.data.length ? {

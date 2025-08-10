@@ -8,9 +8,10 @@ import { GetCommentPrivateUseCase } from "./get-comment-private";
 import { RedisModule } from "@nestjs-modules/ioredis";
 import { CheckLinkUseCaseModule } from "../check-link-status/check-link-status-usecase.module";
 import { CookieModule } from "src/application/cookie/cookie.module";
+import { SettingModule } from "src/application/setting/setting.module";
 
 @Module({
-    imports: [HttpModule, forwardRef(() => TokenModule), ProxyModule, TypeOrmModule.forFeature([LinkEntity]), RedisModule, CheckLinkUseCaseModule, CookieModule],
+    imports: [HttpModule, forwardRef(() => TokenModule), ProxyModule, TypeOrmModule.forFeature([LinkEntity]), RedisModule, CheckLinkUseCaseModule, CookieModule, SettingModule],
     controllers: [],
     providers: [GetCommentPrivateUseCase],
     exports: [GetCommentPrivateUseCase],

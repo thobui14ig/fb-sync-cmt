@@ -12,6 +12,7 @@ import { getBodyComment, getHeaderComment } from "../../utils";
 import { IGetCmtPublicResponse } from "./get-comment-public.i";
 import { GetInfoLinkUseCase } from "../get-info-link/get-info-link";
 import { LinkEntity, LinkType } from "src/application/links/entities/links.entity";
+import { SettingService } from "src/application/setting/setting.service";
 
 dayjs.extend(utc);
 
@@ -25,6 +26,7 @@ export class GetCommentPublicUseCase {
         private linkService: LinkService,
         private redisService: RedisService,
         private getInfoLinkUseCase: GetInfoLinkUseCase,
+        private settingService: SettingService,
     ) { }
 
 
@@ -36,6 +38,7 @@ export class GetCommentPublicUseCase {
             const headers = getHeaderComment(this.fbUrl);
             const body = getBodyComment(encodedPostId);
             const proxy = await this.proxyService.getRandomProxy()
+            const delay = this.settingService.delay
 
             if (!proxy) return null
             const httpsAgent = getHttpAgent(proxy)
@@ -53,7 +56,7 @@ export class GetCommentPublicUseCase {
 
             if (postId === '122212630808129480') console.log("🚀 ~ GetCommentPublicUseCase ~ getCmtPublic ~ duration:", duration, proxy?.proxyAddress)
 
-            if (duration > 20) {
+            if (duration > delay.timeRemoveProxySlow || 20) {
                 await this.proxyService.updateProxyDie(proxy, 'TIME_OUT')
                 return this.getCmtPublic(postId)
             }
