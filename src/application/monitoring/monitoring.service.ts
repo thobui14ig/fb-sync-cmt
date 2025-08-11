@@ -58,21 +58,14 @@ export class MonitoringService implements OnModuleInit {
   constructor(
     @InjectRepository(LinkEntity)
     private linkRepository: Repository<LinkEntity>,
-    @InjectRepository(CommentEntity)
-    private commentRepository: Repository<CommentEntity>,
     private readonly facebookService: FacebookService,
     @InjectRepository(ProxyEntity)
     private proxyRepository: Repository<ProxyEntity>,
     @InjectRepository(DelayEntity)
     private delayRepository: Repository<DelayEntity>,
-    @InjectRepository(UserEntity)
-    private userRepository: Repository<UserEntity>,
-    private getUuidUserUseCase: GetUuidUserUseCase,
-    private settingService: SettingService,
     private proxyService: ProxyService,
     private linkService: LinkService,
     private tokenService: TokenService,
-    private commentService: CommentsService,
     private cookieService: CookieService,
     private redisService: RedisService,
     private connection: DataSource,
@@ -382,7 +375,17 @@ export class MonitoringService implements OnModuleInit {
       }
     }
 
-    return Promise.all([processLinksPrivate(), processLinksPulic()])
+    const processTotalComment = async () => {
+      const batchSize = 100;
+      for (let i = 0; i < postsStarted.length; i += batchSize) {
+        const batch = postsStarted.slice(i, i + batchSize);
+        const linkIds = batch.map(item => item.id)
+        await this.linkService.processTotalComment(linkIds)
+      }
+
+    }
+
+    return Promise.all([processLinksPrivate(), processLinksPulic(), processTotalComment()])
   }
 
   handleStartMonitoring(links: LinkEntity[], type: LinkType) {

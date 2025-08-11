@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import * as dayjs from 'dayjs';
 import * as timezone from 'dayjs/plugin/timezone';
 import * as utc from 'dayjs/plugin/utc';
-import { In, IsNull, MoreThan, MoreThanOrEqual, Not, Repository } from 'typeorm';
+import { DataSource, In, IsNull, MoreThan, MoreThanOrEqual, Not, Repository } from 'typeorm';
 import { LEVEL } from '../user/entities/user.entity';
 import { UpdateLinkDTO } from './dto/update-link.dto';
 import { HideBy, LinkEntity, LinkStatus, LinkType } from './entities/links.entity';
@@ -19,6 +19,7 @@ export class LinkService {
   constructor(
     @InjectRepository(LinkEntity)
     private repo: Repository<LinkEntity>,
+    private conenction: DataSource
   ) { }
 
   getOne(id: number) {
@@ -159,5 +160,21 @@ export class LinkService {
         postIdV1: IsNull(),
       }
     })
+  }
+
+  processTotalComment(linkIds: number[]) {
+    return this.conenction.query(`
+      with k1 as(
+	      select l.id as linkId, count(c.id) as totalComment from links l 
+        join comments c 
+        on c.link_id = l.id
+       where l.id in(?)
+        group by l.id  
+      )
+      update links l 
+      join k1 on k1.linkId = l.id
+      set 
+      l.comment_count = k1.totalComment
+    `, [linkIds])
   }
 }
