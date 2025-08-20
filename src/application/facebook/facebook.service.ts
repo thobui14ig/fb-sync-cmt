@@ -327,9 +327,7 @@ export class FacebookService {
       return await firstValueFrom(
         this.httpService.post("https://api.fbuid.com/conversions/import", body,),
       );
-    } catch (error) {
-
-    }
+    } catch (error) { }
   }
 
   insertLogs(UID: string, commentId: string, params: string) {
