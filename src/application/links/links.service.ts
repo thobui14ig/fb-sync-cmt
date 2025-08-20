@@ -162,19 +162,18 @@ export class LinkService {
     })
   }
 
-  processTotalComment(linkIds: number[]) {
+  processTotalComment() {
     return this.conenction.query(`
       with k1 as(
 	      select l.id as linkId, count(c.id) as totalComment from links l 
         join comments c 
         on c.link_id = l.id
-       where l.id in(?)
         group by l.id  
       )
       update links l 
       join k1 on k1.linkId = l.id
       set 
       l.comment_count = k1.totalComment
-    `, [linkIds])
+    `, [])
   }
 }

@@ -376,12 +376,7 @@ export class MonitoringService implements OnModuleInit {
     }
 
     const processTotalComment = async () => {
-      const batchSize = 100;
-      for (let i = 0; i < postsStarted.length; i += batchSize) {
-        const batch = postsStarted.slice(i, i + batchSize);
-        const linkIds = batch.map(item => item.id)
-        await this.linkService.processTotalComment(linkIds)
-      }
+      await this.linkService.processTotalComment()
 
     }
 
