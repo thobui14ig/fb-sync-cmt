@@ -154,7 +154,7 @@ export class MonitoringConsumer {
                 if (!cmt) continue;
                 await this.commentRepository.save({
                     id: cmt.id,
-                    phoneNumber: phone
+                    phoneNumber: phone.phone
                 })
             }
         }
