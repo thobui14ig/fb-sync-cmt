@@ -77,17 +77,17 @@ export class GetInfoLinkUseCase {
             if (error.response?.data?.error?.code === 190) {//check point
                 await this.tokenService.updateStatusToken(token, TokenStatus.DIE)
             }
-            if (i === 0 && retryCount === 0) {
-                i = i + 1
+            // if (i === 0 && retryCount === 0) {
+            //     i = i + 1
 
-                return this.getInfoLink(postId, i)
-            }
+            //     return this.getInfoLink(postId, i)
+            // }
 
-            if (retryCount < 3) {
-                retryCount = retryCount + 1
+            // if (retryCount < 3) {
+            //     retryCount = retryCount + 1
 
-                return this.getInfoLink(postId, 1, retryCount)
-            }
+            //     return this.getInfoLink(postId, 1, retryCount)
+            // }
 
 
             return {
