@@ -138,13 +138,14 @@ export class LinkService {
     })
   }
 
-  getPostStarted(): Promise<LinkEntity[]> {
+  getPostStarted(ids: number[]): Promise<LinkEntity[]> {
     return this.repo.find({
       where: {
         status: In([LinkStatus.Started, LinkStatus.Pending]),
         type: Not(LinkType.DIE),
         delayTime: MoreThanOrEqual(0),
         hideCmt: false,
+        id: In(ids)
       },
       relations: {
         user: true

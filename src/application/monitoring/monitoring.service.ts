@@ -19,6 +19,7 @@ dayjs.extend(utc);
 type RefreshKey = 'refreshToken' | 'refreshCookie' | 'refreshProxy';
 @Injectable()
 export class MonitoringService {
+  linkIdsReceive: number[] = []
   postIdRunning: string[] = []
   linksPublic: LinkEntity[] = []
   linksPrivate: LinkEntity[] = []
@@ -36,7 +37,8 @@ export class MonitoringService {
 
   @Cron(CronExpression.EVERY_10_SECONDS)
   async startMonitoring() {
-    const postsStarted = await this.linkService.getPostStarted()
+    const postsStarted = await this.linkService.getPostStarted(this.linkIdsReceive)
+    console.log("🚀 ~ MonitoringService ~ startMonitoring ~ postsStarted:", postsStarted.length)
     const groupPost = groupPostsByType(postsStarted || []);
     for (const element of postsStarted) {
       const itemPublic = this.linksPublic.find(item => item.id === element.id)

@@ -24,6 +24,7 @@ import { MonitoringModule } from './application/monitoring/monitoring.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { BullModule } from '@nestjs/bull';
+import { HealthCheckModule } from './application/health-check/health-check.module';
 
 @Module({
   imports: [
@@ -79,6 +80,7 @@ import { BullModule } from '@nestjs/bull';
     SettingModule,
     FacebookModule,
     MonitoringModule,
+    HealthCheckModule,
     EventEmitterModule.forRoot()
   ],
 

@@ -21,15 +21,45 @@ services:
       - REDIS_TYPE=single
     ports:
       - '7000:7000'
-#   redis:
-#     image: redis:latest
-#     container_name: my-redis
-#     ports:
-#       - '6379:6379'
-#     command: ['redis-server', '--appendonly', 'yes']
-#     volumes:
-#       - redis-data:/data
-#     restart: unless-stopped
-
-# volumes:
-#   redis-data:
+  fb-sync-cmt-1:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: fb-sync-cmt-1
+    restart: always
+    environment:
+      - PORT=7001
+      - DB_TYPE=mysql
+      - DB_HOST=91.99.31.157
+      - DB_PORT=3306
+      - DB_USER_NAME=root
+      - DB_PASSWORD=HoangChuong@1111
+      - DB_DATABASE=crawl-fb
+      - NODE_OPTIONS=--max-old-space-size=4096
+      # redis
+      - REDIS_HOST=91.99.31.157
+      - REDIS_PORT=6379
+      - REDIS_TYPE=single
+    ports:
+      - '7001:7001'
+  fb-sync-cmt-2:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: fb-sync-cmt-2
+    restart: always
+    environment:
+      - PORT=7002
+      - DB_TYPE=mysql
+      - DB_HOST=91.99.31.157
+      - DB_PORT=3306
+      - DB_USER_NAME=root
+      - DB_PASSWORD=HoangChuong@1111
+      - DB_DATABASE=crawl-fb
+      - NODE_OPTIONS=--max-old-space-size=4096
+      # redis
+      - REDIS_HOST=91.99.31.157
+      - REDIS_PORT=6379
+      - REDIS_TYPE=single
+    ports:
+      - '7002:7002'
