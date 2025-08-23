@@ -29,7 +29,6 @@ export class MonitoringService {
   isUpdatePostIdV1: boolean = false
 
   constructor(
-    @InjectRepository(LinkEntity)
     private readonly facebookService: FacebookService,
     private linkService: LinkService,
     private consumer: MonitoringConsumer
