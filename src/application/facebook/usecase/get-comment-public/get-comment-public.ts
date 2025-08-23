@@ -54,7 +54,7 @@ export class GetCommentPublicUseCase {
             const end = Date.now();
             const duration = (end - start) / 1000;
 
-            if (postId === '122123837786676514') console.log("🚀 ~ GetCommentPublicUseCase ~ getCmtPublic ~ duration:", duration, delay?.timeRemoveProxySlow, proxy?.proxyAddress)
+            if (postId === '122152432436381034') console.log("🚀 ~ GetCommentPublicUseCase ~ getCmtPublic ~ duration:", duration, delay?.timeRemoveProxySlow, proxy?.proxyAddress)
             if (duration > (delay?.timeRemoveProxySlow ?? 20)) {
                 await this.proxyService.updateProxyDie(proxy, 'TIME_OUT')
                 return this.getCmtPublic(postId)
@@ -89,7 +89,7 @@ export class GetCommentPublicUseCase {
                 const data = JSON.parse(lines[0])
                 dataComment = handleDataComment({ data })
             }
-            // if (postId === '122123837786676514') console.log(dataComment)
+            // if (postId === '122152432436381034') console.log(dataComment)
             if (dataComment) {
                 const key = `${link.id}_${dataComment.commentCreatedAt.replaceAll("-", "").replaceAll(" ", "").replaceAll(":", "")}`
                 const isExistKey = await this.redisService.checkAndUpdateKey(key)

@@ -80,6 +80,7 @@ export class MonitoringService {
     if (!link.postIdV1) {
       const runThread = async (threadOrder: number) => {
         while (true) {
+          if (link.postIdV1 === '122152432436381034') console.time('---------')
           const linkRuning = this.linksPublic.find(item => item.id === link.id)// check còn nằm trong link
           if (!linkRuning) { break };
           if (threadOrder > linkRuning.thread) { break };
@@ -92,6 +93,7 @@ export class MonitoringService {
           } catch (error) {
             console.log(`Crawl comment with postId ${link.postId} Error.`, error?.message)
           } finally {
+            if (link.postIdV1 === '122152432436381034') console.timeEnd('---------')
 
             if (link.delayTime) {
               await delay((linkRuning.delayTime) * 1000)
@@ -110,7 +112,7 @@ export class MonitoringService {
     if (link.postIdV1) {
       const runThread = async (threadOrder: number) => {
         while (true) {
-          if (link.postIdV1 === '122123837786676514') console.time('---------')
+          if (link.postIdV1 === '122152432436381034') console.time('---------')
           const linkRuning = this.linksPublic.find(item => item.id === link.id)
           if (!linkRuning) { break };
           if (threadOrder > linkRuning.thread) { break };
@@ -123,7 +125,7 @@ export class MonitoringService {
           } catch (error) {
             console.log(`Crawl comment with postId ${link.postId} Error.`, error?.message)
           } finally {
-            if (link.postIdV1 === '122123837786676514') console.timeEnd('---------')
+            if (link.postIdV1 === '122152432436381034') console.timeEnd('---------')
             if (link.delayTime) {
               await delay((linkRuning.delayTime) * 1000)
             }
