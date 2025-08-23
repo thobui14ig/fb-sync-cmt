@@ -149,7 +149,6 @@ export class LinkService {
       relations: {
         user: true
       },
-      take: 1000
     })
   }
 
