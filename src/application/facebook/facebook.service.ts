@@ -268,7 +268,6 @@ export class FacebookService {
 
       return null
     } catch (error) {
-      console.log("🚀 ~ getPostIdPublicV2 ~ error:", error)
       return null
     }
   }
