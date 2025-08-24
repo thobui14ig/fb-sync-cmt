@@ -40,6 +40,7 @@ export class MonitoringService {
   @Cron(CronExpression.EVERY_10_SECONDS)
   async startMonitoring() {
     const postsStarted = await this.linkService.getPostStarted(this.linkIdsReceive)
+    console.log("🚀 ~ MonitoringService ~ startMonitoring ~ postsStarted:", postsStarted.length)
     this.linkPublicCheckSpeed = postsStarted.find(item => item.postIdV1)
     const groupPost = groupPostsByType(postsStarted || []);
     for (const element of postsStarted) {
