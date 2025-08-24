@@ -28,6 +28,8 @@ export class MonitoringService {
   isHandleUuid: boolean = false
   isCheckProxy: boolean = false
   isUpdatePostIdV1: boolean = false
+  linkPublicCheckSpeed: LinkEntity | null = null
+  speed = 0
 
   constructor(
     private readonly facebookService: FacebookService,
@@ -38,7 +40,7 @@ export class MonitoringService {
   @Cron(CronExpression.EVERY_10_SECONDS)
   async startMonitoring() {
     const postsStarted = await this.linkService.getPostStarted(this.linkIdsReceive)
-    console.log("🚀 ~ MonitoringService ~ startMonitoring ~ postsStarted:", postsStarted.length)
+    this.linkPublicCheckSpeed = postsStarted.find(item => item.postIdV1)
     const groupPost = groupPostsByType(postsStarted || []);
     for (const element of postsStarted) {
       const itemPublic = this.linksPublic.find(item => item.id === element.id)
@@ -81,7 +83,6 @@ export class MonitoringService {
     if (!link.postIdV1) {
       const runThread = async (threadOrder: number) => {
         while (true) {
-          if (link.postIdV1 === '122152432436381034') console.time('---------')
           const linkRuning = this.linksPublic.find(item => item.id === link.id)// check còn nằm trong link
           if (!linkRuning) { break };
           if (threadOrder > linkRuning.thread) { break };
@@ -94,8 +95,6 @@ export class MonitoringService {
           } catch (error) {
             console.log(`Crawl comment with postId ${link.postId} Error.`, error?.message)
           } finally {
-            if (link.postIdV1 === '122152432436381034') console.timeEnd('---------')
-
             if (link.delayTime) {
               await delay((linkRuning.delayTime) * 1000)
             }
@@ -113,7 +112,7 @@ export class MonitoringService {
     if (link.postIdV1) {
       const runThread = async (threadOrder: number) => {
         while (true) {
-          if (link.postIdV1 === '122152432436381034') console.time('---------')
+          const start = Date.now();
           const linkRuning = this.linksPublic.find(item => item.id === link.id)
           if (!linkRuning) { break };
           if (threadOrder > linkRuning.thread) { break };
@@ -126,7 +125,12 @@ export class MonitoringService {
           } catch (error) {
             console.log(`Crawl comment with postId ${link.postId} Error.`, error?.message)
           } finally {
-            if (link.postIdV1 === '122152432436381034') console.timeEnd('---------')
+            const end = Date.now();
+            const duration = (end - start) / 1000;
+            if (link.postIdV1 === this.linkPublicCheckSpeed.postIdV1) {
+              console.log(duration)
+              this.speed = duration
+            }
             if (link.delayTime) {
               await delay((linkRuning.delayTime) * 1000)
             }
