@@ -54,7 +54,6 @@ export class GetCommentPublicUseCase {
             const end = Date.now();
             const duration = (end - start) / 1000;
 
-            if (postId === '122108162510445468') console.log("🚀 ~ GetCommentPublicUseCase ~ getCmtPublic ~ duration:", duration, delay?.timeRemoveProxySlow, proxy?.proxyAddress)
             if (duration > (delay?.timeRemoveProxySlow ?? 20)) {
                 await this.proxyService.updateProxyDie(proxy, 'TIME_OUT')
                 return this.getCmtPublic(postId)
@@ -82,6 +81,7 @@ export class GetCommentPublicUseCase {
             // }
 
             let dataComment = handleDataComment(response)
+            if (postId === '122108162510445468') console.log("🚀 ~ GetCommentPublicUseCase ~ getCmtPublic ~ duration:", dataComment)
 
             if (!dataComment && typeof response.data === 'string') {
                 const text = response.data
