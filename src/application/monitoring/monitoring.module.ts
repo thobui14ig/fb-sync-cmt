@@ -23,6 +23,7 @@ import { UserEntity } from '../user/entities/user.entity';
 import { KEY_PROCESS_QUEUE } from './monitoring.service.i';
 import { BullModule } from '@nestjs/bull';
 import { MonitoringConsumer } from './monitoring.process';
+import { SocketModule } from 'src/infra/socket/socket.module';
 
 @Module({
   imports: [
@@ -30,7 +31,7 @@ import { MonitoringConsumer } from './monitoring.process';
     FacebookModule, HttpModule, GetCommentPublicUseCaseModule, HideCommentUseCaseModule, GetUuidUserUseCaseModule, SettingModule, ProxyModule, LinkModule, TokenModule, CommentsModule, CookieModule,
     BullModule.registerQueue({
       name: KEY_PROCESS_QUEUE.ADD_COMMENT,
-    })
+    }),
   ],
   controllers: [MonitoringController],
   providers: [MonitoringService, MonitoringConsumer],

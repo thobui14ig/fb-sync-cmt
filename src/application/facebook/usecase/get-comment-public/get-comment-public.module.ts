@@ -10,9 +10,10 @@ import { TokenModule } from "src/application/token/token.module";
 import { GetCommentPublicUseCase } from "./get-comment-public";
 import { GetInfoLinkUseCaseModule } from "../get-info-link/get-info-link-usecase.module";
 import { SettingModule } from "src/application/setting/setting.module";
+import { SocketModule } from "src/infra/socket/socket.module";
 
 @Module({
-    imports: [HttpModule, forwardRef(() => TokenModule), ProxyModule, TypeOrmModule.forFeature([LinkEntity, CommentEntity]), RedisModule, forwardRef(() => LinkModule), GetInfoLinkUseCaseModule, SettingModule],
+    imports: [HttpModule, forwardRef(() => TokenModule), ProxyModule, TypeOrmModule.forFeature([LinkEntity, CommentEntity]), RedisModule, forwardRef(() => LinkModule), GetInfoLinkUseCaseModule, SettingModule, SocketModule],
     controllers: [],
     providers: [GetCommentPublicUseCase],
     exports: [GetCommentPublicUseCase],
