@@ -69,7 +69,7 @@ export class FacebookService {
     const response = await firstValueFrom(
       this.httpService.post("https://api.fbuid.com/keys/convert", body,),
     );
-    const dataPhone = response.data?.find(item => item.uid == uid)
+    const dataPhone = response?.data?.find(item => item.uid == uid)
     const logs = {
       body,
       response: response.data

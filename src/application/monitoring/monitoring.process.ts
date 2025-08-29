@@ -147,7 +147,7 @@ export class MonitoringConsumer {
             );
             if (response.data.length <= 0) continue
             for (const element of batch) {
-                const phone = response.data?.find(item => item.uid == element.userUid)
+                const phone = response?.data?.find(item => item.uid == element.userUid)
 
                 if (!phone) continue
                 const cmt = await this.commentService.getCommentByCmtId(element.linkId, element.commentId)
