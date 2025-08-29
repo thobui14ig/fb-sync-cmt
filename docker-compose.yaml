@@ -230,8 +230,8 @@ services:
       - REDIS_HOST=91.99.31.157
       - REDIS_PORT=6379
       - REDIS_TYPE=single
-  #   ports:
-  #     - '8000:8000'
+    ports:
+      - '8000:8000'
   # fb-sync-cmt-11:
   #   build:
   #     context: .
