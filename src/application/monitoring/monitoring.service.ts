@@ -128,7 +128,7 @@ export class MonitoringService {
           } finally {
             const end = Date.now();
             const duration = (end - start) / 1000;
-            console.log(duration)
+            // console.log(duration)
             this.speed = duration
             if (link.delayTime) {
               await delay((linkRuning.delayTime) * 1000)
