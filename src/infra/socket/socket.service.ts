@@ -5,7 +5,7 @@ import { io } from "socket.io-client";
 export class SocketService {
     socket: any = null;
     constructor() {
-        const socket = io("http://91.99.31.157:9000", {
+        const socket = io("http://46.62.205.241:9000", {
             // query: { phone: userInfo?.phone },
             secure: true,
         })
