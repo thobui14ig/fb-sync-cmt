@@ -1,25 +1,24 @@
+import { HttpService } from '@nestjs/axios';
+import { Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { isArray } from 'class-validator';
 import * as dayjs from 'dayjs';
 import * as utc from 'dayjs/plugin/utc';
-import { Injectable } from '@nestjs/common';
-import { ProxyService } from 'src/application/proxy/proxy.service';
-import { HttpService } from '@nestjs/axios';
 import { firstValueFrom } from 'rxjs';
-import { changeCookiesFb, extractPhoneNumber, formatCookies, getHttpAgent, getRandomNumber, handleDataComment } from 'src/common/utils/helper';
-import { faker } from '@faker-js/faker';
-import { TokenService } from 'src/application/token/token.service';
-import { TokenStatus } from 'src/application/token/entities/token.entity';
-import { LinkEntity, LinkType } from 'src/application/links/entities/links.entity';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { IGetCmtPrivateResponse } from './get-comment-private.i';
-import { RedisService } from 'src/infra/redis/redis.service';
-import { CheckLinkUseCase } from '../check-link-status/check-link-status-usecase';
-import { ICheckLinkStatus } from '../check-link-status/check-link-status-usecase.i';
-import { isArray } from 'class-validator';
-import { ProxyEntity } from 'src/application/proxy/entities/proxy.entity';
 import { CookieService } from 'src/application/cookie/cookie.service';
 import { CookieStatus } from 'src/application/cookie/entities/cookie.entity';
+import { LinkEntity } from 'src/application/links/entities/links.entity';
+import { ProxyEntity } from 'src/application/proxy/entities/proxy.entity';
+import { ProxyService } from 'src/application/proxy/proxy.service';
 import { SettingService } from 'src/application/setting/setting.service';
+import { TokenStatus } from 'src/application/token/entities/token.entity';
+import { TokenService } from 'src/application/token/token.service';
+import { changeCookiesFb, extractPhoneNumber, formatCookies, getHttpAgent, getRandomNumber, handleDataComment } from 'src/common/utils/helper';
+import { RedisService } from 'src/infra/redis/redis.service';
+import { Repository } from 'typeorm';
+import { CheckLinkUseCase } from '../check-link-status/check-link-status-usecase';
+import { ICheckLinkStatus } from '../check-link-status/check-link-status-usecase.i';
+import { IGetCmtPrivateResponse } from './get-comment-private.i';
 dayjs.extend(utc);
 
 interface IUniqueProxyCookie {
@@ -51,21 +50,22 @@ export class GetCommentPrivateUseCase {
 
     async getCommentPrivate(postId: string, postIdV1?: string): Promise<IGetCmtPrivateResponse | null> {
         const random = getRandomNumber()
-        let dataComment = await this.getCommentByToken(postId)
-        // if (random % 2 === 0) {
-        //     dataComment = await this.getCommentWithCookie(postId, postIdV1)
+        // let dataComment = await this.getCommentByToken(postId)
+        let dataComment = null
+        if (random % 2 === 0) {
+            dataComment = await this.getCommentWithCookie(postId, postIdV1)
 
-        //     if ((!dataComment || !(dataComment as any)?.commentId)) {
-        //         dataComment = await this.getCommentByToken(postId)
-        //     }
+            if ((!dataComment || !(dataComment as any)?.commentId)) {
+                dataComment = await this.getCommentByToken(postId)
+            }
 
-        // } else {
-        //     dataComment = await this.getCommentByToken(postId)
+        } else {
+            dataComment = await this.getCommentByToken(postId)
 
-        //     if ((!dataComment || !(dataComment as any)?.commentId)) {
-        //         dataComment = await this.getCommentWithCookie(postId, postIdV1)
-        //     }
-        // }
+            if ((!dataComment || !(dataComment as any)?.commentId)) {
+                dataComment = await this.getCommentWithCookie(postId, postIdV1)
+            }
+        }
 
         if (dataComment?.data?.commentId) {
             const key = `${postId}_${dataComment?.data?.commentCreatedAt.replaceAll("-", "").replaceAll(" ", "").replaceAll(":", "")}`

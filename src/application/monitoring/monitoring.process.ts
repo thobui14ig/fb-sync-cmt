@@ -92,7 +92,9 @@ export class MonitoringConsumer {
                     await Promise.all([this.commentRepository.save(commentEntity), this.linkRepository.save(linkEntity)])
                 }
             }
-        } catch (error) { }
+        } catch (error) {
+            console.log(error?.message)
+        }
     }
 
     async checkIsSave(commentMessage: string) {

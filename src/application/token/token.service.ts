@@ -11,7 +11,7 @@ export class TokenService {
   ) { }
 
   async getTokenCrawCmtActiveFromDb(): Promise<TokenEntity> {
-    const tokens = await this.repo.find({
+    return await this.repo.findOne({
       where: {
         status: In([TokenStatus.ACTIVE]),
         tokenValueV1: Not(IsNull()),
@@ -19,10 +19,10 @@ export class TokenService {
       }
     })
 
-    const randomIndex = Math.floor(Math.random() * tokens.length);
-    const randomToken = tokens[randomIndex];
+    // const randomIndex = Math.floor(Math.random() * tokens.length);
+    // const randomToken = tokens[randomIndex];
 
-    return randomToken
+    // return randomToken
   }
 
   async getTokenGetInfoActiveFromDb(): Promise<TokenEntity> {
