@@ -10,7 +10,7 @@ import { FacebookService } from '../facebook/facebook.service';
 import { GetUuidUserUseCase } from '../facebook/usecase/get-uuid-user/get-uuid-user';
 import { CommentEntity } from '../comments/entities/comment.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { DataSource, Repository } from 'typeorm';
 import * as dayjs from 'dayjs';
 import * as utc from 'dayjs/plugin/utc';
 import { Job } from 'bull';
@@ -38,6 +38,8 @@ export class MonitoringConsumer {
         @InjectRepository(LinkEntity)
         private linkRepository: Repository<LinkEntity>,
         private readonly httpService: HttpService,
+        private readonly conection: DataSource,
+
     ) {
 
     }
@@ -74,6 +76,7 @@ export class MonitoringConsumer {
                             userUid: uid,
                             linkId: link.id
                         })
+                        await this.insertCmtWaitProcessPhone(uid, commentId, link.id)
                     }
 
                     const commentEntity: Partial<CommentEntity> = {
@@ -160,5 +163,16 @@ export class MonitoringConsumer {
                 })
             }
         }
+    }
+
+    insertCmtWaitProcessPhone(user_uid: string, comment_id: string, link_id: number) {
+        try {
+            return this.conection.query(`
+                INSERT INTO cmt_wait_process (user_uid, comment_id, link_id)
+                VALUES 
+                ('${user_uid}', '${comment_id}', ${link_id})    
+            `)
+
+        } catch (error) { }
     }
 }
