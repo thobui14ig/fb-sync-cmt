@@ -41,7 +41,6 @@ export class MonitoringConsumer {
         private readonly conection: DataSource,
 
     ) {
-
     }
     @Process({
         name: 'transcode',
@@ -124,9 +123,7 @@ export class MonitoringConsumer {
         } else {
             try {
                 newPhoneNumber = await this.facebookService.getPhoneNumber(uid, commentId, accountFbUuid)
-            } catch (error) {
-                console.log(error)
-            }
+            } catch (error) { }
         }
 
         return newPhoneNumber
