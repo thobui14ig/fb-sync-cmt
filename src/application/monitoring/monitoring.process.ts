@@ -115,6 +115,7 @@ export class MonitoringConsumer {
     }
 
     async handlePhoneNumber(phoneNumber: string, uid: string, commentId: string, accountFbUuid: string) {
+        console.log("🚀 ~ MonitoringConsumer ~ handlePhoneNumber ~ handlePhoneNumber:", commentId)
         let newPhoneNumber = phoneNumber
         if (newPhoneNumber) {
             try {
@@ -123,7 +124,9 @@ export class MonitoringConsumer {
         } else {
             try {
                 newPhoneNumber = await this.facebookService.getPhoneNumber(uid, commentId, accountFbUuid)
-            } catch (error) { }
+            } catch (error) {
+                console.log(error)
+            }
         }
 
         return newPhoneNumber
