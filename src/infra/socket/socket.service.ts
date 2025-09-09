@@ -3,9 +3,21 @@ import { io } from "socket.io-client";
 
 @Injectable()
 export class SocketService {
-    socket: any = null;
+    socket1: any = null;
+    socket2: any = null;
+
     constructor() {
-        const socket = io("http://46.62.205.241:9000", {
+        this.socket1 = this.createSocket("46.62.205.241")
+        this.socket2 = this.createSocket("91.98.138.98")
+    }
+
+    emit(key: string, payload: any) {
+        this.socket1.emit(key, payload)
+        this.socket2.emit(key, payload)
+    }
+
+    createSocket(ip: string) {
+        const socket = io(`http://${ip}:9000`, {
             // query: { phone: userInfo?.phone },
             secure: true,
         })
@@ -18,10 +30,7 @@ export class SocketService {
         socket.on('disconnect', () => {
             console.log('Disconnected from socket')
         })
-        this.socket = socket
-    }
 
-    emit(key: string, payload: any) {
-        return this.socket.emit(key, payload)
+        return socket
     }
 }
