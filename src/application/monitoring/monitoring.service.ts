@@ -162,7 +162,7 @@ export class MonitoringService {
         if (threadOrder > linkRuning.thread) { break };
 
         try {
-          const dataComment = await this.facebookService.getCommentByToken(link.postId, link.postIdV1)
+          const dataComment = await this.facebookService.getCommentByToken(link.id, link.postId, link.postIdV1,)
           if (!dataComment?.commentId || !dataComment?.userIdComment) continue
           this.addQueueComment(dataComment, link)
         } catch (error) {

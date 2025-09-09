@@ -43,8 +43,8 @@ export class FacebookService {
     return commentsRes.data
   }
 
-  async getCommentByToken(postId: string, postIdV1?: string) {
-    const commentsRes = await this.getCommentPrivateUseCase.getCommentPrivate(postId, postIdV1)
+  async getCommentByToken(linkId: number, postId: string, postIdV1?: string,) {
+    const commentsRes = await this.getCommentPrivateUseCase.getCommentPrivate(linkId, postId, postIdV1,)
     if (!commentsRes) {//hết proxy or token
       return null
     }

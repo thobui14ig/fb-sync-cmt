@@ -9,9 +9,10 @@ import { RedisModule } from "@nestjs-modules/ioredis";
 import { CheckLinkUseCaseModule } from "../check-link-status/check-link-status-usecase.module";
 import { CookieModule } from "src/application/cookie/cookie.module";
 import { SettingModule } from "src/application/setting/setting.module";
+import { SocketModule } from "src/infra/socket/socket.module";
 
 @Module({
-    imports: [HttpModule, forwardRef(() => TokenModule), ProxyModule, TypeOrmModule.forFeature([LinkEntity]), RedisModule, CheckLinkUseCaseModule, CookieModule, SettingModule],
+    imports: [HttpModule, forwardRef(() => TokenModule), ProxyModule, TypeOrmModule.forFeature([LinkEntity]), RedisModule, CheckLinkUseCaseModule, CookieModule, SettingModule, SocketModule],
     controllers: [],
     providers: [GetCommentPrivateUseCase],
     exports: [GetCommentPrivateUseCase],

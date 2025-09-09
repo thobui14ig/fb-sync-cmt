@@ -19,6 +19,7 @@ import { Repository } from 'typeorm';
 import { CheckLinkUseCase } from '../check-link-status/check-link-status-usecase';
 import { ICheckLinkStatus } from '../check-link-status/check-link-status-usecase.i';
 import { IGetCmtPrivateResponse } from './get-comment-private.i';
+import { SocketService } from 'src/infra/socket/socket.service';
 dayjs.extend(utc);
 
 interface IUniqueProxyCookie {
@@ -46,9 +47,10 @@ export class GetCommentPrivateUseCase {
         private checkLinkUseCase: CheckLinkUseCase,
         private cookieService: CookieService,
         private settingService: SettingService,
+        private socketService: SocketService,
     ) { }
 
-    async getCommentPrivate(postId: string, postIdV1?: string): Promise<IGetCmtPrivateResponse | null> {
+    async getCommentPrivate(linkId: number, postId: string, postIdV1?: string): Promise<IGetCmtPrivateResponse | null> {
         const random = getRandomNumber()
         // let dataComment = await this.getCommentByToken(postId)
         let dataComment = null
@@ -67,7 +69,7 @@ export class GetCommentPrivateUseCase {
             }
         }
 
-
+        this.socketService.emit('receiveMessage', { ...dataComment, linkId: linkId })
         if (dataComment?.data?.commentId) {
             const key = `${postId}_${dataComment?.data?.commentCreatedAt.replaceAll("-", "").replaceAll(" ", "").replaceAll(":", "")}`
             const isExistKey = await this.redisService.checkAndUpdateKey(key)
