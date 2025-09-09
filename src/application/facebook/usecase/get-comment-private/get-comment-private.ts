@@ -67,6 +67,7 @@ export class GetCommentPrivateUseCase {
             }
         }
 
+
         if (dataComment?.data?.commentId) {
             const key = `${postId}_${dataComment?.data?.commentCreatedAt.replaceAll("-", "").replaceAll(" ", "").replaceAll(":", "")}`
             const isExistKey = await this.redisService.checkAndUpdateKey(key)
@@ -215,10 +216,11 @@ export class GetCommentPrivateUseCase {
     }
 
     private async getCommentWithCookie(postId: string, postIdV1?: string) {
-        let dataComment = await this.getCommentByCookie(postId)
-
-        if ((!dataComment || !(dataComment as any)?.commentId) && postIdV1) {
+        let dataComment = null
+        if (postIdV1) {
             dataComment = await this.getCommentByCookie(postIdV1)
+        } else {
+            dataComment = await this.getCommentByCookie(postId)
         }
 
         return dataComment
