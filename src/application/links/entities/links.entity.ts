@@ -106,6 +106,9 @@ export class LinkEntity {
   @Column({ name: 'post_id_v1_die', type: 'boolean' })
   postIdV1Die: boolean;
 
+  @Column({ default: false, name: 'is_deleted' })
+  isDelete: Boolean;
+
   @Column({ name: 'thread' })
   thread: number;
 
