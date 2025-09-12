@@ -7,7 +7,7 @@ export class SocketService {
     socket2: any = null;
 
     constructor() {
-        this.socket1 = this.createSocket("46.62.205.241")
+        this.socket1 = this.createSocket("91.98.138.98")
         this.socket2 = this.createSocket("91.98.138.98")
     }
 
