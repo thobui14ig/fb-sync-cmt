@@ -9,14 +9,14 @@ services:
     environment:
       - PORT=7000
       - DB_TYPE=mysql
-      - DB_HOST=46.62.205.241
+      - DB_HOST=
       - DB_PORT=3306
       - DB_USER_NAME=root
-      - DB_PASSWORD=MyRootPass123!
+      - DB_PASSWORD=HoangChuong@1111
       - DB_DATABASE=crawl-fb
       - NODE_OPTIONS=--max-old-space-size=4096
       # redis
-      - REDIS_HOST=46.62.205.241
+      - REDIS_HOST=
       - REDIS_PORT=6379
       - REDIS_TYPE=single
     ports:
@@ -30,14 +30,14 @@ services:
     environment:
       - PORT=7001
       - DB_TYPE=mysql
-      - DB_HOST=46.62.205.241
+      - DB_HOST=
       - DB_PORT=3306
       - DB_USER_NAME=root
-      - DB_PASSWORD=MyRootPass123!
+      - DB_PASSWORD=HoangChuong@1111
       - DB_DATABASE=crawl-fb
       - NODE_OPTIONS=--max-old-space-size=4096
       # redis
-      - REDIS_HOST=46.62.205.241
+      - REDIS_HOST=
       - REDIS_PORT=6379
       - REDIS_TYPE=single
     ports:
@@ -51,14 +51,14 @@ services:
     environment:
       - PORT=7002
       - DB_TYPE=mysql
-      - DB_HOST=46.62.205.241
+      - DB_HOST=
       - DB_PORT=3306
       - DB_USER_NAME=root
-      - DB_PASSWORD=MyRootPass123!
+      - DB_PASSWORD=HoangChuong@1111
       - DB_DATABASE=crawl-fb
       - NODE_OPTIONS=--max-old-space-size=4096
       # redis
-      - REDIS_HOST=46.62.205.241
+      - REDIS_HOST=
       - REDIS_PORT=6379
       - REDIS_TYPE=single
     ports:
@@ -72,14 +72,14 @@ services:
     environment:
       - PORT=7003
       - DB_TYPE=mysql
-      - DB_HOST=46.62.205.241
+      - DB_HOST=
       - DB_PORT=3306
       - DB_USER_NAME=root
-      - DB_PASSWORD=MyRootPass123!
+      - DB_PASSWORD=HoangChuong@1111
       - DB_DATABASE=crawl-fb
       - NODE_OPTIONS=--max-old-space-size=4096
       # redis
-      - REDIS_HOST=46.62.205.241
+      - REDIS_HOST=
       - REDIS_PORT=6379
       - REDIS_TYPE=single
     ports:
@@ -93,39 +93,18 @@ services:
     environment:
       - PORT=7004
       - DB_TYPE=mysql
-      - DB_HOST=46.62.205.241
+      - DB_HOST=
       - DB_PORT=3306
       - DB_USER_NAME=root
-      - DB_PASSWORD=MyRootPass123!
+      - DB_PASSWORD=HoangChuong@1111
       - DB_DATABASE=crawl-fb
       - NODE_OPTIONS=--max-old-space-size=4096
       # redis
-      - REDIS_HOST=46.62.205.241
+      - REDIS_HOST=
       - REDIS_PORT=6379
       - REDIS_TYPE=single
     ports:
       - '7004:7004'
-  # fb-sync-cmt-5:
-  #   build:
-  #     context: .
-  #     dockerfile: Dockerfile
-  #   container_name: fb-sync-cmt-5
-  #   restart: always
-  #   environment:
-  #     - PORT=7005
-  #     - DB_TYPE=mysql
-  #     - DB_HOST=46.62.205.241
-  #     - DB_PORT=3306
-  #     - DB_USER_NAME=root
-  #     - DB_PASSWORD=MyRootPass123!
-  #     - DB_DATABASE=crawl-fb
-  #     - NODE_OPTIONS=--max-old-space-size=4096
-  #     # redis
-  #     - REDIS_HOST=46.62.205.241
-  #     - REDIS_PORT=6379
-  #     - REDIS_TYPE=single
-  #   ports:
-  #     - '7005:7005'
   fb-sync-cmt-6:
     build:
       context: .
@@ -135,14 +114,14 @@ services:
     environment:
       - PORT=7006
       - DB_TYPE=mysql
-      - DB_HOST=46.62.205.241
+      - DB_HOST=
       - DB_PORT=3306
       - DB_USER_NAME=root
-      - DB_PASSWORD=MyRootPass123!
+      - DB_PASSWORD=HoangChuong@1111
       - DB_DATABASE=crawl-fb
       - NODE_OPTIONS=--max-old-space-size=4096
       # redis
-      - REDIS_HOST=46.62.205.241
+      - REDIS_HOST=
       - REDIS_PORT=6379
       - REDIS_TYPE=single
     ports:
@@ -156,14 +135,14 @@ services:
     environment:
       - PORT=7007
       - DB_TYPE=mysql
-      - DB_HOST=46.62.205.241
+      - DB_HOST=
       - DB_PORT=3306
       - DB_USER_NAME=root
-      - DB_PASSWORD=MyRootPass123!
+      - DB_PASSWORD=HoangChuong@1111
       - DB_DATABASE=crawl-fb
       - NODE_OPTIONS=--max-old-space-size=4096
       # redis
-      - REDIS_HOST=46.62.205.241
+      - REDIS_HOST=
       - REDIS_PORT=6379
       - REDIS_TYPE=single
     ports:
@@ -177,14 +156,14 @@ services:
     environment:
       - PORT=7008
       - DB_TYPE=mysql
-      - DB_HOST=46.62.205.241
+      - DB_HOST=
       - DB_PORT=3306
       - DB_USER_NAME=root
-      - DB_PASSWORD=MyRootPass123!
+      - DB_PASSWORD=HoangChuong@1111
       - DB_DATABASE=crawl-fb
       - NODE_OPTIONS=--max-old-space-size=4096
       # redis
-      - REDIS_HOST=46.62.205.241
+      - REDIS_HOST=
       - REDIS_PORT=6379
       - REDIS_TYPE=single
     ports:
@@ -199,14 +178,14 @@ services:
     environment:
       - PORT=7009
       - DB_TYPE=mysql
-      - DB_HOST=46.62.205.241
+      - DB_HOST=
       - DB_PORT=3306
       - DB_USER_NAME=root
-      - DB_PASSWORD=MyRootPass123!
+      - DB_PASSWORD=HoangChuong@1111
       - DB_DATABASE=crawl-fb
       - NODE_OPTIONS=--max-old-space-size=4096
       # redis
-      - REDIS_HOST=46.62.205.241
+      - REDIS_HOST=
       - REDIS_PORT=6379
       - REDIS_TYPE=single
     ports:
@@ -220,120 +199,15 @@ services:
     environment:
       - PORT=8000
       - DB_TYPE=mysql
-      - DB_HOST=46.62.205.241
+      - DB_HOST=
       - DB_PORT=3306
       - DB_USER_NAME=root
-      - DB_PASSWORD=MyRootPass123!
+      - DB_PASSWORD=HoangChuong@1111
       - DB_DATABASE=crawl-fb
       - NODE_OPTIONS=--max-old-space-size=4096
       # redis
-      - REDIS_HOST=46.62.205.241
+      - REDIS_HOST=
       - REDIS_PORT=6379
       - REDIS_TYPE=single
     ports:
       - '8000:8000'
-  # fb-sync-cmt-11:
-  #   build:
-  #     context: .
-  #     dockerfile: Dockerfile
-  #   container_name: fb-sync-cmt-11
-  #   restart: always
-  #   environment:
-  #     - PORT=8001
-  #     - DB_TYPE=mysql
-  #     - DB_HOST=46.62.205.241
-  #     - DB_PORT=3306
-  #     - DB_USER_NAME=root
-  #     - DB_PASSWORD=MyRootPass123!
-  #     - DB_DATABASE=crawl-fb
-  #     - NODE_OPTIONS=--max-old-space-size=4096
-  #     # redis
-  #     - REDIS_HOST=46.62.205.241
-  #     - REDIS_PORT=6379
-  #     - REDIS_TYPE=single
-  #   ports:
-  #     - '8001:8001'
-  # fb-sync-cmt-12:
-  #   build:
-  #     context: .
-  #     dockerfile: Dockerfile
-  #   container_name: fb-sync-cmt-12
-  #   restart: always
-  #   environment:
-  #     - PORT=8002
-  #     - DB_TYPE=mysql
-  #     - DB_HOST=46.62.205.241
-  #     - DB_PORT=3306
-  #     - DB_USER_NAME=root
-  #     - DB_PASSWORD=MyRootPass123!
-  #     - DB_DATABASE=crawl-fb
-  #     - NODE_OPTIONS=--max-old-space-size=4096
-  #     # redis
-  #     - REDIS_HOST=46.62.205.241
-  #     - REDIS_PORT=6379
-  #     - REDIS_TYPE=single
-  #   ports:
-  #     - '8002:8002'
-  # fb-sync-cmt-13:
-  #   build:
-  #     context: .
-  #     dockerfile: Dockerfile
-  #   container_name: fb-sync-cmt-13
-  #   restart: always
-  #   environment:
-  #     - PORT=8003
-  #     - DB_TYPE=mysql
-  #     - DB_HOST=46.62.205.241
-  #     - DB_PORT=3306
-  #     - DB_USER_NAME=root
-  #     - DB_PASSWORD=MyRootPass123!
-  #     - DB_DATABASE=crawl-fb
-  #     - NODE_OPTIONS=--max-old-space-size=4096
-  #     # redis
-  #     - REDIS_HOST=46.62.205.241
-  #     - REDIS_PORT=6379
-  #     - REDIS_TYPE=single
-  #   ports:
-  #     - '8003:8003'
-  # fb-sync-cmt-14:
-  #   build:
-  #     context: .
-  #     dockerfile: Dockerfile
-  #   container_name: fb-sync-cmt-14
-  #   restart: always
-  #   environment:
-  #     - PORT=8004
-  #     - DB_TYPE=mysql
-  #     - DB_HOST=46.62.205.241
-  #     - DB_PORT=3306
-  #     - DB_USER_NAME=root
-  #     - DB_PASSWORD=MyRootPass123!
-  #     - DB_DATABASE=crawl-fb
-  #     - NODE_OPTIONS=--max-old-space-size=4096
-  #     # redis
-  #     - REDIS_HOST=46.62.205.241
-  #     - REDIS_PORT=6379
-  #     - REDIS_TYPE=single
-  #   ports:
-  #     - '8004:8004'
-  # fb-sync-cmt-15:
-  #   build:
-  #     context: .
-  #     dockerfile: Dockerfile
-  #   container_name: fb-sync-cmt-15
-  #   restart: always
-  #   environment:
-  #     - PORT=8005
-  #     - DB_TYPE=mysql
-  #     - DB_HOST=46.62.205.241
-  #     - DB_PORT=3306
-  #     - DB_USER_NAME=root
-  #     - DB_PASSWORD=MyRootPass123!
-  #     - DB_DATABASE=crawl-fb
-  #     - NODE_OPTIONS=--max-old-space-size=4096
-  #     # redis
-  #     - REDIS_HOST=46.62.205.241
-  #     - REDIS_PORT=6379
-  #     - REDIS_TYPE=single
-  #   ports:
-  #     - '8005:8005'
