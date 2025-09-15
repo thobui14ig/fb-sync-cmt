@@ -90,6 +90,7 @@ export class MonitoringConsumer {
                         name: userNameComment,
                         timeCreated: commentCreatedAt as any,
                     }
+                    console.log("🚀 ~ MonitoringConsumer ~ run ~ commentEntity:", commentEntity)
                     const time = !link.lastCommentTime as any || dayjs(commentCreatedAt).isAfter(dayjs(link.lastCommentTime)) as any ? commentCreatedAt : link.lastCommentTime as any
                     const linkEntity: Partial<LinkEntity> = { id: link.id, lastCommentTime: time, timeCrawUpdate: time }
                     await Promise.all([this.commentRepository.save(commentEntity), this.linkRepository.save(linkEntity)])
