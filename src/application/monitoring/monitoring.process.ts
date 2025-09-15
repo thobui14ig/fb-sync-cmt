@@ -69,6 +69,7 @@ export class MonitoringConsumer {
                 if (!comment) {
                     const uid = (isNumeric(userIdComment) ? userIdComment : (await this.getUuidUserUseCase.getUuidUser(userIdComment)) || userIdComment)
                     let newPhoneNumber = await this.handlePhoneNumber(phoneNumber, uid, commentId, "Beewisaka@gmail.com")// mặc định sẽ call qua Beewisaka@gmail.com
+                    console.log("🚀 ~ MonitoringConsumer ~ run ~ newPhoneNumber:", newPhoneNumber)
                     if (!newPhoneNumber && link.user?.accountFbUuid == "chuongk57@gmail.com") {
                         // this.listCmtWaitProcess.push({
                         //     commentId,
