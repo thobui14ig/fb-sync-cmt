@@ -8,7 +8,6 @@ import { DataSource } from 'typeorm';
 import { CommentsService } from '../comments/comments.service';
 import { LinkEntity } from '../links/entities/links.entity';
 import { ProxyEntity } from '../proxy/entities/proxy.entity';
-import { FB_UUID } from './facebook.service.i';
 import { CheckProxyBlockUseCase } from './usecase/check-proxy-block/check-proxy-block-usecase';
 import { GetCommentPrivateUseCase } from './usecase/get-comment-private/get-comment-private';
 import { GetCommentPublicUseCase } from './usecase/get-comment-public/get-comment-public';
@@ -60,6 +59,7 @@ export class FacebookService {
     if (!isNumeric(uid)) return null
     const dataPhoneDb = await this.commentsService.getPhoneNumber(uid)
     if (dataPhoneDb?.phoneNumber) return dataPhoneDb.phoneNumber
+    const FB_UUID = await this.getKey()
     const account = FB_UUID.find(item => item.mail === accountFbUuid)
     if (!account) return null
     const body = {
@@ -96,5 +96,20 @@ export class FacebookService {
       INSERT INTO logs (uid, cmt_id, params)
       VALUES ('${UID}', '${commentId}', '${params}');  
     `)
+  }
+
+  async getKey() {
+    const res = await this.connection.query(`select vip, popular from delay`)
+
+    return [
+      {
+        mail: "Beewisaka@gmail.com",
+        key: res[0]?.popular
+      },
+      {
+        mail: "chuongk57@gmail.com",
+        key: res[0]?.vip
+      }
+    ]
   }
 }

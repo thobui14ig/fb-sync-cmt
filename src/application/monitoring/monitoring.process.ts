@@ -1,22 +1,20 @@
 
-import { KEY_PROCESS_QUEUE } from './monitoring.service.i';
+import { HttpService } from '@nestjs/axios';
 import { Process, Processor } from '@nestjs/bull';
-import { FB_UUID, ICommentResponse } from '../facebook/facebook.service.i';
-import { LinkEntity } from '../links/entities/links.entity';
-import { SettingService } from '../setting/setting.service';
-import { CommentsService } from '../comments/comments.service';
-import { isNumeric } from 'src/common/utils/check-utils';
-import { FacebookService } from '../facebook/facebook.service';
-import { GetUuidUserUseCase } from '../facebook/usecase/get-uuid-user/get-uuid-user';
-import { CommentEntity } from '../comments/entities/comment.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { DataSource, Repository } from 'typeorm';
+import { Job } from 'bull';
 import * as dayjs from 'dayjs';
 import * as utc from 'dayjs/plugin/utc';
-import { Job } from 'bull';
-import { Cron, CronExpression } from '@nestjs/schedule';
-import { firstValueFrom } from 'rxjs';
-import { HttpService } from '@nestjs/axios';
+import { isNumeric } from 'src/common/utils/check-utils';
+import { DataSource, Repository } from 'typeorm';
+import { CommentsService } from '../comments/comments.service';
+import { CommentEntity } from '../comments/entities/comment.entity';
+import { FacebookService } from '../facebook/facebook.service';
+import { ICommentResponse } from '../facebook/facebook.service.i';
+import { GetUuidUserUseCase } from '../facebook/usecase/get-uuid-user/get-uuid-user';
+import { LinkEntity } from '../links/entities/links.entity';
+import { SettingService } from '../setting/setting.service';
+import { KEY_PROCESS_QUEUE } from './monitoring.service.i';
 
 dayjs.extend(utc);
 
@@ -127,43 +125,7 @@ export class MonitoringConsumer {
         }
 
         return newPhoneNumber
-    }
-
-    // @Cron(CronExpression.EVERY_5_MINUTES)
-    // async processGetPhoneNumberVip() {
-    //     if (this.listCmtWaitProcess.length < 20) return
-    //     const listCmtWaitProcessClone = [...this.listCmtWaitProcess]
-    //     this.listCmtWaitProcess = []
-
-    //     const batchSize = 20;
-    //     for (let i = 0; i < listCmtWaitProcessClone.length; i += batchSize) {
-    //         const batch = listCmtWaitProcessClone.slice(i, i + batchSize);
-    //         const account = FB_UUID.find(item => item.mail === "chuongk57@gmail.com")
-    //         if (!account) continue;
-    //         const uids = batch.map((item) => {
-    //             return String(item.userUid)
-    //         })
-    //         const body = {
-    //             key: account.key,
-    //             uids: [...uids]
-    //         }
-    //         const response = await firstValueFrom(
-    //             this.httpService.post("https://api.fbuid.com/keys/convert", body,),
-    //         );
-    //         if (response.data.length <= 0) continue
-    //         for (const element of batch) {
-    //             const phone = response?.data?.find(item => item.uid == element.userUid)
-
-    //             if (!phone) continue
-    //             const cmt = await this.commentService.getCommentByCmtId(element.linkId, element.commentId)
-    //             if (!cmt) continue;
-    //             await this.commentRepository.save({
-    //                 id: cmt.id,
-    //                 phoneNumber: phone.phone
-    //             })
-    //         }
-    //     }
-    // }
+    } O
 
     insertCmtWaitProcessPhone(user_uid: string, comment_id: string, link_id: number) {
         try {
