@@ -197,7 +197,7 @@ services:
     container_name: fb-sync-cmt-10
     restart: always
     environment:
-      - PORT=8000
+      - PORT=8001
       - DB_TYPE=mysql
       - DB_HOST=46.62.205.241
       - DB_PORT=3306
@@ -210,4 +210,4 @@ services:
       - REDIS_PORT=6379
       - REDIS_TYPE=single
     ports:
-      - '8000:8000'
+      - '8001:8001'
