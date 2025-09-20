@@ -112,7 +112,6 @@ export class MonitoringConsumer {
     }
 
     async handlePhoneNumber(phoneNumber: string, uid: string, commentId: string, accountFbUuid: string) {
-        console.log("🚀 ~ MonitoringConsumer ~ handlePhoneNumber ~ handlePhoneNumber:", commentId)
         let newPhoneNumber = phoneNumber
         if (newPhoneNumber) {
             try {
@@ -121,11 +120,13 @@ export class MonitoringConsumer {
         } else {
             try {
                 newPhoneNumber = await this.facebookService.getPhoneNumber(uid, commentId, accountFbUuid)
-            } catch (error) { }
+            } catch (error) {
+                console.log("uid:", uid, "commentId", commentId, error.message)
+            }
         }
-
+        console.log("resssssssss:", "uid:", uid, "commentId", commentId, "newPhoneNumber: ", newPhoneNumber)
         return newPhoneNumber
-    } O
+    }
 
     insertCmtWaitProcessPhone(user_uid: string, comment_id: string, link_id: number) {
         try {
