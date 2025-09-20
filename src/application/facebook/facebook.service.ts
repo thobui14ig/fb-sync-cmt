@@ -4,15 +4,15 @@ import * as dayjs from 'dayjs';
 import * as utc from 'dayjs/plugin/utc';
 import { firstValueFrom } from 'rxjs';
 import { isNumeric } from 'src/common/utils/check-utils';
+import { getHttpAgent } from 'src/common/utils/helper';
 import { DataSource } from 'typeorm';
 import { CommentsService } from '../comments/comments.service';
 import { LinkEntity } from '../links/entities/links.entity';
 import { ProxyEntity } from '../proxy/entities/proxy.entity';
+import { ProxyService } from '../proxy/proxy.service';
 import { CheckProxyBlockUseCase } from './usecase/check-proxy-block/check-proxy-block-usecase';
 import { GetCommentPrivateUseCase } from './usecase/get-comment-private/get-comment-private';
 import { GetCommentPublicUseCase } from './usecase/get-comment-public/get-comment-public';
-import { ProxyService } from '../proxy/proxy.service';
-import { getHttpAgent } from 'src/common/utils/helper';
 
 dayjs.extend(utc);
 // dayjs.extend(timezone);
@@ -76,6 +76,7 @@ export class FacebookService {
         httpsAgent
       }),
     );
+    console.log("🚀 ~ FacebookService ~ getPhoneNumber ~ response:", response.data)
     const dataPhone = response?.data?.find(item => item.uid == uid)
     const logs = {
       body,
