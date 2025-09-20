@@ -76,6 +76,7 @@ export class FacebookService {
         httpsAgent
       }),
     );
+    console.log("🚀 ~ FacebookService ~ getPhoneNumber ~ response:", response.data)
     const dataPhone = response?.data?.find(item => item.uid == uid)
     const logs = {
       body,
