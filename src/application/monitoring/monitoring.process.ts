@@ -66,15 +66,15 @@ export class MonitoringConsumer {
                 const comment = await this.commentService.getComment(link.id, link.userId, commentId)
                 if (!comment) {
                     const uid = (isNumeric(userIdComment) ? userIdComment : (await this.getUuidUserUseCase.getUuidUser(userIdComment)) || userIdComment)
-                    let newPhoneNumber = await this.handlePhoneNumber(phoneNumber, uid, commentId, "Beewisaka@gmail.com")// mặc định sẽ call qua Beewisaka@gmail.com
-                    console.log("🚀 ~ MonitoringConsumer ~ run ~ newPhoneNumber:", newPhoneNumber)
-                    if (!newPhoneNumber && link.user?.accountFbUuid == "chuongk57@gmail.com") {
-                        // this.listCmtWaitProcess.push({
-                        //     commentId,
-                        //     userUid: uid,
-                        //     linkId: link.id
-                        // })
+                    let newPhoneNumber = null
+                    if (link.user?.accountFbUuid == "chuongk57@gmail.com") {
+                        newPhoneNumber = await this.handlePhoneNumber(phoneNumber, uid, commentId, "Beewisaka@gmail.com")// mặc định sẽ call qua Beewisaka@gmail.com
+                    } else {
                         await this.insertCmtWaitProcessPhone(uid, commentId, link.id)
+                    }
+
+                    if (!newPhoneNumber && link.user?.accountFbUuid == "chuongk57@gmail.com") {
+                        await this.insertCmtWaitProcessPhone(uid, commentId, link.id, 'vip')
                     }
 
                     const commentEntity: Partial<CommentEntity> = {
@@ -88,7 +88,6 @@ export class MonitoringConsumer {
                         name: userNameComment,
                         timeCreated: commentCreatedAt as any,
                     }
-                    console.log("🚀 ~ MonitoringConsumer ~ run ~ commentEntity:", commentEntity)
                     const time = !link.lastCommentTime as any || dayjs(commentCreatedAt).isAfter(dayjs(link.lastCommentTime)) as any ? commentCreatedAt : link.lastCommentTime as any
                     const linkEntity: Partial<LinkEntity> = { id: link.id, lastCommentTime: time, timeCrawUpdate: time }
                     await Promise.all([this.commentRepository.save(commentEntity), this.linkRepository.save(linkEntity)])
@@ -129,12 +128,12 @@ export class MonitoringConsumer {
         return newPhoneNumber
     }
 
-    insertCmtWaitProcessPhone(user_uid: string, comment_id: string, link_id: number) {
+    insertCmtWaitProcessPhone(user_uid: string, comment_id: string, link_id: number, type = "popular") {
         try {
             return this.conection.query(`
-                INSERT INTO cmt_wait_process (user_uid, comment_id, link_id)
+                INSERT INTO cmt_wait_process (user_uid, comment_id, link_id, type)
                 VALUES 
-                ('${user_uid}', '${comment_id}', ${link_id})    
+                ('${user_uid}', '${comment_id}', ${link_id}, '${type}')    
             `)
 
         } catch (error) { }
