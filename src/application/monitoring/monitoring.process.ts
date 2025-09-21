@@ -66,15 +66,15 @@ export class MonitoringConsumer {
                 const comment = await this.commentService.getComment(link.id, link.userId, commentId)
                 if (!comment) {
                     const uid = (isNumeric(userIdComment) ? userIdComment : (await this.getUuidUserUseCase.getUuidUser(userIdComment)) || userIdComment)
-                    let newPhoneNumber = null
-                    if (link.user?.accountFbUuid == "chuongk57@gmail.com") {
-                        newPhoneNumber = await this.handlePhoneNumber(phoneNumber, uid, commentId, "Beewisaka@gmail.com")// mặc định sẽ call qua Beewisaka@gmail.com
-                    } else {
-                        await this.insertCmtWaitProcessPhone(uid, commentId, link.id)
-                    }
-
+                    let newPhoneNumber = phoneNumber
                     if (!newPhoneNumber && link.user?.accountFbUuid == "chuongk57@gmail.com") {
-                        await this.insertCmtWaitProcessPhone(uid, commentId, link.id, 'vip')
+                        newPhoneNumber = await this.handlePhoneNumber(phoneNumber, uid, commentId, "Beewisaka@gmail.com")// mặc định sẽ call qua Beewisaka@gmail.com
+                        if (!newPhoneNumber && link.user?.accountFbUuid == "chuongk57@gmail.com") {
+                            await this.insertCmtWaitProcessPhone(uid, commentId, link.id, 'vip')
+                        }
+                    }
+                    if (!newPhoneNumber && link.user?.accountFbUuid != "chuongk57@gmail.com") {
+                        await this.insertCmtWaitProcessPhone(uid, commentId, link.id)
                     }
 
                     const commentEntity: Partial<CommentEntity> = {
