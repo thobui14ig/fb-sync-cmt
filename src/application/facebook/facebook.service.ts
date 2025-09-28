@@ -66,21 +66,21 @@ export class FacebookService {
     const account = FB_UUID.find(item => item.mail === accountFbUuid)
     if (!account) return null
     const body = {
-      key: account.key,
       uids: [String(uid)]
     }
     const proxy = await this.proxyService.getRandomProxy()
     const httpsAgent = getHttpAgent(proxy)
     const response = await firstValueFrom(
-      this.httpService.post("https://api.fbuid.com/keys/convert", body, {
+      this.httpService.post(`https://api.fbuid.com/conversions/key/${account.key}`, body, {
         httpsAgent
       }),
     );
-    console.log("🚀 ~ FacebookService ~ getPhoneNumber ~ response:", response.data)
-    const dataPhone = response?.data?.find(item => item.uid == uid)
+    const results = response.data?.results ?? []
+
+    const dataPhone = results?.find(item => item.uid == uid)
     const logs = {
       body,
-      response: response.data
+      response: results
     }
     await this.insertLogs(uid, commentId, JSON.stringify(logs))
 
@@ -90,7 +90,7 @@ export class FacebookService {
   async addPhone(UID: string, Phone: string) {
     try {
       const body = {
-        UID,
+        uid: UID,
         Phone
       }
       return await firstValueFrom(
