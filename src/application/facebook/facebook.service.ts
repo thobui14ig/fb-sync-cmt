@@ -91,7 +91,7 @@ export class FacebookService {
     try {
       const body = {
         uid: UID,
-        Phone
+        phone: Phone
       }
       return await firstValueFrom(
         this.httpService.post("https://api.fbuid.com/conversions/import", body,),
